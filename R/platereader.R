@@ -825,7 +825,9 @@ getGroups <- function(plate, by="medium", verb=TRUE) {
                     length(bwells), "blank wells\n"))
     }
     ## return non-empty groups
-    groups[lapply(groups,length)>0]
+    groups <- groups[lapply(groups,length)>0]
+    ## order groups by "by"
+    groups[order(names(groups))]
 }
 
 ## TODO - repair example
