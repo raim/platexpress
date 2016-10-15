@@ -789,11 +789,12 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
 getGroups <- function(plate, by="medium", verb=TRUE) {
 
     ## get different types to be grouped as replicates
-    types <- rep(TRUE,nrow(plate))
+                                        #types <- rep(TRUE,nrow(plate))
     lpl <- matrix(unlist(lapply(plate,function(x) as.character(x))),
                   ncol=ncol(plate))
     colnames(lpl) <- colnames(plate)
     ## collapse requested combinations into new type
+    ## TODO: sort by "by" order, such that viewGroups can be manipulated
     types <- rep("",nrow(plate))
     for ( b in by ) 
       types <- paste(types,lpl[,b],sep="_")
