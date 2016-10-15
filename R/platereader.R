@@ -786,7 +786,7 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
 #' can be used in viewGroups(data,groups) to summarize data for these groups.
 #' @seealso \code{\link{readPlateMap}}, \code{\link{viewGroups}}
 #' @export
-getGroups <- function(plate, by="medium", verb=TRUE) {
+getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 
     ## get different types to be grouped as replicates
                                         #types <- rep(TRUE,nrow(plate))
@@ -827,7 +827,9 @@ getGroups <- function(plate, by="medium", verb=TRUE) {
     ## return non-empty groups
     groups <- groups[lapply(groups,length)>0]
     ## order groups by "by"
-    groups[order(names(groups))]
+    if ( order )
+        groups <- groups[order(names(groups))]
+    groups
 }
 
 ## TODO - repair example
