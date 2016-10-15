@@ -99,7 +99,7 @@ ci95 <- function(data,na.rm=FALSE) {
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
-                         fields, formatted=FALSE) {
+                         fields, nrows=8, formatted=FALSE) {
 
 
     ## already in well format?
@@ -109,7 +109,7 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     }
     
     ## plate map by columns and rows
-    dat <- read.table(file, sep=sep, header=TRUE, row.names=1,
+    dat <- read.table(file, sep=sep, header=TRUE, row.names=1, nrows=nrows,
                       stringsAsFactors=FALSE)
 
     ## generate well names from row and column names
@@ -239,10 +239,13 @@ readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
     ## TODO: use these in plots
     ## TODO: check passed pcols
     #if ( missing(pcols) ) 
-    #    data$colors <- setColors(dataIDs)
+    #    data$colors <- getColors(dataIDs)
     #else data$colors <- pcols
 
-    ## INTERPOLATION:
+    ## SET DATA ID 
+    data$dataIDs <- names(data)
+    
+    ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
     ## interpolate data: this adds a master time and temperature
     ## and interpolates all data to this time; if this step
     ## is omitted, there will be no global master time!
@@ -316,6 +319,8 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
         ## BMG gives T for each well, but actually it's the same for all
         ## add this temperature time-course to each other data
         ## and remove from list
+        ## NOTE: temperature is not exported after fusing wells in BMG Mars!
+        ## TODO: find out which time is used when fusing wells in BMG Mars!
         tidx <- which(names(dlst)=="Temperature")
         if ( length(tidx)>1 )
           warning(paste("BMG Temperature format has changed, multiple entries",
@@ -334,8 +339,9 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
         
         ## rm from data list
         dlst <- dlst[names(dlst)!="Temperature"]
-        ## .. and add to each other data
-        dlst <- lapply(dlst, function(x) {x$temp=temp; x} )
+        ## .. and add to each other data (if it was present
+        if ( length(tidx)>1 )
+            dlst <- lapply(dlst, function(x) {x$temp=temp; x} )
 
         ## append data
         data <- append(data,dlst)
@@ -345,14 +351,17 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
     ## TODO: use these in plots
     ## TODO: check passed pcols
     #if ( missing(pcols) ) 
-    #    data$colors <- setColors(ptypes)
+    #    data$colors <- getColors(ptypes)
     #else data$colors <- pcols
 
     ## NOTE: at this stage, data between different plate-readers
     ## should already look similar; each entry containing separate
     ## time and temperature vectors
 
-    ## INTERPOLATION:
+    ## SET DATA ID 
+    data$dataIDs <- names(data)
+    
+    ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
     ## interpolate data: this adds a master time and temperature
     ## and interpolates all data to this time; if this step
     ## is omitted, there will be no global master time!
@@ -362,11 +371,110 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
     data
 }
 
-setColors <- function(ptypes) {
+
+#' \code{\link{prettyData}} : set colors and order or filter the data set
+#' @param dids a vector of data IDs, data will be filtered and sorted by this list
+#' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
+#' @seealso \code{\link{readPlateData}}
+#' @export
+prettyData <- function(data, dids, colors,
+                       mids=c(time="Time",temp="Temperature")) {
+
+    ## dids: data sorting, if missing, take all
+    if ( missing(dids) )
+        dids <- data$dataIDs
+
+    ## reduce mids
+    mids <- mids[mids%in%names(data)]
+    
+    ## re-order: mids first and IDs last
+    data$dataIDs <- dids
+    data <- data[c(match(mids,names(data)),
+                   match(dids,names(data)),
+                   match("dataIDs",names(data)))]
+
+    ## generate colors, if none are present
+    if ( missing(colors) & !"colors"%in%names(data) ) {
+        data$colors <- getColors(data$dataIDs)
+    }
+    ## set new or replace existing 
+    if ( !missing(colors) )
+        data$colors <- colors
+    data
+}
+
+## TODO: implement other types? 
+getColors <- function(ptypes,type="R") {
     ## colors
-    pcols <- getRGB(length(ptypes))
+    if ( type=="R" )
+        pcols <- getRGB(length(ptypes))
+    if ( type=="rainbow" )
+        pcols <- sub("FF$","",rainbow(length(ptypes)))
     names(pcols) <- ptypes
-    ptypes
+    pcols
+}
+
+## add data
+#' \code{\link{addData}} : add a data set, e.g., calculated ratios
+#' @param data the current platexpress data set
+#' @param ID the ID of the new data 
+#' @param dat the new data, must be a matrix akin to other data in the set
+#' @seealso \code{\link{readPlateData}}
+#' @export
+addData <- function(data, ID, dat, col, processing) {
+    data$dataIDs <- c(data$dataIDs, ID) # add to ID list
+    if ( "colors" %in% names(data) ) { # add color
+        if ( missing(col) ) 
+            col <- getRGB(length(data$colors)+1)
+        data$colors <- c(data$colors, col[length(col)])
+        names(data$colors) <- c(names(data$colors)[2:length(data$colors)-1],ID)
+    }
+    if ( missing(processing) ) # add date as processing note
+        processing <- date()
+    data <- append(data, list(list(data=dat, processing=processing)))
+    names(data) <- c(names(data)[2:length(data)-1],ID)
+    data
+}
+
+
+#' \code{\link{rmData}} : remove a data set
+#' @param data the current platexpress data set
+#' @param ID a vector of IDs of the data to be removed
+#' @param dat the new data, must be a matrix akin to other data in the set
+#' @seealso \code{\link{addData}}
+#' @export
+rmData <- function(data, ID) {
+    data$dataIDs <- data$dataIDs[!data$dataIDs%in%ID] # rm ID
+    if ( "colors" %in% names(data) ) # rm color
+        data$colors <- data$colors[!names(data$colors)%in%ID]
+    data[-which(names(data)%in%ID)] # rm data
+}
+
+
+#' \code{\link{getData}} : get a specific data set, returns a data matrix
+#' @param data the current platexpress data set
+#' @param ID the ID of the data to be obtained
+#' @export
+getData <- function(data, ID, type="data") {
+    data[[ID]][[type]]
+}
+
+## cut data either by time, or by a chosen data set
+###' @export
+cutData <- function(data, rng, ID) {
+    
+}
+
+## convert to groFit data format
+#' @export
+data2grofit <- function(data,dids,dose) {
+    if ( missing(dose) )
+        dose <- as.factor(rep(1,ncol(odn)))
+    grdat <- data.frame(cbind(colnames(odn),
+                              as.factor(rep("test",ncol(odn))),
+                              dose),
+                        t(data[[ID]]$data))
+    grdat
 }
 
 #' set wells that should be skipped from all analyses and plots to NA
@@ -403,7 +511,7 @@ correctBlanks <- function(data, plate, dids, by,
     corr <- data
   
     ## reduce matrix to requested data
-    data <- data[!names(data)%in%mids]
+    data <- data[data$dataIDs]
     ptypes <- names(data)
     if ( !missing(dids) ) # only use requested data 
       ptypes <- ptypes[ptypes%in%dids]
@@ -414,7 +522,7 @@ correctBlanks <- function(data, plate, dids, by,
       cat(paste("blanking", paste(ptypes,collapse=";"),"\n"))
 
     ## reducing result matrix to requested data
-    corr <- corr[names(corr)%in% c(mids,ptypes)]
+    #corr <- corr[names(corr)%in% c(mids,ptypes)]
 
     ## blank wells
     blanks <- plate[,"blank"]
@@ -434,6 +542,10 @@ correctBlanks <- function(data, plate, dids, by,
     }
     btypes <- unique(types)
 
+    ## CORRECT BY TIME
+    ## sometimes blanks show trends, e.g., higher fluorescence
+    ## in the beginning
+    
     ## blank each type separately
     for ( i in 1:length(btypes) ) {
         btyp <- btypes[i]
@@ -450,9 +562,9 @@ correctBlanks <- function(data, plate, dids, by,
             #cat(paste("\tdata wells:",paste(dwells,collapse=";"),"\n",
             #          "\tblank wells:",paste(bwells,collapse=";"),"\n"))
             corr[[ptyp]]$data[,c(dwells,bwells)] <-
-              dat[,c(dwells,bwells)] - blank
-            corr[[i]]$processing <- c(corr[[i]]$processing,
-                                      "blank-corrected")
+                           dat[,c(dwells,bwells)] - blank
+            corr[[ptyp]]$processing <- c(corr[[ptyp]]$processing,
+                                         paste("blank-corrected by",btyp))
         }
     }
     corr
@@ -466,6 +578,7 @@ listAverage <- function(lst, id) {
 
     ## reduce to entries that have <id>
     lst <- lst[unlist(lapply(lst, function(x) id%in%names(x)))]
+    if ( length(lst)==0 ) return(NULL)
     ## collect values with the same ID for different data sets
     vals <- lapply(lst, function(x) x[[id]])
     vals <- matrix(unlist(vals), ncol = length(vals), byrow = FALSE)
@@ -497,24 +610,24 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
       cat(paste("Interpolating all data to a single master time.\n"))
     
     ## 1) calculate average (MASTER) time
-    mtime <- listAverage(data, "time") 
+    mtime <- listAverage(data, "time")
     mtemp <- listAverage(data, "temp") 
     
     ## 2) interpolate all data to MASTER time
-    for ( i in 1:length(data) ) {
-        data[[i]]$orig <- data[[i]]$data
-        mdat <- data[[i]]$data
-        for ( j in 1:ncol(data[[i]]$data) ) {
-            x <- data[[i]]$time
-            y <- data[[i]]$data[,j]
+    for ( id in data$dataIDs ) {
+        data[[id]]$orig <- data[[id]]$data
+        mdat <- data[[id]]$data
+        for ( j in 1:ncol(data[[id]]$data) ) {
+            x <- data[[id]]$time
+            y <- data[[id]]$data[,j]
             ## interpolate data, NOTE that rule=2 will fill the end points
             mdat[,j] <- approx(x=x,y=y,xout=mtime,rule=2)$y
         }
         ## replace data
-        data[[i]]$data <- mdat
+        data[[id]]$data <- mdat
         ## indicate interpolation
-        data[[i]]$processing <- c(data[[i]]$processing,
-                                  "interpolated")
+        data[[id]]$processing <- c(data[[id]]$processing,
+                                   "interpolated")
     }
     
 
@@ -573,7 +686,8 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
     mids <- c(mids,xid) # will all be removed from plot data
 
     ## reduce matrix to plot data
-    data <- data[!names(data)%in%mids]
+    data <- data[data$dataIDs]
+    #data <- data[!names(data)%in%mids]
     ptypes <- names(data)
     if ( !missing(dids) ) # only use requested data for plots
       ptypes <- ptypes[ptypes%in%dids]
@@ -607,11 +721,10 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
     }
 
     ## colors
-    if ( !"colors" %in% names(data) ) {
-        ## as color palette 1:n, but in RGB to allow alpha
-        pcols <- getRGB(length(ptypes))
-        names(pcols) <- ptypes
-    }
+    #if ( !"colors" %in% names(data) )
+    if ( missing(pcols) )
+        pcols <- getColors(ptypes)
+
     ## colors - TODO - add only missing colors
     #if ( !"colors" %in% names(data) )
     #    ## as color palette 1:n, but in RGB to allow alpha
@@ -657,6 +770,7 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
     ## TODO: find out how to do silent returns (like plot/hist etc.)
     ## and return meaningful and/or non-plotted information
     ##return(list(ylims=ylims, xlim=xlim))
+    pcols
 }
 
 
@@ -709,7 +823,8 @@ getGroups <- function(plate, by="medium", verb=TRUE) {
           cat(paste("\tgroup", btyp, ":", length(dwells), "wells, skipping",
                     length(bwells), "blank wells\n"))
     }
-    groups
+    ## return non-empty groups
+    groups[lapply(groups,length)>0]
 }
 
 ## TODO - repair example
@@ -738,6 +853,7 @@ getGroups <- function(plate, by="medium", verb=TRUE) {
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
 #' @param legpos position of the well IDs on the plots
 #' @param lwd.orig line-width of the original single data, set to 0 to supress plotting of all original data
+#' @param lty.orig line type of the original single data, set to 0 to supress plotting of all original data
 #' @param mai set the outer margins around plot areas, see ?par
 #' @param mgp set the position of axis title, tick marks and tick lengths
 #' @param xaxis plot x-axis if TRUE
@@ -752,7 +868,7 @@ viewGroups <- function(data, groups,
                        mids=c(time="Time", temp="Temperature"), 
                        xid, xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
-                       legpos="topleft", lwd.orig=0.5,
+                       legpos="topleft", lty.orig=1,lwd.orig=0.1,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
                        nrow=1, xaxis=TRUE, yaxis=TRUE) {
     
@@ -773,7 +889,8 @@ viewGroups <- function(data, groups,
     mids <- c(mids,xid) # will all be removed from plot data
 
     ## reduce data to plotted data
-    data <- data[!names(data)%in%mids]
+    data <- data[data$dataIDs]
+    #data <- data[!names(data)%in%mids]
     ptypes <- names(data)
     if ( !missing(dids) ) # only use requested data for plots
       ptypes <- ptypes[ptypes%in%dids]
@@ -797,9 +914,8 @@ viewGroups <- function(data, groups,
                 dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE]
             } else {
                 dt <- NULL
-                for ( i in 1:ncol(dat) ) {
+                for ( i in 1:ncol(dat) ) 
                     dt <- c(dt,dat[xdat[,i]>=xlim[1]&xdat[,i]<=xlim[2],i])
-                }
                 dat <- dt
             }
             ylim <- range(c(dat[is.finite(dat)]),na.rm=TRUE)
@@ -812,10 +928,9 @@ viewGroups <- function(data, groups,
     }
 
     ## colors
-    if ( missing(pcols) ) {
-        pcols <- getRGB(length(ptypes))
-        names(pcols) <- ptypes
-    }
+    if ( missing(pcols) ) 
+        pcols <- getColors(ptypes) 
+
     ## colors - TODO - add only missing colors
     #if ( !"colors" %in% names(data) )
     #    ## as color palette 1:n, but in RGB to allow alpha
@@ -842,15 +957,21 @@ viewGroups <- function(data, groups,
             ## calculate stats only for common x!
             ## TODO: instead bin data on x and calculate ci there
             ## or interpolate data to common x (on the fly)?
+            ## TODO: do we get NAs or empty vals from ci?
             if ( is.null(dim(x)) ) { 
                 mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
                 ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
             }
             ## PLOT
             par(new=i!=1)
+            ## override lty.orig=0 and lwd.orig=0 if x is data-specific
+            if ( !is.null(dim(x)) ) {
+                if ( lwd.orig==0 ) lwd.orig <- 0.1
+                if ( lty.orig==0 ) lty.orig <- 1
+            }
             ## override color to allow lwd.orig=0 to work for PDF as well
             tmp <- ifelse(lwd.orig==0,NA, pcols[ptyp])
-            matplot(x,dat,type="l",lty=2,lwd=lwd.orig,axes=FALSE,
+            matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
                     ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xlab,log=log)
             
             ## plot mean and confidence intervals
@@ -859,10 +980,18 @@ viewGroups <- function(data, groups,
                     col=paste(pcols[ptyp],"55",sep=""))
                 lines(x=x,mn,col=pcols[ptyp],lwd=2)
             }
+
+            ## add axes for first two values
+            if ( yaxis & i==1 ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
+                                     col=pcols[ptyp],
+                                     col.axis=pcols[ptyp])
+            if ( yaxis & i==2 ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
+                                     col=pcols[ptyp],
+                                     col.axis=pcols[ptyp])
+
         }
         legend(legpos,id,bty="n")
         if ( xaxis ) axis(1)
-        if ( yaxis ) axis(2)
     }
     ## TODO: find out how to do silent returns (like plot/hist etc.)
     ## and return meaningful and/or non-plotted information
