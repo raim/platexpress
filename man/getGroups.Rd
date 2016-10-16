@@ -4,7 +4,7 @@
 \alias{getGroups}
 \title{group wells by experiment annotations (in plate map file)}
 \usage{
-getGroups(plate, by = "medium", verb = TRUE)
+getGroups(plate, by = "medium", order = FALSE, verb = TRUE)
 }
 \arguments{
 \item{by}{a list of column IDs of the plate layout}

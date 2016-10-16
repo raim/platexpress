@@ -2,18 +2,21 @@
 % Please edit documentation in R/platereader.R
 \name{interpolatePlateTimes}
 \alias{interpolatePlateTimes}
-\title{interpolate all data to an average master time:
-calculates average time for each measurement point
-and interpolates all values to this time}
+\title{\code{\link{interpolatePlateTimes}} interpolate all data to an average
+master time: calculates average time for each measurement point
+and interpolates all values to this time; this is also used for
+well temperatures}
 \usage{
 interpolatePlateTimes(data, verb = TRUE)
 }
 \value{
-returns a copy of the full data list with a master time and temperature added at the top level
+returns a copy of the full data list with a master time and
+temperature added at the top level
 }
 \description{
-interpolate all data to an average master time:
-calculates average time for each measurement point
-and interpolates all values to this time
+\code{\link{interpolatePlateTimes}} interpolate all data to an average
+master time: calculates average time for each measurement point
+and interpolates all values to this time; this is also used for
+well temperatures
 }
 

@@ -6,8 +6,8 @@
 \usage{
 viewGroups(data, groups, mids = c(time = "Time", temp = "Temperature"), xid,
   xscale = FALSE, xlim, dids, pcols, yscale = TRUE, ylims, ylim, log = "",
-  legpos = "topleft", lwd.orig = 0.5, mai = c(0.5, 0, 0, 0),
-  mgp = c(1.5, 0.5, 0), nrow = 1, xaxis = TRUE, yaxis = TRUE)
+  legpos = "topleft", lty.orig = 1, lwd.orig = 0.1, mai = c(0.5, 0, 0,
+  0), mgp = c(1.5, 0.5, 0), nrow = 1, xaxis = TRUE, yaxis = c(1, 2))
 }
 \arguments{
 \item{data}{the list of measurement data as provided by \code{\link{readPlateData}}}
@@ -40,6 +40,8 @@ all plotted wells; if FALSE each well be locally scaled}
 log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 
 \item{legpos}{position of the well IDs on the plots}
+
+\item{lty.orig}{line type of the original single data, set to 0 to supress plotting of all original data}
 
 \item{lwd.orig}{line-width of the original single data, set to 0 to supress plotting of all original data}
 

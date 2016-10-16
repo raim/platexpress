@@ -10,11 +10,15 @@ correctBlanks(data, plate, dids, by, mids = c(time = "Time", temp =
 \arguments{
 \item{data}{the data list to be blank-corrected}
 
-\item{plate}{the plate layout where column "blanks" indicates which wells are to be treated as blanks}
+\item{plate}{the plate layout where column "blanks" indicates which wells
+are to be treated as blanks}
 
-\item{dids}{IDs of the data which should be blank-corrected, all will be blanked if missing}
+\item{dids}{IDs of the data which should be blank-corrected, all will be
+blanked if missing}
 
-\item{by}{a list of column IDs of the plate layout; separate blank correction will be attempted for groups in these columns; each group must have at least one specified blank associated}
+\item{by}{a list of column IDs of the plate layout; separate blank
+correction will be attempted for groups in these columns; each group
+must have at least one specified blank associated}
 }
 \description{
 \code{\link{correctBlanks}} correct for blanks

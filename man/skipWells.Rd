@@ -2,15 +2,18 @@
 % Please edit documentation in R/platereader.R
 \name{skipWells}
 \alias{skipWells}
-\title{set wells that should be skipped from all analyses and plots to NA}
+\title{\code{\link{skipWells}} set wells that should be skipped from all
+analyses and plots to NA}
 \usage{
 skipWells(data, skip)
 }
 \arguments{
-\item{skip}{a list of strings identifiying the wells to be skipped, e.g. "B3" to skip the well in row B/column 3}
+\item{skip}{a list of strings identifiying the wells to be skipped,
+e.g. "B3" to skip the well in row B/column 3}
 }
 \description{
-set wells that should be skipped from all analyses and plots to NA
+\code{\link{skipWells}} set wells that should be skipped from all
+analyses and plots to NA
 }
 \examples{
 raw <- skipWells(raw, skip="A9")

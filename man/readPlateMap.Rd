@@ -3,10 +3,10 @@
 \name{readPlateMap}
 \alias{readPlateMap}
 \title{\code{\link{readPlateMap}} parses a plate design file in CSV. Rows and 
-columns should be named as in the corresponding datafiles.}
+columns should be named as in the corresponding data files.}
 \usage{
 readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
-  formatted = FALSE)
+  nrows = 8, formatted = FALSE)
 }
 \arguments{
 \item{file}{text file containing the plate layout.}
@@ -29,7 +29,7 @@ a table of well content descriptors, where the first column 'wells'
 }
 \description{
 \code{\link{readPlateMap}} parses a plate design file in CSV. Rows and 
-columns should be named as in the corresponding datafiles.
+columns should be named as in the corresponding data files.
 }
 \examples{
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
