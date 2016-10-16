@@ -674,13 +674,16 @@ correctBlanks <- function(data, plate, dids, by,
     corr
 }
 
-#' \code{\link{adjustBase}} adjust data to a minimal base, useful for
-#' adjustment of negative values after blank corrections
+#' \code{\link{adjustBase}} adjust data to a minimal base
+#' @details Adjusts data to a new mininum, this is useful for adjustment
+#' of negative values after blank corrections
 #' @param dids vector of ID strings for which base correction should be
 #' executed
 #' @param base the new minimum for the data, default is 0, but it could
 #' e.g. be the OD used for inoculation
 #' @param by TODO: choose specific groups via plate-designs
+#' @return Returns `data' where all data sets or only those selected by option
+#' dids where raised to a minimum level in 
 #' @export
 adjustBase <- function(data, dids, base=0) {
 
@@ -727,10 +730,12 @@ listAverage <- function(lst, id) {
     avg
 }
 
-#' interpolate all data to an average master time:
-#' calculates average time for each measurement point
-#' and interpolates all values to this time
-#' @return returns a copy of the full data list with a master time and temperature added at the top level
+#' \code{\link{interpolatePlateTimes}} interpolate all data to an average
+#' master time: calculates average time for each measurement point
+#' and interpolates all values to this time; this is also used for
+#' well temperatures
+#' @return returns a copy of the full data list with a master time and
+#' temperature added at the top level
 #' @export
 interpolatePlateTimes <- function(data, verb=TRUE) {
 
@@ -801,16 +806,15 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
 
     ## which wells to plot?
     wells <-  paste(rep(rows,each=length(cols)),cols,sep="")
-
-
     
-    ## get master data: time and temperature
+    ## get x-data: global data (time, temperature)
+    ## or a data set specified via xid
     ## TODO: implement absence of master time, if interpolate=FALSE
     ## upon reading of data
     time <- data[[mids["time"]]]
     if ( mids["temp"] %in% names(data) )
       temp <- data[[mids["temp"]]]
-    if ( !missing(xid) ) {
+    if ( !missing(xid) ) { # or use other data-set as x
         xdat <- data[[xid]]$data[,wells,drop=FALSE]
     } else xid <- NULL
     mids <- c(mids,xid) # will all be removed from plot data
@@ -830,8 +834,8 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
     if ( length(ptypes)==0 ) {
         cat(paste("no data to plot\n"))
         return()
-    }else
-      cat(paste("plotting", paste(ptypes,collapse=";"),"\n"))
+    } else
+        cat(paste("plotting", paste(ptypes,collapse=";"),"\n"))
     
     ## PLOT PARAMS
     ## xlim
