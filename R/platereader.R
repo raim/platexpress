@@ -1094,6 +1094,7 @@ viewGroups <- function(data, groups,
                        mids=c(time="Time", temp="Temperature"), 
                        xid, xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
+                       show.ci95=TRUE,
                        legpos="topleft", lty.orig=1,lwd.orig=0.1,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
                        nrow=1, xaxis=TRUE, yaxis=c(1,2)) {
@@ -1193,7 +1194,7 @@ viewGroups <- function(data, groups,
             ## TODO: instead bin data on x and calculate ci there
             ## or interpolate data to common x (on the fly)?
             ## TODO: do we get NAs or empty vals from ci?
-            if ( is.null(dim(x)) ) { 
+            if ( is.null(dim(x)) & show.ci95 ) { 
                 mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
                 ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
             }
@@ -1210,7 +1211,7 @@ viewGroups <- function(data, groups,
                     ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xlab,log=log)
             
             ## plot mean and confidence intervals
-            if ( is.null(dim(x)) ) { # only for common x!
+            if ( is.null(dim(x)) & show.ci95 ) { # only for common x!
                 polygon(x=c(x,rev(x)),y=c(mn-ci,rev(mn+ci)),border=NA,
                     col=paste(pcols[ptyp],"55",sep=""))
                 lines(x=x,mn,col=pcols[ptyp],lwd=2)
