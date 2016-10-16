@@ -84,8 +84,8 @@ viewSpectrum <- function(wavelengths=380:780, alpha=11, pch=16, cex=3,
 #' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
 #' @export
 findWavelength <- function(x=534, y=1.09, ...) {
-    abline(v=x)
-    text(x, y, x, ...)
+    abline(v=x,col=lambda2RGB(x))
+    text(x, y, x,col=lambda2RGB(x), ...)
     axis(4)
 }
 
