@@ -52,16 +52,54 @@ getRGB <- function(n) {
 }
 
 
-## convert wavelength to RGB, after
-## links and code posted at
-## http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb
-## see http://www.fourmilab.ch/documents/specrend/ for original code and why
-## not all wavelengths can be converted to RGB
+#' \code{\link{viewSpectrum}}
+#' @param wavelengths vector of wavelengths to be plotted
+#' @param alpha the alpha factor (opacity) for plot symbols, min=1, max=255
+#' @param pch the plot symbol type, see ?par("pch")
+#' @param cex the plot symbol size, see ?par("cex")
+#' @param ... further arguments to plot
+#' @details Shows the color spectrum along wavelength in nm. See
+#' \code{\link{wavelength2RGB}} for details.
+#' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
+#' @export
+viewSpectrum <- function(wavelengths=380:780, alpha=11, bar=FALSE, pch=16, cex=3, ...) {
+    cols <- sapply(wavelengths, wavelength2RGB)
+    if ( bar ) {
+        bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
+        barplot(bars,border=cols,col=cols,las=2)
+    } else {
+        plot(wavelengths,rep(1,length(wavelengths)),
+             axes=FALSE,ylab="approximate color",main="use findWavelength(353)",xlab="wavelength, nm",
+             col=paste(cols,alpha,sep=""),ylim=c(.9,1.1),pch=pch,cex=cex,...)
+        axis(1,at=pretty(wavelengths))
+    }
+}
+#' \code{\link{viewSpectrum}}
+#' @param x wavelength in nm
+#' @param y position of the text, from 0.9 to 1.1
+#' @param pos positioning of the text, see ?text
+#' @details Color selector: draws a vertical line in the spectrum
+#' plotted by \code{\link{viewSpectrum}} at a given wavelength in nm
+#' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
+#' @export
+findWavelength <- function(x=534, y=1.09, pos=1) {
+    abline(v=x)
+    text(x, y, x, pos=pos)
+    axis(4)
+}
+
+#' \code{\link{wavelength2RGB}}
+#' @details converts wavelength in nm to RGB, after links and code posted at
+#' http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb
+#' see http://www.fourmilab.ch/documents/specrend/ for original code and why
+#' not all wavelengths can be converted to RGB.
 #' @examples
-#' spectrum <- seq(380,780,1)
-#' cols <- sapply(spectrum, wavelength2RGB)
-#' bars <- rep(1,length(spectrum)); names(bars) <- spectrum
+#' wavelengths <- seq(380,780,1)
+#' cols <- sapply(wavelengths, wavelength2RGB)
+#' bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
 #' barplot(bars,border=cols,col=cols,las=2)
+#' @seealso \code{\link{viewSpectrum}}
+#' @export
 wavelength2RGB <- function(wavelength){
 
     ## intensity scaling near visibility
@@ -844,21 +882,26 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
         xlim <- range(c(xdat),na.rm=TRUE)
       else
         xlim <- range(time)
-    ## local ylims 
-    if ( missing(ylims) & missing(ylim) ) {
-        ylims <- list()
-        for ( k in 1:length(ptypes) ) {
+    ## set local ylims
+    ## TODO: generalize and align with code in viewGroup
+    if ( missing(ylim) ) {
+        pidx <- 1:length(ptypes)
+        ylim <- rep(list(c(NA,NA)),length(ptypes)) # initiliaze
+        for ( k in pidx ) {
             dat <- data[[ptypes[k]]]$data[,wells,drop=FALSE] # get plotted wells
             if ( is.null(xid) ) # if x is time, limit to plot xlim
               dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE] 
-            ylim <- range(c(dat[is.finite(dat)]),na.rm=TRUE)
-            ylims <- append(ylims,list(ylim))
+            ylm <- range(c(dat[is.finite(dat)]),na.rm=TRUE) # get range
+            ylim[[k]] <- ylm
         }
-        names(ylims) <- ptypes
-    } else if ( missing(ylims) & !missing(ylim) )  { # expand single ylim 
+        names(ylim) <- ptypes
+        if ( !missing(ylims) ) # update by argument ylims
+            ylim[names(ylims)] <- ylims[names(ylims)]
+        ylims <- ylim
+    } else  { # .. or expand single ylim argument c(y1,y2) 
         ylims <- rep(list(ylim),length(ptypes))
         names(ylims) <- ptypes
-    }
+    } 
 
     ## plot plate
     par(mfcol=c(length(rows),length(cols)),mai=rep(0,4))
@@ -1001,7 +1044,7 @@ viewGroups <- function(data, groups,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
                        legpos="topleft", lty.orig=1,lwd.orig=0.1,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
-                       nrow=1, xaxis=TRUE, yaxis=TRUE) {
+                       nrow=1, xaxis=TRUE, yaxis=c(1,2)) {
     
 
     wells <- unique(unlist(groups))
@@ -1044,6 +1087,8 @@ viewGroups <- function(data, groups,
         xlim <- range(c(xdat),na.rm=TRUE)
       else
         xlim <- range(time)
+    ## set local ylims
+    ## TODO: generalize and align with code in viewPlate
     if ( missing(ylims) & missing(ylim) ) {
         ylims <- list()
         for ( k in 1:length(ptypes) ) {
@@ -1120,10 +1165,10 @@ viewGroups <- function(data, groups,
             }
 
             ## add axes for first two values
-            if ( yaxis & i==1 ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
-                                     col=pcols[ptyp],
-                                     col.axis=pcols[ptyp])
-            if ( yaxis & i==2 ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
+            if ( yaxis[1]==i ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
+                                    col=pcols[ptyp],
+                                    col.axis=pcols[ptyp])
+            if ( yaxis[2]==i ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
                                      col=pcols[ptyp],
                                      col.axis=pcols[ptyp])
 
