@@ -57,34 +57,35 @@ getRGB <- function(n) {
 #' @param alpha the alpha factor (opacity) for plot symbols, min=1, max=255
 #' @param pch the plot symbol type, see ?par("pch")
 #' @param cex the plot symbol size, see ?par("cex")
+#' @param ylab ylab, see ?plot
+#' @param xlab xlab, see ?plot
+#' @param main main, see ?plot
 #' @param ... further arguments to plot
 #' @details Shows the color spectrum along wavelength in nm. See
 #' \code{\link{wavelength2RGB}} for details.
 #' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
 #' @export
-viewSpectrum <- function(wavelengths=380:780, alpha=11, bar=FALSE, pch=16, cex=3, ...) {
-    cols <- sapply(wavelengths, wavelength2RGB)
-    if ( bar ) {
-        bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
-        barplot(bars,border=cols,col=cols,las=2)
-    } else {
-        plot(wavelengths,rep(1,length(wavelengths)),
-             axes=FALSE,ylab="approximate color",main="use findWavelength(353)",xlab="wavelength, nm",
-             col=paste(cols,alpha,sep=""),ylim=c(.9,1.1),pch=pch,cex=cex,...)
-        axis(1,at=pretty(wavelengths))
-    }
+viewSpectrum <- function(wavelengths=380:780, alpha=11, pch=16, cex=3,
+                         ylab="approximate color",
+                         main="use findWavelength(353)",
+                         xlab="wavelength, nm", ...) {
+    cols <- wavelength2RGB(wavelengths)
+    plot(wavelengths,rep(1,length(wavelengths)),
+         axes=FALSE,ylab=ylab,xlab=xlab,main=main,
+         col=paste(cols,alpha,sep=""),ylim=c(.9,1.1),pch=pch,cex=cex,...)
+    axis(1,at=pretty(wavelengths))
 }
 #' \code{\link{viewSpectrum}}
 #' @param x wavelength in nm
 #' @param y position of the text, from 0.9 to 1.1
-#' @param pos positioning of the text, see ?text
+#' @param ... further arguments to ?text
 #' @details Color selector: draws a vertical line in the spectrum
 #' plotted by \code{\link{viewSpectrum}} at a given wavelength in nm
 #' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
 #' @export
-findWavelength <- function(x=534, y=1.09, pos=1) {
+findWavelength <- function(x=534, y=1.09, ...) {
     abline(v=x)
-    text(x, y, x, pos=pos)
+    text(x, y, x, ...)
     axis(4)
 }
 
@@ -100,7 +101,11 @@ findWavelength <- function(x=534, y=1.09, pos=1) {
 #' barplot(bars,border=cols,col=cols,las=2)
 #' @seealso \code{\link{viewSpectrum}}
 #' @export
-wavelength2RGB <- function(wavelength){
+wavelength2RGB <- function(wavelength)
+    cols <- sapply(wavelength, lambda2RGB)
+## translated from
+## http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb
+lambda2RGB <- function(wavelength) {
 
     ## intensity scaling near visibility
     gamma <- 0.80 
@@ -940,7 +945,8 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
       }
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
-    plotparams <- list(ylims=ylims, xlim=xlim, colors=pcols)
+    if ( is.null(xid) ) xid <- "Time"
+    plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols)
 }
 
 
@@ -1064,7 +1070,7 @@ viewGroups <- function(data, groups,
 
     ## get plot params - colors
     if ( missing(pcols) ) # if not missing: overrides set&default colors
-        if ( !is.null(colors) )
+        if ( !is.null(data$colors) )
             pcols <- data$colors # set colors
         else
             pcols <- getColors(data$dataIDs) # default colors
@@ -1178,7 +1184,8 @@ viewGroups <- function(data, groups,
     }
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
-    plotparams <- list(ylims=ylims, xlim=xlim, colors=pcols)
+    if ( is.null(xid) ) xid <- "Time"
+    plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols)
 }
 
 
