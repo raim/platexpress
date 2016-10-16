@@ -793,6 +793,14 @@ listAverage <- function(lst, id) {
     if ( length(lst)==0 ) return(NULL)
     ## collect values with the same ID for different data sets
     vals <- lapply(lst, function(x) x[[id]])
+    ## check length of lists and find missing time-points
+    if ( any(diff(unlist(lapply(vals, length)))!=0) ) {
+        stop("data have different lengths: ", id)
+        ## find point of discrepancy
+        mn <- min(unlist(lapply(vals, length)))
+        tmp <- lapply(vals, function(x) x[1:mn])
+        tmp <- matrix(unlist(tmp), ncol = length(tmp), byrow = FALSE)
+    }
     vals <- matrix(unlist(vals), ncol = length(vals), byrow = FALSE)
     ## take average of each time-point
     avg <- apply(vals,1,mean)
@@ -803,7 +811,7 @@ listAverage <- function(lst, id) {
         tdf <- apply(vals,2,diff) ## difference between timepoints
         if ( max(tsd) > 0.01*median(c(tdf)) ) {
             td <- max(tsd)/median(c(tdf))
-            warning(paste("max. SD within timepoint is",
+            warning(paste(id, ": max. SD within timepoint is",
                           round(td,3)*100, "% of median difference between",
                           "time points.\n"))
         }
