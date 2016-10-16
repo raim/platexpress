@@ -496,20 +496,39 @@ getColors <- function(ptypes,type="R") {
 #' @param data the current platexpress data set
 #' @param ID the ID of the new data 
 #' @param dat the new data, must be a matrix akin to other data in the set
+#' @param col plot color for the new data, an RGB string w/o alpha suffix
+#' @param processing optional processing note
+#' @param replace replace existing data, default: FALSE
 #' @seealso \code{\link{readPlateData}}
 #' @export
-addData <- function(data, ID, dat, col, processing) {
-    data$dataIDs <- c(data$dataIDs, ID) # add to ID list
-    if ( "colors" %in% names(data) ) { # add color
-        if ( missing(col) ) 
-            col <- getRGB(length(data$colors)+1)
-        data$colors <- c(data$colors, col[length(col)])
-        names(data$colors) <- c(names(data$colors)[2:length(data$colors)-1],ID)
+addData <- function(data, ID, dat, col, processing,replace=FALSE) {
+    ## replace existing
+    if ( ID%in%data$dataIDs ) {
+        if ( replace ) {
+            data[[ID]]$data <- dat
+            if ( !missing(col) )
+                if ( "colors" %in% names(data) )
+                    data$colors[ID] <- col
+            if ( missing(processing) )
+                processing <- paste("replaced",date())
+            data[[ID]]$processing <- processing
+        } else
+            stop("\"",ID, "\" already present, use replace=TRUE to replace")
+    } else {
+        ## add new data
+        data$dataIDs <- c(data$dataIDs, ID) # add to ID list
+        if ( "colors" %in% names(data) ) { # add color
+            if ( missing(col) ) 
+                col <- getRGB(length(data$colors)+1)
+            data$colors <- c(data$colors, col[length(col)])
+            names(data$colors) <-
+                c(names(data$colors)[2:length(data$colors)-1],ID)
+        }
+        if ( missing(processing) ) # add date as processing note
+            processing <- date()
+        data <- append(data, list(list(data=dat, processing=processing)))
+        names(data) <- c(names(data)[2:length(data)-1],ID)
     }
-    if ( missing(processing) ) # add date as processing note
-        processing <- date()
-    data <- append(data, list(list(data=dat, processing=processing)))
-    names(data) <- c(names(data)[2:length(data)-1],ID)
     data
 }
 
@@ -521,6 +540,8 @@ addData <- function(data, ID, dat, col, processing) {
 #' @seealso \code{\link{addData}}
 #' @export
 rmData <- function(data, ID) {
+    if ( !ID%in%data$dataIDs )
+        warning("\"",ID,"\" not found")
     data$dataIDs <- data$dataIDs[!data$dataIDs%in%ID] # rm ID
     if ( "colors" %in% names(data) ) # rm color
         data$colors <- data$colors[!names(data$colors)%in%ID]
@@ -533,16 +554,16 @@ rmData <- function(data, ID) {
 #' @param ID the ID of the data to be obtained
 #' @export
 getData <- function(data, ID, type="data") {
-    data[[ID]][[type]]
+    data[[ID]][[type]] # just return the current data or old versions
 }
 
-## cut data either by time, or by a chosen data set
+## TODO: cut data either by time, or by a chosen data set
 ###' @export
 cutData <- function(data, rng, ID) {
     
 }
 
-## convert to groFit data format
+## TODO: convert to groFit data format
 #' @export
 data2grofit <- function(data,dids,dose) {
     if ( missing(dose) )
@@ -554,8 +575,10 @@ data2grofit <- function(data,dids,dose) {
     grdat
 }
 
-#' set wells that should be skipped from all analyses and plots to NA
-#' @param skip a list of strings identifiying the wells to be skipped, e.g. "B3" to skip the well in row B/column 3
+#' \code{\link{skipWells}} set wells that should be skipped from all
+#' analyses and plots to NA
+#' @param skip a list of strings identifiying the wells to be skipped,
+#' e.g. "B3" to skip the well in row B/column 3
 #' @examples
 #' raw <- skipWells(raw, skip="A9")
 #' @export
@@ -572,9 +595,13 @@ skipWells <- function(data, skip) {
 
 #' \code{\link{correctBlanks}} correct for blanks
 #' @param data the data list to be blank-corrected
-#' @param plate the plate layout where column "blanks" indicates which wells are to be treated as blanks
-#' @param dids IDs of the data which should be blank-corrected, all will be blanked if missing
-#' @param by a list of column IDs of the plate layout; separate blank correction will be attempted for groups in these columns; each group must have at least one specified blank associated
+#' @param plate the plate layout where column "blanks" indicates which wells
+#' are to be treated as blanks
+#' @param dids IDs of the data which should be blank-corrected, all will be
+#' blanked if missing
+#' @param by a list of column IDs of the plate layout; separate blank
+#' correction will be attempted for groups in these columns; each group
+#' must have at least one specified blank associated
 #' @examples
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
@@ -647,6 +674,13 @@ correctBlanks <- function(data, plate, dids, by,
     corr
 }
 
+#' \code{\link{adjustBase}} adjust data to a minimal base, useful for
+#' adjustment of negative values after blank corrections
+#' @param dids vector of ID strings for which base correction should be
+#' executed
+#' @param base the new minimum for the data, default is 0, but it could
+#' e.g. be the OD used for inoculation
+#' @param by TODO: choose specific groups via plate-designs
 #' @export
 adjustBase <- function(data, dids, base=0) {
 
