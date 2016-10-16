@@ -51,6 +51,73 @@ getRGB <- function(n) {
     apply(cols,2,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))
 }
 
+
+## convert wavelength to RGB, after
+## links and code posted at
+## http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb
+## see http://www.fourmilab.ch/documents/specrend/ for original code and why
+## not all wavelengths can be converted to RGB
+#' @examples
+#' spectrum <- seq(380,780,1)
+#' cols <- sapply(spectrum, wavelength2RGB)
+#' bars <- rep(1,length(spectrum)); names(bars) <- spectrum
+#' barplot(bars,border=cols,col=cols,las=2)
+wavelength2RGB <- function(wavelength){
+
+    ## intensity scaling near visibility
+    gamma <- 0.80 
+    intensityMax <- 255
+
+    Red <- 0.0
+    Green <- 0.0
+    Blue <- 0.0
+
+    if ( (wavelength >= 380) & (wavelength<440) ) {
+        Red <- -(wavelength - 440) / (440 - 380)
+        Green <- 0.0
+        Blue <- 1.0
+    } else if ( (wavelength >= 440) & (wavelength<490) ) {
+        Red <- 0.0
+        Green <- (wavelength - 440) / (490 - 440)
+        Blue <- 1.0
+    }else if ( (wavelength >= 490) & (wavelength<510) ) {
+        Red <- 0.0;
+        Green <- 1.0;
+        Blue <- -(wavelength - 510) / (510 - 490);
+    } else if ( (wavelength >= 510) & (wavelength<580) ) {
+        Red <- (wavelength - 510) / (580 - 510)
+        Green <- 1.0
+        Blue <- 0.0
+    } else if ((wavelength >= 580) & (wavelength<645) ) {
+        Red <- 1.0
+        Green <- -(wavelength - 645) / (645 - 580)
+        Blue <- 0.0
+    } else if ( (wavelength >= 645) & (wavelength<781) ) {
+        Red <- 1.0
+        Green <- 0.0
+        Blue <- 0.0
+    }
+
+    ## intensity scaled near the vision limits
+    factor <- 0.0
+    if ( (wavelength >= 380) & (wavelength<420) ) {
+        factor <- 0.3 + 0.7*(wavelength - 380) / (420 - 380)
+    } else if ( (wavelength >= 420) & (wavelength<701) ) { 
+        factor <- 1.0
+    } else if ( (wavelength >= 701) & (wavelength<781) ) {
+        factor <- 0.3 + 0.7*(780 - wavelength) / (780 - 700)
+    }
+    
+    rgb <- rep(NA,3)
+    ## Don't want 0^x = 1 for x <> 0
+    rgb[1] <- ifelse(Red==0,  0, round(intensityMax * (Red   * factor)^gamma))
+    rgb[2] <- ifelse(Green==0,0, round(intensityMax * (Green * factor)^gamma))
+    rgb[3] <- ifelse(Blue==0, 0, round(intensityMax * (Blue  * factor)^gamma))
+    
+    rgb(rgb[1],rgb[2],rgb[3],maxColorValue=intensityMax)
+}
+
+
 ## trim leading and trailing white-space from parsed strings
 trim <- function(str)
   gsub(" *$", "", gsub("^ *", "", str) )
@@ -373,7 +440,7 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
 
 
 #' \code{\link{prettyData}} : set colors and order or filter the data set
-#' @param dids a vector of data IDs, data will be filtered and sorted by this list
+#' @param dids a vector of data IDs, data will be filtered and sorted by this list; of the vector is named the IDs will be replaced by these names
 #' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
 #' @seealso \code{\link{readPlateData}}
 #' @export
@@ -393,13 +460,23 @@ prettyData <- function(data, dids, colors,
                    match(dids,names(data)),
                    match("dataIDs",names(data)))]
 
+
+    ## rename!
+    if ( !is.null(names(dids)) ) {
+        names(data)[match(dids,names(data))] <- names(dids)
+        data$dataIDs[match(dids,data$dataIDs)] <- names(dids)
+    }
+    
     ## generate colors, if none are present
     if ( missing(colors) & !"colors"%in%names(data) ) {
         data$colors <- getColors(data$dataIDs)
     }
     ## set new or replace existing 
-    if ( !missing(colors) )
+    if ( !missing(colors) ) {
+        if ( is.null(names(colors)) )
+            names(colors) <- data$dataIDs
         data$colors <- colors
+    }
     data
 }
 
@@ -570,6 +647,23 @@ correctBlanks <- function(data, plate, dids, by,
     corr
 }
 
+#' @export
+adjustBase <- function(data, dids, base=0) {
+
+    if ( missing(dids) ) # only use requested data 
+        dids <- data$dataIDs # use all
+    
+    for ( did in dids ) {
+        dat <- data[[did]]$data
+        for ( j in 1:ncol(dat) ) 
+            dat[,j] <- dat[,j] - min(dat[,j],na.rm=TRUE) + base
+        data[[did]]$data <- dat
+        data[[did]]$processing <- c(data[[did]]$processing,
+                                    paste("corrected to base",base))
+    }
+    data
+}
+
 ## helper function to calculate an average value
 ## for a variable given in several list items,
 ## used for average (master) time and temperatures
@@ -673,6 +767,8 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
 
     ## which wells to plot?
     wells <-  paste(rep(rows,each=length(cols)),cols,sep="")
+
+
     
     ## get master data: time and temperature
     ## TODO: implement absence of master time, if interpolate=FALSE
@@ -685,9 +781,15 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
     } else xid <- NULL
     mids <- c(mids,xid) # will all be removed from plot data
 
+    ## get plot params - colors
+    if ( missing(pcols) ) # if not missing: overrides set&default colors
+        if ( !is.null(data$colors) )
+            pcols <- data$colors # set colors
+        else
+            pcols <- getColors(data$dataIDs) # default colors
+    
     ## reduce matrix to plot data
     data <- data[data$dataIDs]
-    #data <- data[!names(data)%in%mids]
     ptypes <- names(data)
     if ( !missing(dids) ) # only use requested data for plots
       ptypes <- ptypes[ptypes%in%dids]
@@ -720,18 +822,6 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
         names(ylims) <- ptypes
     }
 
-    ## colors
-    #if ( !"colors" %in% names(data) )
-    if ( missing(pcols) )
-        pcols <- getColors(ptypes)
-
-    ## colors - TODO - add only missing colors
-    #if ( !"colors" %in% names(data) )
-    #    ## as color palette 1:n, but in RGB to allow alpha
-    #    pcols <- getRGB(length(ptypes))
-    #    names(pcols) <- ptypes
-    #}
-    
     ## plot plate
     par(mfcol=c(length(rows),length(cols)),mai=rep(0,4))
     for ( j in cols ) 
@@ -767,10 +857,9 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
               }
           }
       }
-    ## TODO: find out how to do silent returns (like plot/hist etc.)
-    ## and return meaningful and/or non-plotted information
-    ##return(list(ylims=ylims, xlim=xlim))
-    pcols
+    ## TODO: return meaningful and/or non-plotted information
+    ## assigning it makes it silent!
+    plotparams <- list(ylims=ylims, xlim=xlim, colors=pcols)
 }
 
 
@@ -794,7 +883,6 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
                   ncol=ncol(plate))
     colnames(lpl) <- colnames(plate)
     ## collapse requested combinations into new type
-    ## TODO: sort by "by" order, such that viewGroups can be manipulated
     types <- rep("",nrow(plate))
     for ( b in by ) 
       types <- paste(types,lpl[,b],sep="_")
@@ -893,6 +981,13 @@ viewGroups <- function(data, groups,
     } else xid <- NULL
     mids <- c(mids,xid) # will all be removed from plot data
 
+    ## get plot params - colors
+    if ( missing(pcols) ) # if not missing: overrides set&default colors
+        if ( !is.null(colors) )
+            pcols <- data$colors # set colors
+        else
+            pcols <- getColors(data$dataIDs) # default colors
+
     ## reduce data to plotted data
     data <- data[data$dataIDs]
     #data <- data[!names(data)%in%mids]
@@ -933,8 +1028,8 @@ viewGroups <- function(data, groups,
     }
 
     ## colors
-    if ( missing(pcols) ) 
-        pcols <- getColors(ptypes) 
+    #if ( missing(pcols) ) 
+    #    pcols <- getColors(ptypes) 
 
     ## colors - TODO - add only missing colors
     #if ( !"colors" %in% names(data) )
@@ -998,9 +1093,9 @@ viewGroups <- function(data, groups,
         legend(legpos,id,bty="n")
         if ( xaxis ) axis(1)
     }
-    ## TODO: find out how to do silent returns (like plot/hist etc.)
-    ## and return meaningful and/or non-plotted information
-    ##return(list(ylims=ylims, xlim=xlim))
+    ## TODO: return meaningful and/or non-plotted information
+    ## assigning it makes it silent!
+    plotparams <- list(ylims=ylims, xlim=xlim, colors=pcols)
 }
 
 
