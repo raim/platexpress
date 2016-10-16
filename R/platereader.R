@@ -52,7 +52,9 @@ getRGB <- function(n) {
 }
 
 
-#' \code{\link{viewSpectrum}}
+#' \code{\link{viewSpectrum}}:
+#' shows the color spectrum of visible light along wavelengths in nm.
+#' See \code{\link{wavelength2RGB}} for details.
 #' @param wavelengths vector of wavelengths to be plotted
 #' @param alpha the alpha factor (opacity) for plot symbols, min=1, max=255
 #' @param pch the plot symbol type, see ?par("pch")
@@ -61,11 +63,15 @@ getRGB <- function(n) {
 #' @param xlab xlab, see ?plot
 #' @param main main, see ?plot
 #' @param ... further arguments to plot
-#' @details Shows the color spectrum along wavelength in nm. See
-#' \code{\link{wavelength2RGB}} for details.
-#' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
+#' @details Plots the color spectrum over the selected wavelengths in nm.
+#' The utility functions  \code{\link{plotWavelength}} and
+#' \code{\link{findWavelength}} can be used to plot and interactively (click
+#' on plot) find wavelengths. The function \code{\link{wavelength2RGB}} can
+#' then be used to convert this wavelength to RGB colors.
+#' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}},
+#' \code{\link{plotWavelength}}
 #' @export
-viewSpectrum <- function(wavelengths=380:780, alpha=11, pch=16, cex=3,
+viewSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
                          ylab="approximate color",
                          main="use findWavelength(353)",
                          xlab="wavelength, nm", ...) {
@@ -75,25 +81,57 @@ viewSpectrum <- function(wavelengths=380:780, alpha=11, pch=16, cex=3,
          col=paste(cols,alpha,sep=""),ylim=c(.9,1.1),pch=pch,cex=cex,...)
     axis(1,at=pretty(wavelengths))
 }
-#' \code{\link{viewSpectrum}}
+#' \code{\link{plotWavelength}}:
+#' a color selector for \code{\link{viewSpectrum}}; draws a vertical line,
+#' the wavelength, and a filled circle at a given wavelength in nm.
 #' @param x wavelength in nm
 #' @param y position of the text, from 0.9 to 1.1
 #' @param ... further arguments to ?text
-#' @details Color selector: draws a vertical line in the spectrum
-#' plotted by \code{\link{viewSpectrum}} at a given wavelength in nm
-#' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}}
+#' @param ych y position of the symbol
+#' @param pch the plot symbol type, see ?par("pch")
+#' @param cex the plot symbol size, see ?par("cex")
+#' @seealso \code{\link{viewSpectrum}}, \code{\link{findWavelength}},
+#' \code{\link{wavelength2RGB}}
 #' @export
-findWavelength <- function(x=534, y=1.09, ...) {
-    abline(v=x,col=lambda2RGB(x))
-    text(x, y, x,col=lambda2RGB(x), ...)
+plotWavelength <- function(x=534, y=1.09, ych=0.95, cex=5, pch=19, ...) {
+    col <- wavelength2RGB(x)
+    abline(v=x,col=col)
+    text(x, y, x,col=col, ...)
+    points(x, ych, col=col, cex=cex, pch=pch)
     axis(4)
 }
 
-#' \code{\link{wavelength2RGB}}
-#' @details converts wavelength in nm to RGB, after links and code posted at
-#' http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb
-#' see http://www.fourmilab.ch/documents/specrend/ for original code and why
-#' not all wavelengths can be converted to RGB.
+#' \code{\link{findWavelength}}:
+#' a color selector for \code{\link{viewSpectrum}}; expects the user to
+#' click on the spectrum, then draws a vertical line at the clicked
+#' wavelength using \code{\link{plotWavelength}} and records the wavelength
+#' in nm.
+#' @param n number of clicks to record
+#' @param ... further arguments to \code{\link{plotWavelength}}, for
+#' selecting plot symbol and text size, and positions
+#' @seealso \code{\link{viewSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
+#' @export
+findWavelength <- function(n=1, ...) {
+    cat(paste("PLEASE CLICK ON THE PLOT ... "))
+    rgb <- matrix(NA,ncol=2,nrow=n)
+    colnames(rgb) <- c("nm","RGB")
+    for ( i in 1:n ) {
+        xy <- locator(1)
+        rgb[i,] <-  c(round(xy$x,1), wavelength2RGB(xy$x))
+        plotWavelength(round(xy$x), ych=xy$y, ...)
+        cat(paste("\n\t", round(xy$x,1), "nm, in RGB:", rgb[i,2],"\n",
+                  ifelse(i==n,"",paste(n-i, "LEFT, CLICK AGAIN ..."))))
+    }
+    cat("\n")
+    rgb
+}
+
+#' \code{\link{wavelength2RGB}}:
+#' converts wavelength in nm (visible light: 380:780 nm) to RGB.
+#' @details implemented following the java code posted at
+#' http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb .
+#' Also see http://www.fourmilab.ch/documents/specrend/ for original code and
+#' why not all wavelengths can be converted to RGB.
 #' @examples
 #' wavelengths <- seq(380,780,1)
 #' cols <- sapply(wavelengths, wavelength2RGB)
@@ -191,7 +229,7 @@ ci95 <- function(data,na.rm=FALSE) {
 ## strings.
 ## TODO: repair this in example:
 #' \code{\link{readPlateMap}} parses a plate design file in CSV. Rows and 
-#' columns should be named as in the corresponding datafiles.
+#' columns should be named as in the corresponding data files.
 #' @param file text file containing the plate layout.
 #' @param sep column separator, as in read.table
 #' @param fsep within-field separator, separating the well-specific descriptors
