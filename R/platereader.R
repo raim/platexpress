@@ -891,7 +891,7 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
                       mids=c(time="Time",temp="Temperature"), 
                       xid, xscale=FALSE,xlim,
                       dids, pcols, yscale=TRUE,ylims,ylim,log="",
-                      legpos="topleft") {
+                      legpos="topleft",add.legend=TRUE) {
 
     ## which wells to plot?
     wells <-  paste(rep(rows,each=length(cols)),cols,sep="")
@@ -989,6 +989,10 @@ viewPlate <- function(data,rows=toupper(letters[1:8]),cols=1:12,
               }
           }
       }
+    ## add legend to last plot
+    if ( add.legend )
+      legend("topright",ptypes,lty=1,col=pcols[ptypes])   
+
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
     if ( is.null(xid) ) xid <- "Time"
@@ -1090,16 +1094,21 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 #' groups <- getGroups(plate=ap12plate, by=c("strain"))
 #' vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
 #' @export
-viewGroups <- function(data, groups,
+viewGroups <- function(data, groups, groups2,
                        mids=c(time="Time", temp="Temperature"), 
                        xid, xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
                        show.ci95=TRUE,
                        legpos="topleft", lty.orig=1,lwd.orig=0.1,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
-                       nrow=1, xaxis=TRUE, yaxis=c(1,2)) {
+                       nrow=1, xaxis=TRUE, yaxis=c(1,2),
+                       add.legend=TRUE) {
     
 
+    if ( missing(groups) ) {
+        groups <- list(unlist(groups2))
+        names(groups) <- "*"
+    }
     wells <- unique(unlist(groups))
     
     ## get master data: time and temperature
@@ -1174,10 +1183,10 @@ viewGroups <- function(data, groups,
     #    names(pcols) <- ptypes
     #}
 
-    if ( length(groups)>1 ) {
+    #if ( length(groups)>1 ) {
         ncol <- ceiling(length(groups)/nrow)
         par(mfcol=c(nrow,ncol))
-    }
+    #}
     par(mai=mai,mgp=mgp)
     for ( g in 1:length(groups) ) {
         wells <- groups[[g]]
@@ -1186,49 +1195,72 @@ viewGroups <- function(data, groups,
         if ( !is.null(xid) ) 
           x <- xdat[,wells]
         else x <- time
+
+        ## get subgroups
+        if ( !missing(groups2) ) {
+            gidx <- grep(id, names(groups2))
+            sgroups <- groups2[gidx]
+        } else
+          sgroups <- groups[g]
+
+        parnew <- FALSE
         for ( i in 1:length(ptypes) ) {
             ptyp <- ptypes[i]
-            ## get data for selected wells
-            dat <- data[[ptyp]]$data[,wells]
-            ## calculate stats only for common x!
-            ## TODO: instead bin data on x and calculate ci there
-            ## or interpolate data to common x (on the fly)?
-            ## TODO: do we get NAs or empty vals from ci?
-            if ( is.null(dim(x)) & show.ci95 ) { 
-                mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
-                ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
-            }
-            ## PLOT
-            par(new=i!=1)
-            ## override lty.orig=0 and lwd.orig=0 if x is data-specific
-            if ( !is.null(dim(x)) ) {
-                if ( lwd.orig==0 ) lwd.orig <- 0.1
-                if ( lty.orig==0 ) lty.orig <- 1
-            }
-            ## override color to allow lwd.orig=0 to work for PDF as well
-            tmp <- ifelse(lwd.orig==0,NA, pcols[ptyp])
-            matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
-                    ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xlab,log=log)
-            
-            ## plot mean and confidence intervals
-            if ( is.null(dim(x)) & show.ci95 ) { # only for common x!
-                polygon(x=c(x,rev(x)),y=c(mn-ci,rev(mn+ci)),border=NA,
-                    col=paste(pcols[ptyp],"55",sep=""))
-                lines(x=x,mn,col=pcols[ptyp],lwd=2)
-            }
+            for ( sg in 1:length(sgroups) ) {
+                wells <- sgroups[[sg]]
+                ##id <- names(sgroups)[sg]
+                ## x data other then time
+                if ( !is.null(xid) )
+                  x <- xdat[,wells]
+                else x <- time
 
-            ## add axes for first two values
-            if ( yaxis[1]==i ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
-                                    col=pcols[ptyp],
-                                    col.axis=pcols[ptyp])
-            if ( yaxis[2]==i ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
-                                     col=pcols[ptyp],
-                                     col.axis=pcols[ptyp])
+                ## get data for selected wells
+                dat <- data[[ptyp]]$data[,wells]
+                ## calculate stats only for common x!
+                ## TODO: instead bin data on x and calculate ci there
+                ## or interpolate data to common x (on the fly)?
+                ## TODO: do we get NAs or empty vals from ci?
+                if ( is.null(dim(x)) & show.ci95 ) {
+                    mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
+                    ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
+                }
+                ## PLOT
+                par(new=parnew) #i!=1)
+                parnew <- TRUE
+                ## override lty.orig=0 and lwd.orig=0 if x is data-specific
+                if ( !is.null(dim(x)) ) {
+                    if ( lwd.orig==0 ) lwd.orig <- 0.1
+                    if ( lty.orig==0 ) lty.orig <- 1
+                }
+                ## override color to allow lwd.orig=0 to work for PDF as well
+                tmp <- ifelse(lwd.orig==0,NA, pcols[ptyp])
+                matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
+                        ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xlab,log=log)
 
+                ## plot mean and confidence intervals
+                if ( is.null(dim(x)) & show.ci95 ) { # only for common x!
+                    polygon(x=c(x,rev(x)),y=c(mn-ci,rev(mn+ci)),border=NA,
+                            col=paste(pcols[ptyp],"55",sep=""))
+                    lines(x=x,mn,col=pcols[ptyp],lwd=2)
+                }
+
+                ## add axes for first two values
+                if ( yaxis[1]==i ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
+                            col=pcols[ptyp],
+                            col.axis=pcols[ptyp])
+                if ( yaxis[2]==i ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
+                            col=pcols[ptyp],
+                            col.axis=pcols[ptyp])
+
+            }
+            legend(legpos,id,bty="n")
+            if ( xaxis ) axis(1)
         }
-        legend(legpos,id,bty="n")
-        if ( xaxis ) axis(1)
     }
+    ## add legend to last plot
+    if ( add.legend )
+        legend("topright",ptypes,lty=1,col=pcols[ptypes])
+
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
     if ( is.null(xid) ) xid <- "Time"
