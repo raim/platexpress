@@ -1064,7 +1064,8 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 
 #' plot grouped wells as summary plots, incl. confidence intervals and means
 #' @param data the list of measurement data as provided by \code{\link{readPlateData}}
-#' @param groups a list of well grouped wells, as produced by \code{\link{getGroups}}
+#' @param groups a list of well grouped wells, as produced by \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2} 
+#' @param groups2 sub-groups of \code{groups}, group2 must be constructed as \code{groups}, but with one additional grouping, e.g. \code{\link{getGroups}}(platemap, by=c("media","strain")) following the example for parameter see \code{groups}
 #' @param nrows number of plot rows
 #' @param mids vector of named strings, indicating the IDs of the master
 #' time and temperature vectors in the data
@@ -1082,12 +1083,15 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 #' @param log plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
 #' @param legpos position of the well IDs on the plots
+#' @param g2.legend plot a legend for group2 subgroups
 #' @param lwd.orig line-width of the original single data, set to 0 to supress plotting of all original data
 #' @param lty.orig line type of the original single data, set to 0 to supress plotting of all original data
 #' @param mai set the outer margins around plot areas, see ?par
 #' @param mgp set the position of axis title, tick marks and tick lengths
 #' @param xaxis plot x-axis if TRUE
 #' @param yaxis plot y-axis if TRUE
+#' @param embed setting TRUE allows to embed plots of single groups within in layouted plots, see ?layout and par("mfcol")
+#' @param no.par setting TRUE supresses all internal plot defaults (e.g., mai, mgp)
 #' @seealso \code{\link{viewPlate}}, \code{\link{getGroups}}, \code{\link{readPlateMap}}
 #' @examples
 #' data(ap12)
@@ -1098,8 +1102,10 @@ viewGroups <- function(data, groups, groups2,
                        mids=c(time="Time", temp="Temperature"), 
                        xid, xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
-                       show.ci95=TRUE,
-                       legpos="topleft", lty.orig=1,lwd.orig=0.1,
+                       show.ci95=TRUE,show.mean=TRUE,
+                       lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
+                       legpos="topleft", g2.legend=TRUE,
+                       embed=FALSE, no.par=FALSE,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
                        add.legend=TRUE) {
@@ -1183,11 +1189,11 @@ viewGroups <- function(data, groups, groups2,
     #    names(pcols) <- ptypes
     #}
 
-    #if ( length(groups)>1 ) {
+    if ( length(groups)>1 | !embed ) {
         ncol <- ceiling(length(groups)/nrow)
         par(mfcol=c(nrow,ncol))
-    #}
-    par(mai=mai,mgp=mgp)
+    }
+    if ( !no.par ) par(mai=mai,mgp=mgp)
     for ( g in 1:length(groups) ) {
         wells <- groups[[g]]
         id <- names(groups)[g]
@@ -1197,6 +1203,8 @@ viewGroups <- function(data, groups, groups2,
         else x <- time
 
         ## get subgroups
+        ## TODO: actually search by wells instead of
+        ## grepping name, since this doesnt allow name extensions
         if ( !missing(groups2) ) {
             gidx <- grep(id, names(groups2))
             sgroups <- groups2[gidx]
@@ -1208,7 +1216,7 @@ viewGroups <- function(data, groups, groups2,
             ptyp <- ptypes[i]
             for ( sg in 1:length(sgroups) ) {
                 wells <- sgroups[[sg]]
-                ##id <- names(sgroups)[sg]
+                sid <- names(sgroups)[sg]
                 ## x data other then time
                 if ( !is.null(xid) )
                   x <- xdat[,wells]
@@ -1220,9 +1228,11 @@ viewGroups <- function(data, groups, groups2,
                 ## TODO: instead bin data on x and calculate ci there
                 ## or interpolate data to common x (on the fly)?
                 ## TODO: do we get NAs or empty vals from ci?
-                if ( is.null(dim(x)) & show.ci95 ) {
-                    mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
-                    ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
+                if ( is.null(dim(x)) ) {
+                    if ( show.mean )
+                        mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
+		    if ( show.ci95 )
+                        ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
                 }
                 ## PLOT
                 par(new=parnew) #i!=1)
@@ -1230,7 +1240,8 @@ viewGroups <- function(data, groups, groups2,
                 ## override lty.orig=0 and lwd.orig=0 if x is data-specific
                 if ( !is.null(dim(x)) ) {
                     if ( lwd.orig==0 ) lwd.orig <- 0.1
-                    if ( lty.orig==0 ) lty.orig <- 1
+                    lty.orig <- ifelse(g2.legend,sg,
+                                ifelse(lty.orig==0,1,lty.orig))
                 }
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, pcols[ptyp])
@@ -1238,10 +1249,13 @@ viewGroups <- function(data, groups, groups2,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xlab,log=log)
 
                 ## plot mean and confidence intervals
-                if ( is.null(dim(x)) & show.ci95 ) { # only for common x!
-                    polygon(x=c(x,rev(x)),y=c(mn-ci,rev(mn+ci)),border=NA,
-                            col=paste(pcols[ptyp],"55",sep=""))
-                    lines(x=x,mn,col=pcols[ptyp],lwd=2)
+                if ( is.null(dim(x)) ) { # only for common x!
+                    if ( show.ci95 )
+                        polygon(x=c(x,rev(x)),y=c(mn-ci,rev(mn+ci)),border=NA,
+                                col=paste(pcols[ptyp],"55",sep=""))
+                    if ( show.mean )
+                        lines(x=x,mn,col=pcols[ptyp],lwd=lwd.mean,
+                              lty=ifelse(g2.legend,sg,lty.mean))
                 }
 
                 ## add axes for first two values
@@ -1253,7 +1267,10 @@ viewGroups <- function(data, groups, groups2,
                             col.axis=pcols[ptyp])
 
             }
-            legend(legpos,id,bty="n")
+            if ( length(sgroups)>1 & g2.legend )
+                legend(legpos,names(sgroups),lty=1:length(sgroups),bty="n")
+            else
+                legend(legpos,id, bty="n")
             if ( xaxis ) axis(1)
         }
     }
