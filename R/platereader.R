@@ -52,7 +52,7 @@ getRGB <- function(n) {
 }
 
 
-#' \code{\link{viewSpectrum}}:
+#' \code{\link{showSpectrum}}:
 #' shows the color spectrum of visible light along wavelengths in nm.
 #' See \code{\link{wavelength2RGB}} for details.
 #' @param wavelengths vector of wavelengths to be plotted
@@ -71,7 +71,7 @@ getRGB <- function(n) {
 #' @seealso \code{\link{wavelength2RGB}}, \code{\link{findWavelength}},
 #' \code{\link{plotWavelength}}
 #' @export
-viewSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
+showSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
                          ylab="approximate color",
                          main="use findWavelength(353)",
                          xlab="wavelength, nm", ...) {
@@ -82,7 +82,7 @@ viewSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
     axis(1,at=pretty(wavelengths))
 }
 #' \code{\link{plotWavelength}}:
-#' a color selector for \code{\link{viewSpectrum}}; draws a vertical line,
+#' a color selector for \code{\link{showSpectrum}}; draws a vertical line,
 #' the wavelength, and a filled circle at a given wavelength in nm.
 #' @param x wavelength in nm
 #' @param y position of the text, from 0.9 to 1.1
@@ -90,7 +90,7 @@ viewSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
 #' @param ych y position of the symbol
 #' @param pch the plot symbol type, see ?par("pch")
 #' @param cex the plot symbol size, see ?par("cex")
-#' @seealso \code{\link{viewSpectrum}}, \code{\link{findWavelength}},
+#' @seealso \code{\link{showSpectrum}}, \code{\link{findWavelength}},
 #' \code{\link{wavelength2RGB}}
 #' @export
 plotWavelength <- function(x=534, y=1.09, ych=0.95, cex=5, pch=19, ...) {
@@ -102,14 +102,14 @@ plotWavelength <- function(x=534, y=1.09, ych=0.95, cex=5, pch=19, ...) {
 }
 
 #' \code{\link{findWavelength}}:
-#' a color selector for \code{\link{viewSpectrum}}; expects the user to
+#' a color selector for \code{\link{showSpectrum}}; expects the user to
 #' click on the spectrum, then draws a vertical line at the clicked
 #' wavelength using \code{\link{plotWavelength}} and records the wavelength
 #' in nm.
 #' @param n number of clicks to record
 #' @param ... further arguments to \code{\link{plotWavelength}}, for
 #' selecting plot symbol and text size, and positions
-#' @seealso \code{\link{viewSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
+#' @seealso \code{\link{showSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
 #' @export
 findWavelength <- function(n=1, ...) {
     cat(paste("PLEASE CLICK ON THE PLOT ... "))
@@ -137,7 +137,7 @@ findWavelength <- function(n=1, ...) {
 #' cols <- sapply(wavelengths, wavelength2RGB)
 #' bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
 #' barplot(bars,border=cols,col=cols,las=2)
-#' @seealso \code{\link{viewSpectrum}}
+#' @seealso \code{\link{showSpectrum}}
 #' @export
 wavelength2RGB <- function(wavelength)
     cols <- sapply(wavelength, lambda2RGB)
