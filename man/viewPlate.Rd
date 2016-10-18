@@ -4,20 +4,19 @@
 \alias{viewPlate}
 \title{\code{\link{viewPlate}} plots all data in plate format}
 \usage{
-viewPlate(data, rows = toupper(letters[1:8]), cols = 1:12, mids = c(time =
-  "Time", temp = "Temperature"), xid, xscale = FALSE, xlim, dids, pcols,
-  yscale = TRUE, ylims, ylim, log = "", legpos = "topleft")
+viewPlate(data, wells, rows = toupper(letters[1:8]), cols = 1:12,
+  xid = "Time", xscale = FALSE, xlim, dids, pcols, yscale = TRUE, ylims,
+  ylim, log = "", legpos = "topleft", add.legend = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by \code{\link{readPlateData}}}
+
+\item{wells}{a list of wells to plot, overrules \code{rows} and \code{cols}}
 
 \item{rows}{a list of strings/characters used as row ID in the composite
 row:col well description in the plate layout (map) and plate data}
 
 \item{cols}{as rows but plate column IDs}
-
-\item{mids}{vector of named strings, indicating the IDs of the master
-time and temperature vectors in the data}
 
 \item{xid}{ID of a data-set in the input data that can be used as x-axis
 instead of the default Time vector}
@@ -42,6 +41,9 @@ all plotted wells; if FALSE each well be locally scaled}
 log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 
 \item{legpos}{position of the well IDs on the plots}
+
+\item{mids}{vector of named strings, indicating the IDs of the master
+time and temperature vectors in the data}
 }
 \description{
 \code{\link{viewPlate}} plots all data in plate format

@@ -4,18 +4,19 @@
 \alias{viewGroups}
 \title{plot grouped wells as summary plots, incl. confidence intervals and means}
 \usage{
-viewGroups(data, groups, mids = c(time = "Time", temp = "Temperature"), xid,
-  xscale = FALSE, xlim, dids, pcols, yscale = TRUE, ylims, ylim, log = "",
-  legpos = "topleft", lty.orig = 1, lwd.orig = 0.1, mai = c(0.5, 0, 0,
-  0), mgp = c(1.5, 0.5, 0), nrow = 1, xaxis = TRUE, yaxis = c(1, 2))
+viewGroups(data, groups, groups2, xid = "Time", xscale = FALSE, xlim, dids,
+  pcols, yscale = TRUE, ylims, ylim, log = "", show.ci95 = TRUE,
+  show.mean = TRUE, lty.orig = 1, lwd.orig = 0.1, lty.mean = 1,
+  lwd.mean = 2, legpos = "topleft", g2.legend = TRUE, embed = FALSE,
+  no.par = FALSE, mai = c(0.5, 0, 0, 0), mgp = c(1.5, 0.5, 0), nrow = 1,
+  xaxis = TRUE, yaxis = c(1, 2), add.legend = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by \code{\link{readPlateData}}}
 
-\item{groups}{a list of well grouped wells, as produced by \code{\link{getGroups}}}
+\item{groups}{a list of well grouped wells, as produced by \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2}}
 
-\item{mids}{vector of named strings, indicating the IDs of the master
-time and temperature vectors in the data}
+\item{groups2}{sub-groups of \code{groups}, group2 must be constructed as \code{groups}, but with one additional grouping, e.g. \code{\link{getGroups}}(platemap, by=c("media","strain")) following the example for parameter see \code{groups}}
 
 \item{xid}{ID of a data-set in the input data that can be used as x-axis
 instead of the default Time vector}
@@ -39,11 +40,17 @@ all plotted wells; if FALSE each well be locally scaled}
 \item{log}{plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 
-\item{legpos}{position of the well IDs on the plots}
-
 \item{lty.orig}{line type of the original single data, set to 0 to supress plotting of all original data}
 
 \item{lwd.orig}{line-width of the original single data, set to 0 to supress plotting of all original data}
+
+\item{legpos}{position of the well IDs on the plots}
+
+\item{g2.legend}{plot a legend for group2 subgroups}
+
+\item{embed}{setting TRUE allows to embed plots of single groups within in layouted plots, see ?layout and par("mfcol")}
+
+\item{no.par}{setting TRUE supresses all internal plot defaults (e.g., mai, mgp)}
 
 \item{mai}{set the outer margins around plot areas, see ?par}
 

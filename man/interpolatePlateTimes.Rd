@@ -7,7 +7,7 @@ master time: calculates average time for each measurement point
 and interpolates all values to this time; this is also used for
 well temperatures}
 \usage{
-interpolatePlateTimes(data, verb = TRUE)
+interpolatePlateTimes(data, verb = TRUE, xid)
 }
 \value{
 returns a copy of the full data list with a master time and

@@ -4,7 +4,7 @@
 \alias{prettyData}
 \title{\code{\link{prettyData}} : set colors and order or filter the data set}
 \usage{
-prettyData(data, dids, colors, mids = c(time = "Time", temp = "Temperature"))
+prettyData(data, dids, colors)
 }
 \arguments{
 \item{dids}{a vector of data IDs, data will be filtered and sorted by this list; of the vector is named the IDs will be replaced by these names}

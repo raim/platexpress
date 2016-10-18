@@ -4,14 +4,14 @@
 \alias{adjustBase}
 \title{\code{\link{adjustBase}} adjust data to a minimal base}
 \usage{
-adjustBase(data, dids, base = 0)
+adjustBase(data, base = 0, dids, add.fraction, xlim)
 }
 \arguments{
-\item{dids}{vector of ID strings for which base correction should be
-executed}
-
 \item{base}{the new minimum for the data, default is 0, but it could
 e.g. be the OD used for inoculation}
+
+\item{dids}{vector of ID strings for which base correction should be
+executed}
 
 \item{by}{TODO: choose specific groups via plate-designs}
 }

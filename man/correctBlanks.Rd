@@ -4,8 +4,7 @@
 \alias{correctBlanks}
 \title{\code{\link{correctBlanks}} correct for blanks}
 \usage{
-correctBlanks(data, plate, dids, by, mids = c(time = "Time", temp =
-  "Temperature"))
+correctBlanks(data, plate, by, dids, nbins = 1)
 }
 \arguments{
 \item{data}{the data list to be blank-corrected}
@@ -13,12 +12,12 @@ correctBlanks(data, plate, dids, by, mids = c(time = "Time", temp =
 \item{plate}{the plate layout where column "blanks" indicates which wells
 are to be treated as blanks}
 
-\item{dids}{IDs of the data which should be blank-corrected, all will be
-blanked if missing}
-
 \item{by}{a list of column IDs of the plate layout; separate blank
 correction will be attempted for groups in these columns; each group
 must have at least one specified blank associated}
+
+\item{dids}{IDs of the data which should be blank-corrected, all will be
+blanked if missing}
 }
 \description{
 \code{\link{correctBlanks}} correct for blanks

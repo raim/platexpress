@@ -24,6 +24,6 @@ bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
 barplot(bars,border=cols,col=cols,las=2)
 }
 \seealso{
-\code{\link{viewSpectrum}}
+\code{\link{showSpectrum}}
 }
 

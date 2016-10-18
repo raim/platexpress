@@ -3,7 +3,7 @@
 \name{findWavelength}
 \alias{findWavelength}
 \title{\code{\link{findWavelength}}:
-a color selector for \code{\link{viewSpectrum}}; expects the user to
+a color selector for \code{\link{showSpectrum}}; expects the user to
 click on the spectrum, then draws a vertical line at the clicked
 wavelength using \code{\link{plotWavelength}} and records the wavelength
 in nm.}
@@ -18,12 +18,12 @@ selecting plot symbol and text size, and positions}
 }
 \description{
 \code{\link{findWavelength}}:
-a color selector for \code{\link{viewSpectrum}}; expects the user to
+a color selector for \code{\link{showSpectrum}}; expects the user to
 click on the spectrum, then draws a vertical line at the clicked
 wavelength using \code{\link{plotWavelength}} and records the wavelength
 in nm.
 }
 \seealso{
-\code{\link{viewSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
+\code{\link{showSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
 }
 
