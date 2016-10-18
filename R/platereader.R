@@ -1298,8 +1298,8 @@ viewGroups <- function(data, groups, groups2,
         xlim <- range(time)
     ## set local ylims
     ## TODO: generalize and align with code in viewPlate
-    if ( missing(ylims) & missing(ylim) ) {
-        ylims <- list()
+    if ( missing(ylim) ) {
+        ylim <- list()
         for ( k in 1:length(ptypes) ) {
             dat <- data[[ptypes[k]]]$data[,wells,drop=FALSE] # get plotted wells
             if ( global.x ) {
@@ -1310,10 +1310,13 @@ viewGroups <- function(data, groups, groups2,
                     dt <- c(dt,dat[xdat[,i]>=xlim[1]&xdat[,i]<=xlim[2],i])
                 dat <- dt
             }
-            ylim <- range(c(dat[is.finite(dat)]),na.rm=TRUE)
-            ylims <- append(ylims,list(ylim))
+            ylm <- range(c(dat[is.finite(dat)]),na.rm=TRUE)
+            ylim <- append(ylim,list(ylm))
         }
-        names(ylims) <- ptypes
+        names(ylim) <- ptypes
+        if ( !missing(ylims) ) # update by argument ylims
+            ylim[names(ylims)] <- ylims[names(ylims)]
+        ylims <- ylim
     } else if ( missing(ylims) & !missing(ylim) )  { # expand single ylim 
         ylims <- rep(list(ylim),length(ptypes))
         names(ylims) <- ptypes
