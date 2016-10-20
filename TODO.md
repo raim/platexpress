@@ -1,7 +1,6 @@
 # TODO - platexpress
 
 ## DATA HANDLING
-### set better data IDs & data colors
 ### default data IDs and colors for defined plates
 ### order group by "by"
 ### cutTime: simple function to look only at specific times
