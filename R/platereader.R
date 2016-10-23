@@ -704,7 +704,7 @@ skipWells <- function(data, skip) {
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @export
-correctBlanks <- function(data, plate, by, dids, nbins=1) {
+correctBlanks <- function(data, plate, type="ci95", by, dids, nbins=1) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
@@ -771,12 +771,21 @@ correctBlanks <- function(data, plate, by, dids, nbins=1) {
             timebins <- cbind(ceiling(timebins[1:(nbin-1)]),
                               floor(timebins[2:nbin]))
             cat(paste(ptyp, "\n"))
+            ## calculate and subtract blanks for time bins (default: all)
             for ( t in 1:nrow(timebins) ) {
                 bin <- timebins[t,1]:timebins[t,2]
                 if ( nrow(timebins)>1 )
                     cat(paste("\ttime bin:",t,timebins[t,1],"-",timebins[t,2]))
-                ## subtract blank for time bin (default: all)
-                blank <- median(c(dat[bin,bwells]),na.rm=TRUE)
+
+                ## calculate blank!
+                if ( type=="median" )
+                    blank <- median(c(dat[bin,bwells]),na.rm=TRUE)
+                else if ( type=="mean" )
+                    blank <- mean(c(dat[bin,bwells]),na.rm=TRUE)
+                else if ( type=="ci95" )
+                    blank <- mean(c(dat[bin,bwells]),na.rm=TRUE) -  ci95(c(dat[bin,bwells]),na.rm=TRUE)
+                
+                ## subtract blank
                 corr[[ptyp]]$data[bin,c(dwells,bwells)] <-
                                dat[bin,c(dwells,bwells)] - blank
                 cat(paste("\tblank:",blank,"\n"))
