@@ -8,6 +8,8 @@
 ## DATA PLOTTING
 
 ## DATA PROCESSING
+### interpolatePlateData: check end handling, replace by NA? handle NA
+    in ci95 plots
 ### set above 0, after blanking
 ### smoothing
 ### stats over replicates
