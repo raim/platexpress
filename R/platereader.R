@@ -1483,8 +1483,7 @@ viewGroups <- function(data, groups, groups2,
                 ## or interpolate data to common x (on the fly)?
                 ## TODO: do we get NAs or empty vals from ci?
                 if ( is.null(dim(x)) & length(wells)>1 ) {
-                    if ( show.mean )
-                        mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
+                    mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
 		    if ( show.ci95 )
                         ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
                 }
