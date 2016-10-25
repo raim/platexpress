@@ -659,6 +659,7 @@ cutData <- function(data, rng, ID) {
     
 }
 
+### data2grofit: see AP12.R for example, TODO: fix example data and update file
 #' \code{\link{data2grofit}} : converts \code{package:platexpress} data to
 #' \code{package:grofit} data format
 #' @param data the current platexpress data set, see \code{\link{readPlateData}}
