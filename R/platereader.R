@@ -681,7 +681,7 @@ cutData <- function(data, rng, ID) {
 #' grdat <- data2grofit(data)
 #' fit <- gcFit(grdat$time, grdat$data)
 #' @export
-data2grofit <- function(data, did="OD", max.time, wells, plate, eid, dose) {
+data2grofit <- function(data, did="OD", min.time, max.time, wells, plate, eid, dose) {
     
     dat <- data[[did]]$data
     if ( missing(wells) )
@@ -693,6 +693,10 @@ data2grofit <- function(data, did="OD", max.time, wells, plate, eid, dose) {
     if ( !missing(max.time) ) {
         dat <- dat[time<=max.time,]
         time <- time[time<=max.time]
+    }
+    if ( !missing(min.time) ) {
+        dat <- dat[time>=min.time,]
+        time <- time[time>=min.time]
     }
     time <- t(matrix(rep(time, ncol(dat)), c(length(time), ncol(dat))))
 
