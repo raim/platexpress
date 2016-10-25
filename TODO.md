@@ -1,5 +1,8 @@
 # TODO - platexpress
 
+## LIBRARY
+### fix example data to reflect current use
+
 ## DATA HANDLING
 ### default data IDs and colors for defined plates
 ### order group by "by"
@@ -15,4 +18,4 @@
 ### stats over replicates
 ### local fits: linear, lin-expo
 ### fit growth models: interface to grofit and growthrater
-
+### find lag: use growth models, but only to find and rm (consensus?) lag
