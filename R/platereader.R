@@ -756,12 +756,13 @@ skipWells <- function(data, skip) {
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @export
-correctBlanks <- function(data, plate, type="ci95", by, dids, nbins=1) {
+correctBlanks <- function(data, plate, type="ci95", by, dids, mid="Time", max.mid, mbins=1) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
     ## start new data list
     corr <- data
+    time <- data[[mid]] ## TODO: take from data mids
   
     ## reduce matrix to requested data
     data <- data[data$dataIDs]
@@ -818,7 +819,7 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, nbins=1) {
             dat <- data[[ptyp]]$data
             ## TODO: do this in time bins
             
-            timebins <- unique(c(seq(1,nrow(dat),nrow(dat)/nbins),nrow(dat)))
+            timebins <- unique(c(seq(1,nrow(dat),nrow(dat)/mbins),nrow(dat)))
             nbin <- length(timebins)
             timebins <- cbind(ceiling(timebins[1:(nbin-1)]),
                               floor(timebins[2:nbin]))
@@ -826,17 +827,31 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, nbins=1) {
             ## calculate and subtract blanks for time bins (default: all)
             for ( t in 1:nrow(timebins) ) {
                 bin <- timebins[t,1]:timebins[t,2]
-                if ( nrow(timebins)>1 )
+                #if ( nrow(timebins)>1 )
                     cat(paste("\ttime bin:",t,timebins[t,1],"-",timebins[t,2]))
 
-                ## calculate blank!
-                if ( type=="median" )
-                    blank <- median(c(dat[bin,bwells]),na.rm=TRUE)
-                else if ( type=="mean" )
-                    blank <- mean(c(dat[bin,bwells]),na.rm=TRUE)
-                else if ( type=="ci95" )
-                    blank <- mean(c(dat[bin,bwells]),na.rm=TRUE) -  ci95(c(dat[bin,bwells]),na.rm=TRUE)
-                
+                ## cut maximal time for blanking
+                bbin <- bin
+                if ( !missing(max.mid) ) {
+                    cat(paste("\tskipping",sum(time[bbin]>max.mid),"bins at",max.mid,"\n"))
+                    bbin <- bbin[time[bbin]<=max.mid]
+                }
+
+                ## TODO: this should only happen if time is
+                if ( length(bbin)==0 ) {
+                    cat(paste("skipping time bin", t, "at", max.mid, "\n"))
+                    warning("no blank data at time bin", t, "at", max.mid)
+                    blank <- 0
+                    #next # TODO: warning?
+                } else {
+                    ## calculate blank!
+                    if ( type=="median" )
+                        blank <- median(c(dat[bbin,bwells]),na.rm=TRUE)
+                    else if ( type=="mean" )
+                        blank <- mean(c(dat[bbin,bwells]),na.rm=TRUE)
+                    else if ( type=="ci95" )
+                        blank <- mean(c(dat[bbin,bwells]),na.rm=TRUE) -  ci95(c(dat[bin,bwells]),na.rm=TRUE)
+                }
                 ## subtract blank
                 corr[[ptyp]]$data[bin,c(dwells,bwells)] <-
                                dat[bin,c(dwells,bwells)] - blank
@@ -859,31 +874,61 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, nbins=1) {
 #' @param base the new minimum for the data, default is 0, but it could
 #' e.g. be the OD used for inoculation
 #' @param by TODO: choose specific groups via plate-designs
+#' @param add.fraction TODO
+#' @param xlim min and max row number of the data to be adjusted
+#' @param add.fraction a fraction of the whole data range, added to base
+#' @param each add base for each well separately!
 #' @return Returns `data' where all data sets or only those selected by option
 #' dids where raised to a minimum level in 
 #' @export
-adjustBase <- function(data, base=0, dids, add.fraction, xlim) {
+adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE) {
 
     if ( missing(dids) ) # only use requested data 
         dids <- data$dataIDs # use all
     
     for ( did in dids ) {
-        dat <- data[[did]]$data
-        dat <- dat - min(dat,na.rm=TRUE) + base
-        if ( !missing(add.fraction) ) {
+
+        #if ( missing(wells) )
+        #    wells <- colnames(data[[did]]$data)
+
+        ## each well separately?
+        if ( each )
+            bins <- as.list(1:ncol(data[[did]]$data))
+        else
+            bins <- list(1:ncol(data[[did]]$data))
+
+
+        for ( bin in bins ) {
+
+            ## only requrested wells
+            #bin <- bin[colnames(data)[bin]%in%wells]
+            
+            dat <- data[[did]]$data[,bin,drop=FALSE]
+        
+
+
             if ( missing(xlim) )
                 xlim <- c(1,nrow(dat))
-            dat <-
-                dat + diff(range(dat[xlim[1]:xlim[2],],na.rm=TRUE))*add.fraction
-        }
-        ## old: each separate?
-                                        #for ( j in 1:ncol(dat) ) {
-         #   dat[,j] <- dat[,j] - min(dat[,j],na.rm=TRUE) + base
-          #  if ( !missing(add.fraction) ) {
-                #diff(range(dat[,j],na.rm=TRUE))
-           # }
+            xrng <- xlim[1]:xlim[2]
+            
+            cat(paste(paste(bin,collapse=";"), "adding", min(dat[xrng,],na.rm=TRUE), "\n"))
+
+            dat <- dat - min(dat[xrng,],na.rm=TRUE) + base
+            
+            if ( !missing(add.fraction) ) 
+                dat <- dat + diff(range(dat[xrng,],na.rm=TRUE))*add.fraction
+            
+            ## each separate?
+            
+        #for ( j in 1:ncol(dat) ) {
+        #    dat[,j] <- dat[,j] - min(dat[,j],na.rm=TRUE) + base
+        #    if ( !missing(add.fraction) ) {
+        #        diff(range(dat[,j],na.rm=TRUE))
+        #    }
         #}
-        data[[did]]$data <- dat
+        
+            data[[did]]$data[,bin] <- dat
+        }
         data[[did]]$processing <- c(data[[did]]$processing,
                                     paste("corrected to base",base))
     }
