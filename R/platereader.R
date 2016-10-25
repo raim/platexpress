@@ -659,16 +659,67 @@ cutData <- function(data, rng, ID) {
     
 }
 
-## TODO: convert to groFit data format
+#' \code{\link{data2grofit}} : converts \code{package:platexpress} data to
+#' \code{package:grofit} data format
+#' @param data the current platexpress data set, see \code{\link{readPlateData}}
+#' @param did data ID of the data to be converted, from \code{data$dataIDs}
+#' @param max.time maximal time of the data to be used
+#' @param wells column IDs of the data set to use, if missing all wells
+#' are taken
+#' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
+#' of this map can be converted to \code{package:grofit} data annotation
+#' @param eid column IDs in the plate layout map to be used for
+#' \code{package:groFit} data annotation; if missing but \code{plate} is
+#' present, the columns 2 and 3 are used
+#' @param dose vector of doses in each well, used as the third column of
+#' \code{package:grofit} data annotation, where it can be used for dose-response
+#' calculations
+#' @details Returns a simple list with two entries \code{time} and \code{data},
+#' as required for \code{package:grofit}.
+#' @examples
+#' grdat <- data2grofit(data)
+#' fit <- gcFit(grdat$time, grdat$data)
 #' @export
-data2grofit <- function(data,dids,dose) {
+data2grofit <- function(data, did="OD", max.time, wells, plate, eid, dose) {
+    
+    dat <- data[[did]]$data
+    if ( missing(wells) )
+        wells <- colnames(dat)
+    dat <- dat[,wells]
+    ## expand time to full matrix
+    ## TODO: use internal time and non-interpolated data?
+    time <- data$Time
+    if ( !missing(max.time) ) {
+        dat <- dat[time<=max.time,]
+        time <- time[time<=max.time]
+    }
+    time <- t(matrix(rep(time, ncol(dat)), c(length(time), ncol(dat))))
+
+    ## well annotation
+    if ( !missing(plate) ) {
+        if ( missing(eid) )
+            eid <- colnames(plate)[2:3]
+        idx <- match(wells,as.character(plate[,"well"]))
+        annotation <- data.frame(cbind(as.character(plate[idx,eid[1]]),
+                                       as.character(plate[idx,eid[2]])))
+    } else
+        annotation <- data.frame(cbind(colnames(dat),
+                                       rep("",ncol(dat))))
+    ## dose information for grofit dose-response calculations
     if ( missing(dose) )
-        dose <- as.factor(rep(1,ncol(odn)))
-    grdat <- data.frame(cbind(colnames(odn),
-                              as.factor(rep("test",ncol(odn))),
-                              dose),
-                        t(data[[ID]]$data))
-    grdat
+        if ( !missing(plate) ) { ## get dose info from plate layout: TODO
+            if ( "dose" %in% colnames(plate) ) {
+                idx <- match(wells,as.character(plate[,"dose"]))
+                dose <- as.numeric(plate[idx,"dose"])
+            }
+        } else                 
+            dose <- rep(0,ncol(dat))
+
+    ## construct grofit data
+    grdat <- data.frame(annotation,
+                        dose,
+                        t(dat))
+    list(time=time, data=grdat)
 }
 
 #' \code{\link{skipWells}} set wells that should be skipped from all
