@@ -59,6 +59,8 @@ gcFit <- function (time, data, control = grofit.control())
                 plot(fitpara, colData = 1, colModel = 3, cex = 0.5)
                 plot(nonpara, add = TRUE, raw = FALSE, colData = 0, 
                   colSpline = 2, cex = 1.5)
+                ## TODO: why is it two
+                abline(v=summary(fitpara)$lambda) #fitpara$parameters$lambda)
             }
             else {
                 plot(nonpara, add = FALSE, raw = TRUE, colData = 1, 
