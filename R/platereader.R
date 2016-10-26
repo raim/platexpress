@@ -346,6 +346,7 @@ readPlateData <- function(files, type, data.ids, interpolate=TRUE,
 #' @export
 readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
                              skip=58, sep=";", dec=".", skiplastcol=FALSE,
+                             time.format="numeric",
                              pcols, verb=TRUE) {
 
     indat <- read.csv(file, header=FALSE,stringsAsFactors=FALSE,
@@ -379,7 +380,14 @@ readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
         lcol <- ncol(indat)
         if ( skiplastcol  ) lcol <- lcol -1
         cols <- 4:lcol
-        time <- as.numeric(strptime(indat[sidx:eidx,2],format <- "%H:%M:%S"))
+        time <- indat[sidx:eidx,2]
+        #cat(paste("time format", time.format, time[1], "\n"))
+        if ( time.format!="numeric" )
+          time <- as.numeric(strptime(time,format=time.format))
+        else
+          time <- as.numeric(sub(",",".",time))
+         #cat(paste("time format", time.format, time[1], "\n"))
+
         temp <-  as.numeric(sub(",",".",indat[sidx:eidx,3]))
         dat <- matrix(as.numeric(sub(",",".",unlist(indat[sidx:eidx,cols]))),
                       ncol=length(cols),nrow=length(sidx:eidx))
@@ -389,12 +397,17 @@ readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
         emptycols <- which(colnames(dat)=="NA")
         if ( length(emptycols)>0 )
           dat <- dat[,-emptycols]
+        ## check last rows (sometimes empty, sometimes not)
+        ## -> just use NA values in time
+        dat  <- dat[!is.na(time),]
+        temp <- temp[!is.na(time)]
+        time <- time[!is.na(time)]
         data[[dataID]] <- list(time=time, temp=temp, data=dat)
     }
 
     ## since time here comes formatted, the current data is
     ## added -> subtract minimal time
-    t0 <- min(unlist(lapply(data, function(x) x$time)))
+    t0 <- min(unlist(lapply(data, function(x) x$time)),na.rm=TRUE)
     for ( i in 1:length(data) ) 
       data[[i]]$time <- data[[i]]$time - t0
     
@@ -727,23 +740,26 @@ data2grofit <- function(data, did="OD", min.time, max.time, wells, plate, eid, d
     list(time=time, data=grdat)
 }
 
-#' \code{\link{skipWells}} set wells that should be skipped from all
-#' analyses and plots to NA
+#' \code{\link{skipWells}} rm wells from both data, plate maps and groupings
+#' @data data structures from \code{platexpress}; either data (\code{\link{readPlateData}}), a plate layout map (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})
 #' @param skip a list of strings identifiying the wells to be skipped,
 #' e.g. "B3" to skip the well in row B/column 3
+#' @details removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
 #' @examples
 #' raw <- skipWells(raw, skip="A9")
 #' @export
 skipWells <- function(data, skip) {
-    for ( id in data$dataIDs ) {
-        #if ( !"data"%in%names(data[[id]]) ) next
-        #sk <- skip[skip%in%colnames(data[[id]]$data)]
-        wells <- colnames(data[[id]]$data)
-        data[[id]]$data <- data[[id]]$data[,-which(wells%in%skip),drop=FALSE]
-        #if ( length(sk)>0 )
-        #  for ( j in 1:length(sk)) 
-        #      data[[i]]$data[,sk[j]] <- NA
-    }
+
+    if ( "dataIDs" %in% names(data) ) ## rm from data
+      for ( id in data$dataIDs ) {
+          wells <- colnames(data[[id]]$data)
+          data[[id]]$data <- data[[id]]$data[,-which(wells%in%skip),drop=FALSE]
+      }
+    else if ( !is.null(dim(data)) ) ## rm from plate layout map
+      data[match(skip,data[,"well"]),2:ncol(data)] <- NA
+    else ## rm from grouping
+      for ( g in 1:length(data) )
+        data[[g]] <- data[[g]][!data[[g]]%in%skip]
     data
 }
 
@@ -989,7 +1005,7 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
       cat(paste("Interpolating all data to a single master time.\n"))
     
     ## 1) calculate average (MASTER) time
-        mtime <- listAverage(data, "time")
+    mtime <- listAverage(data, "time")
     ## TODO: add back temperature
     #mtemp <- listAverage(data, "temp") 
     
