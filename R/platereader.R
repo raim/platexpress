@@ -228,6 +228,14 @@ ci95 <- function(data,na.rm=FALSE) {
 }
 
 
+## calculcates standard error
+se <- function(data,na.rm=TRUE) {
+    if ( na.rm ) data <- data[!is.na(data)]
+    n <- length(data)
+    error <- sd(data)/sqrt(n)
+    error
+}
+
 ### PLATE DESIGN & DATA
 
 ## Plate Design: parses a plate design file in CSV. Rows and columns
@@ -667,10 +675,70 @@ getData <- function(data, ID, type="data") {
 }
 
 ## TODO: cut data either by time, or by a chosen data set
-###' @export
-cutData <- function(data, rng, ID) {
-    
+#' \code{\link{cutData}} : cut data in a range of the x-axis
+#' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
+#' @param rng a single value or a data range
+#' @details Cuts the passed \code{\link{platexpress}} data to ranges of
+#' of the x-axis (time or other, see \code{data$mids}). If paramter \code{rng}
+#' is a single value, data for the closest x value will be returned
+#' if rng is a single value
+#' @export
+cutData <- function(data, rng, mid) {
+
+    if ( missing(mid) )
+        mid <- data$mids[1]
+    xdat <- data[[mid]]
+    if ( length(rng)==2 )
+        filter <- xdat >= rng[1] & xdat <= rng[2]
+    else if ( length(rng)==1 )
+        filter <- abs(rng-xdat) == min(abs(rng-xdat))
+    for ( did in data$dataIDs ) {
+        data[[did]]$data <- data[[did]]$data[filter,,drop=FALSE]
+        data[[did]]$processing <- c(data[[did]]$processing,
+                                    paste("cut at", paste(rng,collapse="-")))
+    }
+    data[[mid]] <- xdat[filter]
+    data
 }
+
+## returns all data for group of wells in a given range of the x-axis for
+###' @export
+boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", etype="se") {
+    if ( missing(mid) )
+        mid <- data$mids[1]
+    cdat <- cutData(data, rng, mid)
+
+    bdat <- rep(list(NA),length(groups))
+    names(bdat) <- names(groups)
+    for ( sg in 1:length(groups) ) 
+        bdat[[sg]] <- cdat[[did]]$data[,groups[[sg]],drop=FALSE]
+
+    if ( plot ) {
+        par(mai=c(1,.75,.1,.1))
+        pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
+        if ( type=="box" )
+            boxplot(pdat,ylab=did,las=2)
+        else if ( type=="bar" ) {
+            mn <- unlist(lapply(pdat, mean,na.rm=TRUE))
+            if ( etype=="ci" ) # 95% confidence interval
+                ci <- unlist(lapply(pdat, ci95,na.rm=TRUE))
+            else if ( etype=="se" ) { # standard error sd/n^2
+                sd <- unlist(lapply(pdat, sd, na.rm=TRUE))
+                n2 <- sqrt(unlist(lapply(pdat, length)))
+                ci <-  sd / n2
+            }
+            
+            x <- barplot(mn,ylim=c(0,max(mn+ci)),ylab=did,las=2)
+            arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,length=.05,lwd=1.5)            
+        }
+        ## get actual point if only one points was chosen
+        if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
+        legend("topright",paste("at",mid, "=",paste(rng,collapse="-")))
+    }
+    
+    result <- bdat
+}
+
 
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
 #' \code{\link{data2grofit}} : converts \code{package:platexpress} data to
@@ -1041,7 +1109,7 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
 
 ## interpolate one dataset to common points of another
 ## data set, e.g., fluorescence to OD
-interpolatePlateData <- function(data, xid, dids, n) {
+interpolatePlateData <- function(data, xid, dids, n, xout) {
 
     if ( missing(dids) )
         dids <- data$dataIDs
@@ -1050,9 +1118,11 @@ interpolatePlateData <- function(data, xid, dids, n) {
     ## get new master data
     xdat <- data[[xid]]$data
     if ( missing(n) ) n <- nrow(xdat)
-    xout <- range(c(xdat),na.rm=TRUE)
-    xout <- seq(xout[1], xout[2], length.out=n)
-
+    if ( missing(xout) ) {
+        xout <- range(c(xdat),na.rm=TRUE)
+        xout <- seq(xout[1], xout[2], length.out=n)
+    }
+    
     ## 2) interpolate all data to MASTER time
     for ( id in dids ) {
         data[[id]]$orig <- data[[id]]$data
@@ -1067,7 +1137,7 @@ interpolatePlateData <- function(data, xid, dids, n) {
                 mdat[,j] <- NA
             else ## TODO: replace by cubic spline fit with smart end handling!
                 #mdat[,j] <- spline(x=x,y=y,xout=xout,method="natural")$y
-                mdat[,j] <- approx(x=x,y=y,xout=xout,rule=2)$y
+                mdat[,j] <- approx(x=x,y=y,xout=xout,rule=1)$y
         }
         ## replace data
         data[[id]]$data <- mdat
@@ -1321,6 +1391,49 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
     groups
 }
 
+
+
+## TODO: use this in viewGroups as well?
+#' calculates simple statistics for groups as plotted in
+#' \code{\link{viewGroups}}
+#' @param data \code{\link{platexpress} data, see \code{\link{readPlateData}}
+#' @param groups a list of well grouped wells, as produced by
+#' \code{\link{getGroups}}
+#' @details Calculates the simple statistics over grouped wells
+#' (means, 95% confidence intervals, stdandard errors) along the x-axis
+#' (usually time).
+#' @return Returns a data structure similar to the input data, but
+#' where actual data is replaced  statistics over grouped wells.
+#' @seealso \code{\link{readPlateMap}}, \code{\link{viewGroups}}
+#' @export
+groupStats <- function(data, groups, dids) {
+
+
+    
+    if ( missing(dids) )
+        dids <- data$dataIDs
+        
+    for ( did in dids ) {
+        SE <- matrix(NA,nrow=nrow(data[[did]]$data),ncol=length(groups))
+        colnames(SE) <- names(groups)
+        MN<-CI<-SE
+        for ( sg in 1:length(groups) ) {
+            wells <- groups[[sg]]
+            #wells <- wells[wells%in%pwells] # filter for present wells
+            sid <- names(groups)[sg]
+            
+            ## get data for selected wells
+            dat <- data[[did]]$data[,wells]
+            ## calculate stats only for common x!
+            MN[,sg] <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
+            SE[,sg] <- apply(dat,1,function(x) se(x,na.rm=TRUE))
+            CI[,sg] <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
+        }
+        data[[did]]$stats <- list(mean=MN,ci05=CI,se=SE)
+    }
+    data
+}
+
 ## TODO - repair example
 ## @example
 ## groups <- getGroups(plate=plate, by=c("strain"))
@@ -1487,6 +1600,12 @@ viewGroups <- function(data, groups, groups2,
         parnew <- FALSE
         for ( i in 1:length(ptypes) ) {
             ptyp <- ptypes[i]
+
+            col.orig <- pcols[ptyp]
+            ## override colors if
+            orig.cols <- NA
+            if ( !global.x ) 
+                orig.cols <- getColors(names(sgroups))
             for ( sg in 1:length(sgroups) ) {
                 wells <- sgroups[[sg]]
                 wells <- wells[wells%in%pwells] # filter for present wells
@@ -1511,21 +1630,29 @@ viewGroups <- function(data, groups, groups2,
                 par(new=parnew) #i!=1)
                 parnew <- TRUE
                 ## override lty.orig=0 and lwd.orig=0 if x is data-specific
+                if ( !global.x ) 
+                    col.orig <- orig.cols[sid]
                 if ( !is.null(dim(x)) | length(wells)==1 ) {
                     if ( lwd.orig==0 ) lwd.orig <- 0.1
                     lty.orig <- ifelse(g2.legend,sg,
                                 ifelse(lty.orig==0,1,lty.orig))
+                    #col.orig <- ifelse(g
                 }
                 ## override color to allow lwd.orig=0 to work for PDF as well
-                tmp <- ifelse(lwd.orig==0,NA, pcols[ptyp])
+                tmp <- ifelse(lwd.orig==0,NA, col.orig)
                 matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xid,log=log)
 
                 ## plot mean and confidence intervals
                 if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
-                    if ( show.ci95 )
-                        polygon(x=c(x,rev(x)),y=c(mn-ci,rev(mn+ci)),border=NA,
+                    if ( show.ci95 ) {
+                        px <- c(x,rev(x))
+                        py <- c(mn-ci,rev(mn+ci))
+                        px <- px[!is.na(py)]
+                        py <- py[!is.na(py)]
+                        polygon(x=px,y=py,border=NA,
                                 col=paste(pcols[ptyp],"55",sep=""))
+                    }
                     if ( show.mean )
                         lines(x=x,mn,col=pcols[ptyp],lwd=lwd.mean,
                               lty=ifelse(g2.legend,sg,lty.mean))
@@ -1533,16 +1660,20 @@ viewGroups <- function(data, groups, groups2,
 
                 ## add axes for first two values
                 if ( yaxis[1]==i ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
-                            col=pcols[ptyp],
-                            col.axis=pcols[ptyp])
+                            col=ifelse(global.x,col.orig,1),
+                            col.axis=ifelse(global.x,col.orig,1))
                 if ( yaxis[2]==i ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
-                            col=pcols[ptyp],
-                            col.axis=pcols[ptyp])
-
+                            col=ifelse(global.x,col.orig,1),
+                            col.axis=ifelse(global.x,col.orig,1))
             }
             if ( length(sgroups)>1 & g2.legend )
-                legend(legpos,names(sgroups),lty=1:length(sgroups),bty="n")
-            else
+                if ( global.x ) 
+                    legend(legpos,names(sgroups),lty=1:length(sgroups),
+                           col=1,bty="n")
+                else
+                    legend(legpos,names(sgroups),lty=1:length(sgroups),
+                           col=orig.cols,bg="#FFFFFFAA")
+              else
                 legend(legpos,id, bty="n")
             if ( xaxis ) axis(1)
         }
@@ -1554,7 +1685,7 @@ viewGroups <- function(data, groups, groups2,
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
     #if ( global.x ) xid <- "Time"
-    plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols)
+    plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols, orig.cols=orig.cols)
 }
 
 
