@@ -809,7 +809,7 @@ data2grofit <- function(data, did="OD", min.time, max.time, wells, plate, eid, d
 }
 
 #' \code{\link{skipWells}} rm wells from both data, plate maps and groupings
-#' @data data structures from \code{platexpress}; either data (\code{\link{readPlateData}}), a plate layout map (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})
+#' @param data data structures from \code{platexpress}; either data (\code{\link{readPlateData}}), a plate layout map (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})
 #' @param skip a list of strings identifiying the wells to be skipped,
 #' e.g. "B3" to skip the well in row B/column 3
 #' @details removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
@@ -1396,7 +1396,7 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 ## TODO: use this in viewGroups as well?
 #' calculates simple statistics for groups as plotted in
 #' \code{\link{viewGroups}}
-#' @param data \code{\link{platexpress} data, see \code{\link{readPlateData}}
+#' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a list of well grouped wells, as produced by
 #' \code{\link{getGroups}}
 #' @details Calculates the simple statistics over grouped wells

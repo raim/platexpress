@@ -2,18 +2,21 @@
 % Please edit documentation in R/platereader.R
 \name{skipWells}
 \alias{skipWells}
-\title{\code{\link{skipWells}} set wells that should be skipped from all
-analyses and plots to NA}
+\title{\code{\link{skipWells}} rm wells from both data, plate maps and groupings}
 \usage{
 skipWells(data, skip)
 }
 \arguments{
+\item{data}{data structures from \code{platexpress}; either data (\code{\link{readPlateData}}), a plate layout map (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})}
+
 \item{skip}{a list of strings identifiying the wells to be skipped,
 e.g. "B3" to skip the well in row B/column 3}
 }
 \description{
-\code{\link{skipWells}} set wells that should be skipped from all
-analyses and plots to NA
+\code{\link{skipWells}} rm wells from both data, plate maps and groupings
+}
+\details{
+removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
 }
 \examples{
 raw <- skipWells(raw, skip="A9")

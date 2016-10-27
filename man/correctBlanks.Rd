@@ -4,7 +4,8 @@
 \alias{correctBlanks}
 \title{\code{\link{correctBlanks}} correct for blanks}
 \usage{
-correctBlanks(data, plate, by, dids, nbins = 1)
+correctBlanks(data, plate, type = "ci95", by, dids, mid = "Time", max.mid,
+  mbins = 1)
 }
 \arguments{
 \item{data}{the data list to be blank-corrected}
