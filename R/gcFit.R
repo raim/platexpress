@@ -1,5 +1,5 @@
 ## hack of grofit function gcFit to run without interaction but with plots
-gcFit <- function (time, data, control = grofit.control()) 
+gcFit.2 <- function (time, data, control = grofit.control()) 
 {
     if (is(control) != "grofit.control") 
         stop("control must be of class grofit.control!")
