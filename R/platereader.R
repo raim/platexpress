@@ -674,6 +674,33 @@ getData <- function(data, ID, type="data") {
     data[[ID]][[type]] # just return the current data or old versions
 }
 
+
+#' @param lag a named vector given the lag-phase to be removed; the names correspond to the wells in data
+shiftData <- function(data, lag, dids, mid) {
+
+    if ( missing(dids) ) 
+        dids <- data$dataIDs
+
+    if ( missing(mid) )
+        mid <- data$mids[1]
+    xdat <- data[[mid]]
+    
+    for ( i in 1:length(lag) ) {
+        well <- names(lag)[i]
+        idx <- which(xdat >= lag[i])[1]
+        end <- length(xdat)
+        for ( did in dids ) {
+            data[[did]]$data[,well] <-
+                          c(data[[did]]$data[idx:end, well],
+                            rep(NA,idx-1))
+        }
+        data[[did]]$processing <- c(data[[did]]$processing,
+                                    paste("well",well,"shifted by lag", lag[i]))
+        
+    }
+    data
+}
+
 ## TODO: cut data either by time, or by a chosen data set
 #' \code{\link{cutData}} : cut data in a range of the x-axis
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
@@ -1503,9 +1530,9 @@ viewGroups <- function(data, groups, groups2,
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
     global.x <- xid %in% data$mids
-    if ( global.x ) {
+    if ( global.x ) 
         time <- data[[xid]]
-    } else if ( xid %in% data$dataIDs )
+    else if ( xid %in% data$dataIDs )
         xdat <- data[[xid]]$data[,wells,drop=FALSE]
     else
         stop("x-axis data: \"", xid, "\" not found")
@@ -1640,16 +1667,25 @@ viewGroups <- function(data, groups, groups2,
                 }
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
+
                 matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xid,log=log)
 
                 ## plot mean and confidence intervals
                 if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
                     if ( show.ci95 ) {
+                           
                         px <- c(x,rev(x))
                         py <- c(mn-ci,rev(mn+ci))
                         px <- px[!is.na(py)]
                         py <- py[!is.na(py)]
+                        px <- c(px,px[1])
+                        py <- c(py,py[1])
+                        if ( log=="y") {                            
+                            py[py<0] <- ylims[[ptyp]][1]
+                            warning("mean - 95% c.i. is below 0;",
+                                    "raised to ylim for log. y-axis polygon")
+                        }
                         polygon(x=px,y=py,border=NA,
                                 col=paste(pcols[ptyp],"55",sep=""))
                     }
