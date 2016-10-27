@@ -819,14 +819,16 @@ data2grofit <- function(data, did="OD", min.time, max.time, wells, plate, eid, d
         annotation <- data.frame(cbind(colnames(dat),
                                        rep("",ncol(dat))))
     ## dose information for grofit dose-response calculations
-    if ( missing(dose) )
-        if ( !missing(plate) ) { ## get dose info from plate layout: TODO
+    ## TODO: this is ugly, do nicer!
+    if ( missing(dose) ) 
+        if ( !missing(plate) ) ## get dose info from plate layout: TODO
             if ( "dose" %in% colnames(plate) ) {
                 idx <- match(wells,as.character(plate[,"dose"]))
                 dose <- as.numeric(plate[idx,"dose"])
+                found.dose <- TRUE
             }
-        } else                 
-            dose <- rep(0,ncol(dat))
+    if ( missing(dose) )
+        dose <- rep(0,ncol(dat))
 
     ## construct grofit data
     grdat <- data.frame(annotation,
