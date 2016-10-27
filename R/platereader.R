@@ -218,6 +218,9 @@ trim <- function(str)
 
 ### STATS
 
+## moving average
+ma <- function(x,n=5){filter(x,rep(1/n,n), sides=2)}
+
 # calculate 95% confidence intervals for the given
 # data vector using a t-distribution
 ci95 <- function(data,na.rm=FALSE) {
@@ -1506,7 +1509,7 @@ groupStats <- function(data, groups, dids) {
 viewGroups <- function(data, groups, groups2,
                        xid="Time", xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
-                       show.ci95=TRUE,show.mean=TRUE,
+                       show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
                        legpos="topleft", g2.legend=TRUE,
                        embed=FALSE, no.par=FALSE,
@@ -1693,8 +1696,8 @@ viewGroups <- function(data, groups, groups2,
                                 col=paste(pcols[ptyp],"55",sep=""))
                     }
                     if ( show.mean )
-                        lines(x=x,mn,col=pcols[ptyp],lwd=lwd.mean,
-                              lty=ifelse(g2.legend,sg,lty.mean))
+                        lines(x=x,mn,col=ifelse(emphasize.mean,1,pcols[ptyp]),
+                              lwd=lwd.mean,lty=ifelse(g2.legend,sg,lty.mean))
                 }
 
                 ## add axes for first two values
