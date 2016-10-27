@@ -675,7 +675,9 @@ getData <- function(data, ID, type="data") {
 }
 
 
+#' \code{\link{shiftData}} : shift x-axis by a lag-phase to align growth curves
 #' @param lag a named vector given the lag-phase to be removed; the names correspond to the wells in data
+#' @export
 shiftData <- function(data, lag, dids, mid) {
 
     if ( missing(dids) ) 
@@ -696,7 +698,6 @@ shiftData <- function(data, lag, dids, mid) {
         }
         data[[did]]$processing <- c(data[[did]]$processing,
                                     paste("well",well,"shifted by lag", lag[i]))
-        
     }
     data
 }
