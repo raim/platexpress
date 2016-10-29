@@ -16,7 +16,36 @@ and
 (TODO) and quickly display their results within `platexpress`.
 
 
+## Installation
+
+`platexpress` is currently under heavy development and there is no official
+release yet. You can download from github and run:
+
+```
+R CMD build platexpress/
+R CMD INSTALL platexpress_0.1.tar.gz
+```
+
+or use the library `devtools`:
+
+```R
+install.packages("devtools")
+library(devtools)
+install_github("raim/platexpress")
+```
+
+
 ## A Typical Workflow in `platexpress`
+
+NOTE: the following examples are all executed step-by-step in an R
+`demo()` that comes with the library. For a quick tour of the following, 
+open R and type:
+
+```R
+library(platexpress)
+demo("demo_ap12",package="platexpress")
+``` 
+
 ### 1) Parse the plate layout and measurements 
 
 The plate layout will later allow to do blank correction and group
