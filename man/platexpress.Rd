@@ -12,6 +12,8 @@ microplate-readers or other parallel growth systems.
 }
 \section{Platexpress Workflow}{
 
+see README.md at https://github.com/raim/platexpress or demo/demo_AP12.R
+type \code{demo("demo_AP12", package="platexpress")}
 }
 \examples{
 ### A TYPICAL WORKFLOW
@@ -23,7 +25,7 @@ plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\\n", fields=c("st
 ## 2) parse the data, exported from platereader software
 
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",")
+raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",", time.format="\%H:\%M:\%S", time.conversion=1/3600)
 
 ## 3) inspect the raw data
 

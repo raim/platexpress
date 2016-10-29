@@ -19,6 +19,7 @@ e.g. "B3" to skip the well in row B/column 3}
 removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
 }
 \examples{
-raw <- skipWells(raw, skip="A9")
+data(ap12)
+raw <- skipWells(ap12data, skip="A9")
 }
 

@@ -5,12 +5,14 @@
 \title{\code{\link{data2grofit}} : converts \code{package:platexpress} data to
 \code{package:grofit} data format}
 \usage{
-data2grofit(data, did = "OD", min.time, max.time, wells, plate, eid, dose)
+data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
 }
 \arguments{
 \item{data}{the current platexpress data set, see \code{\link{readPlateData}}}
 
 \item{did}{data ID of the data to be converted, from \code{data$dataIDs}}
+
+\item{min.time}{minimal time of the data to be used}
 
 \item{max.time}{maximal time of the data to be used}
 
@@ -25,8 +27,8 @@ of this map can be converted to \code{package:grofit} data annotation}
 present, the columns 2 and 3 are used}
 
 \item{dose}{vector of doses in each well, used as the third column of
-\code{package:grofit} data annotation, where it can be used for dose-response
-calculations}
+\code{package:grofit} data annotation, where it can be used for
+dose-response calculations}
 }
 \description{
 \code{\link{data2grofit}} : converts \code{package:platexpress} data to
@@ -35,9 +37,5 @@ calculations}
 \details{
 Returns a simple list with two entries \code{time} and \code{data},
 as required for \code{package:grofit}.
-}
-\examples{
-grdat <- data2grofit(data)
-fit <- gcFit(grdat$time, grdat$data)
 }
 

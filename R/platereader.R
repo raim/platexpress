@@ -6,7 +6,9 @@
 #' microbial growth & gene expression data as measured in typical
 #' microplate-readers or other parallel growth systems.
 #' 
-#' @section Platexpress Workflow
+#' @section Platexpress Workflow:
+#' see README.md at https://github.com/raim/platexpress or demo/demo_AP12.R
+#' type \code{demo("demo_AP12", package="platexpress")}
 #' @examples
 #' ### A TYPICAL WORKFLOW
 #' ## 1) parse the plate layout map
@@ -17,7 +19,7 @@
 #' ## 2) parse the data, exported from platereader software
 #' 
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-#' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",")
+#' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",", time.format="%H:%M:%S", time.conversion=1/3600)
 #' 
 #' ## 3) inspect the raw data
 #' 
@@ -665,6 +667,9 @@ rmData <- function(data, ID) {
 #' \code{\link{getData}} : get a specific data set, returns a data matrix
 #' @param data the current platexpress data set
 #' @param ID the ID of the data to be obtained
+#' @param type the type of the data to be returned (default "data"),
+#' the data list also contains original values for some of the processing
+#' steps
 #' @export
 getData <- function(data, ID, type="data") {
     data[[ID]][[type]] # just return the current data or old versions
@@ -702,6 +707,7 @@ shiftData <- function(data, lag, dids, mid) {
 #' \code{\link{cutData}} : cut data in a range of the x-axis
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
 #' @param rng a single value or a data range
+#' @param mid ID of the x-axis data to be used for cutting
 #' @details Cuts the passed \code{\link{platexpress}} data to ranges of
 #' of the x-axis (time or other, see \code{data$mids}). If paramter \code{rng}
 #' is a single value, data for the closest x value will be returned
@@ -780,11 +786,18 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
 }
 
 
+### This would require to depend on grofit
+## @examples
+## data(ap12)
+## grdat <- data2grofit(ap12data)
+## fit <- gcFit.2(grdat$time, grdat$data)
+
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
 #' \code{\link{data2grofit}} : converts \code{package:platexpress} data to
 #' \code{package:grofit} data format
 #' @param data the current platexpress data set, see \code{\link{readPlateData}}
 #' @param did data ID of the data to be converted, from \code{data$dataIDs}
+#' @param min.time minimal time of the data to be used
 #' @param max.time maximal time of the data to be used
 #' @param wells column IDs of the data set to use, if missing all wells
 #' are taken
@@ -794,16 +807,15 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
 #' \code{package:groFit} data annotation; if missing but \code{plate} is
 #' present, the columns 2 and 3 are used
 #' @param dose vector of doses in each well, used as the third column of
-#' \code{package:grofit} data annotation, where it can be used for dose-response
-#' calculations
+#' \code{package:grofit} data annotation, where it can be used for
+#' dose-response calculations
 #' @details Returns a simple list with two entries \code{time} and \code{data},
 #' as required for \code{package:grofit}.
-#' @examples
-#' grdat <- data2grofit(data)
-#' fit <- gcFit(grdat$time, grdat$data)
 #' @export
-data2grofit <- function(data, did="OD", min.time, max.time, wells, plate, eid, dose) {
-    
+data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) {
+
+    if ( missing(did) )
+        did <- data$dataIDs[1]
     dat <- data[[did]]$data
     if ( missing(wells) )
         wells <- colnames(dat)
@@ -856,7 +868,8 @@ data2grofit <- function(data, did="OD", min.time, max.time, wells, plate, eid, d
 #' e.g. "B3" to skip the well in row B/column 3
 #' @details removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
 #' @examples
-#' raw <- skipWells(raw, skip="A9")
+#' data(ap12)
+#' raw <- skipWells(ap12data, skip="A9")
 #' @export
 skipWells <- function(data, skip) {
 
@@ -874,7 +887,7 @@ skipWells <- function(data, skip) {
 }
 
 #' \code{\link{correctBlanks}} correct for blanks
-#' @param data the data list to be blank-corrected
+#' @param data the \code{\link{platexpress}} data list to be blank-corrected
 #' @param plate the plate layout where column "blanks" indicates which wells
 #' are to be treated as blanks
 #' @param dids IDs of the data which should be blank-corrected, all will be
@@ -882,14 +895,23 @@ skipWells <- function(data, skip) {
 #' @param by a list of column IDs of the plate layout; separate blank
 #' correction will be attempted for groups in these columns; each group
 #' must have at least one specified blank associated
+#' @param type TODO
+#' @param mid ID of the x-axis data to be used, if blanked along x-axis, set
+#' by \code{mbins}>1
+#' @param mbins the number of bins the x-axis is to be divided, if blanked
+#' along the x-axis, see \code{mid}
+#' @param max.mid the maximal x-axis value where blanks should be used
 #' @examples
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @export
-correctBlanks <- function(data, plate, type="ci95", by, dids, mid="Time", max.mid, mbins=1) {
+correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbins=1) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
+    if ( missing(mid) )
+        mid <- data$mids[1]
+    
     ## start new data list
     corr <- data
     time <- data[[mid]] ## TODO: take from data mids
@@ -963,7 +985,8 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid="Time", max.mi
                 ## cut maximal time for blanking
                 bbin <- bin
                 if ( !missing(max.mid) ) {
-                    cat(paste("\tskipping",sum(time[bbin]>max.mid),"bins at",max.mid,"\n"))
+                    cat(paste("\tskipping",sum(time[bbin]>max.mid),
+                              "bins at",max.mid,"\n"))
                     bbin <- bbin[time[bbin]<=max.mid]
                 }
 
@@ -1003,8 +1026,8 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid="Time", max.mi
 #' executed
 #' @param base the new minimum for the data, default is 0, but it could
 #' e.g. be the OD used for inoculation
-#' @param by TODO: choose specific groups via plate-designs
-#' @param add.fraction TODO
+#' @param wells column IDs of the data set to adjust, if missing all wells
+#' are taken
 #' @param xlim min and max row number of the data to be adjusted
 #' @param add.fraction a fraction of the whole data range, added to base
 #' @param each add base for each well separately!
@@ -1106,6 +1129,9 @@ listAverage <- function(lst, id) {
 #' master time: calculates average time for each measurement point
 #' and interpolates all values to this time; this is also used for
 #' well temperatures
+#' @param data TODO
+#' @param verb TODO
+#' @param xid TODO
 #' @return returns a copy of the full data list with a master time and
 #' temperature added at the top level
 #' @export
@@ -1238,7 +1264,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
 #' @param legpos position of the well IDs on the plots
 #' @examples
-#' data(ap12data)
+#' data(ap12)
 #' vp <- viewPlate(ap12data)
 #' @export
 viewPlate <- function(data, wells, 
@@ -1399,7 +1425,10 @@ viewPlate <- function(data, wells,
 ## data(ap12)
 ## groups <- getGroups(plate=ap12plate, by=c("strain"))
 #' group wells by experiment annotations (in plate map file)
+#' @param plate the plate layout map, see \code{\link{readPlateMap}}
 #' @param by a list of column IDs of the plate layout
+#' @param order if TRUE groups will be alphabetically ordered
+#' @param verb if TRUE report messages are more detailed
 #' @details Calculates the distinct groups from the plate layout by the selected
 #' experimental parameters.
 #' @return Returns a list of well IDs for the identified grouping. This list
@@ -1459,6 +1488,8 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a list of well grouped wells, as produced by
 #' \code{\link{getGroups}}
+#' @param dids data IDs for which statistics should be reported,
+#' if missing stats for all data will be reported
 #' @details Calculates the simple statistics over grouped wells
 #' (means, 95% confidence intervals, stdandard errors) along the x-axis
 #' (usually time).
@@ -1770,7 +1801,8 @@ viewGroups <- function(data, groups, groups2,
 
 ### COMMENTS FOR EXAMPLE DATA
   
-#' ap12data: example data by Dennis Dienst and Alice Pawloski, incl. the
+ 
+#' ap12: example data by Dennis Dienst and Alice Pawloski, incl. the
 #' plate reader measurements of E.coli growth, expressing a fluorescent
 #' proteins, in a Synergy Mx platereader  
 #' 
@@ -1786,8 +1818,10 @@ viewGroups <- function(data, groups, groups2,
 #'
 #' @docType data
 #' @keywords datasets
-#' @name ap12data
-#' @usage data(ap12data)
-#' @format a list of time-courses of absorbance and fluorescence data, read in by readPlateData("AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535")) and readPlateMap("AP12_layout.csv", fields=c("strain","samples"))
+#' @name ap12
+#' @usage data(ap12)
+#' @format a list of time-courses of absorbance and fluorescence data, read
+#' in by readPlateData("AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535")) and the plate layou map, read in  by
+#' readPlateMap("AP12_layout.csv", fields=c("strain","samples"))
 #' @seealso \code{\link{readPlateData}} and \code{\link{readPlateMap}} 
 NULL

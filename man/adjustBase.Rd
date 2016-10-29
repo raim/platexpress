@@ -10,18 +10,17 @@ adjustBase(data, base = 0, wells, dids, add.fraction, xlim, each = FALSE)
 \item{base}{the new minimum for the data, default is 0, but it could
 e.g. be the OD used for inoculation}
 
+\item{wells}{column IDs of the data set to adjust, if missing all wells
+are taken}
+
 \item{dids}{vector of ID strings for which base correction should be
 executed}
 
-\item{add.fraction}{TODO}
+\item{add.fraction}{a fraction of the whole data range, added to base}
 
 \item{xlim}{min and max row number of the data to be adjusted}
 
 \item{each}{add base for each well separately!}
-
-\item{by}{TODO: choose specific groups via plate-designs}
-
-\item{add.fraction}{a fraction of the whole data range, added to base}
 }
 \value{
 Returns `data' where all data sets or only those selected by option

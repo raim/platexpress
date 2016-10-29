@@ -10,6 +10,8 @@ cutData(data, rng, mid)
 \item{data}{\code{\link{platexpress}} data, see \code{link{readPlateData}}}
 
 \item{rng}{a single value or a data range}
+
+\item{mid}{ID of the x-axis data to be used for cutting}
 }
 \description{
 \code{\link{cutData}} : cut data in a range of the x-axis

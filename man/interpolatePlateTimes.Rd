@@ -9,6 +9,13 @@ well temperatures}
 \usage{
 interpolatePlateTimes(data, verb = TRUE, xid)
 }
+\arguments{
+\item{data}{TODO}
+
+\item{verb}{TODO}
+
+\item{xid}{TODO}
+}
 \value{
 returns a copy of the full data list with a master time and
 temperature added at the top level

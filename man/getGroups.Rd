@@ -7,7 +7,13 @@
 getGroups(plate, by = "medium", order = FALSE, verb = TRUE)
 }
 \arguments{
+\item{plate}{the plate layout map, see \code{\link{readPlateMap}}}
+
 \item{by}{a list of column IDs of the plate layout}
+
+\item{order}{if TRUE groups will be alphabetically ordered}
+
+\item{verb}{if TRUE report messages are more detailed}
 }
 \value{
 Returns a list of well IDs for the identified grouping. This list

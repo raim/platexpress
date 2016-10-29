@@ -4,14 +4,15 @@
 \alias{correctBlanks}
 \title{\code{\link{correctBlanks}} correct for blanks}
 \usage{
-correctBlanks(data, plate, type = "ci95", by, dids, mid = "Time", max.mid,
-  mbins = 1)
+correctBlanks(data, plate, type = "ci95", by, dids, mid, max.mid, mbins = 1)
 }
 \arguments{
-\item{data}{the data list to be blank-corrected}
+\item{data}{the \code{\link{platexpress}} data list to be blank-corrected}
 
 \item{plate}{the plate layout where column "blanks" indicates which wells
 are to be treated as blanks}
+
+\item{type}{TODO}
 
 \item{by}{a list of column IDs of the plate layout; separate blank
 correction will be attempted for groups in these columns; each group
@@ -19,6 +20,14 @@ must have at least one specified blank associated}
 
 \item{dids}{IDs of the data which should be blank-corrected, all will be
 blanked if missing}
+
+\item{mid}{ID of the x-axis data to be used, if blanked along x-axis, set
+by \code{mbins}>1}
+
+\item{max.mid}{the maximal x-axis value where blanks should be used}
+
+\item{mbins}{the number of bins the x-axis is to be divided, if blanked
+along the x-axis, see \code{mid}}
 }
 \description{
 \code{\link{correctBlanks}} correct for blanks

@@ -10,6 +10,10 @@ getData(data, ID, type = "data")
 \item{data}{the current platexpress data set}
 
 \item{ID}{the ID of the data to be obtained}
+
+\item{type}{the type of the data to be returned (default "data"),
+the data list also contains original values for some of the processing
+steps}
 }
 \description{
 \code{\link{getData}} : get a specific data set, returns a data matrix

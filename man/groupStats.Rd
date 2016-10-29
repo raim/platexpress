@@ -12,6 +12,9 @@ groupStats(data, groups, dids)
 
 \item{groups}{a list of well grouped wells, as produced by
 \code{\link{getGroups}}}
+
+\item{dids}{data IDs for which statistics should be reported,
+if missing stats for all data will be reported}
 }
 \value{
 Returns a data structure similar to the input data, but

@@ -50,7 +50,7 @@ time and temperature vectors in the data}
 \code{\link{viewPlate}} plots all data in plate format
 }
 \examples{
-data(ap12data)
+data(ap12)
 vp <- viewPlate(ap12data)
 }
 
