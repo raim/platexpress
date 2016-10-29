@@ -26,22 +26,30 @@ experiments:
 plate <- readPlateMap(file="AP12_layout.csv", blank.id="blank",fsep="\n", fields=c("strain","samples"))
 ```
 
-... and parse the data, as exported from platereader software:
+... and parse the data, as exported from platereader "Synergy Mx" 
+software:
 
 ```R
 raw <- readPlateData(file="AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
 ```
 
-Here we include some specifics for this data set. E.g. the file was
-exported with times in format HH:MM:SS, and we need to tell it to
-our parser. Also, the time is in seconds but we would prefer
+Here we include some specifics for this data set. First, we need to
+specify from which plate-reader the file was exported. `platexpress`
+can currently read files exported from "Synergy Mx" and "BMG Optima"
+software. Please let us know, if you need other formats to be
+implemented.  Even, if we now the plate-reader some things always
+change between exported data sets. E.g., the example file was exported
+with times in format HH:MM:SS, and we need to tell it to our parser
+via the argument `time.format` (see R base function
+`base::strptime`). The resulting time is in seconds but we would prefer
 hours, i.e., divide it by 3600. This is done by the `time.conversion`
-argument. 
+argument, although in this case you could simply convert it manually
+with `raw$Time <- raw$Time/3600` as well.
 
-Generally, parsing a new data file, freshly exported from the plate-reader
-or from a spread-sheet program is likely to cause problems. You should take 
-care at this step. Problems with data parsing are usually the most 
-time-consuming step.
+Generally, parsing a new data file, freshly exported from the
+plate-reader or from a spread-sheet program is likely to cause
+problems. You should take care at this step. Problems with data
+parsing are usually the most time-consuming step in data analysis!
 
 ### 2) Inspect and process the raw data
 
