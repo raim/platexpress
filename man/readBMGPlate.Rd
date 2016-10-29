@@ -4,18 +4,14 @@
 \alias{readBMGPlate}
 \title{Read BMG Optima/MARS-exported files}
 \usage{
-readBMGPlate(files, data.ids, interpolate = TRUE, skip = 5, sep = ";",
-  dec = ".", verb = TRUE, pcols)
+readBMGPlate(files, data.ids, skip = 5, sep = ";", dec = ".",
+  verb = TRUE)
 }
 \arguments{
 \item{files}{list of one or more data files}
 
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
-
-\item{interpolate}{if true a master time, the average time between distinct
-measurements of one timepoint, is calculated and all values are interpolated
-to this mastertime. This is currently obligatory for further processing.}
 
 \item{skip}{lines to skip from the data file}
 

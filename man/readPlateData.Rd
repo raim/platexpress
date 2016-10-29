@@ -7,8 +7,8 @@ the plate reader software. Header IDs in the data file should match with
 IDs in the plate map, see \code{link{readPlateMap}}. Pre-defined read-in
 functions exist for a couple of plate-readers.}
 \usage{
-readPlateData(files, type, data.ids, interpolate = TRUE, skip = 0,
-  sep = "\\t", dec = ".", verb = TRUE, ...)
+readPlateData(files, type, data.ids, skip = 0, sep = "\\t", dec = ".",
+  verb = TRUE, interpolate = TRUE, time.conversion, ...)
 }
 \arguments{
 \item{files}{list of one or more data files}
@@ -19,10 +19,6 @@ for BMG Optima/Mars, ('BMG') and Synergy Mx ('Synergy').}
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
 
-\item{interpolate}{if true a master time, the average time between distinct
-measurements of one timepoint, is calculated and all values are interpolated
-to this mastertime. This is currently obligatory for further processing.}
-
 \item{skip}{lines to skip from the data file}
 
 \item{sep}{column separator, as in read.table}
@@ -30,6 +26,10 @@ to this mastertime. This is currently obligatory for further processing.}
 \item{dec}{decimal operator used in the data file}
 
 \item{verb}{print messages if true}
+
+\item{interpolate}{if true a master time, the average time between distinct
+measurements of one timepoint, is calculated and all values are interpolated
+to this mastertime. This is currently obligatory for further processing.}
 }
 \value{
 a list of distinct measurement time-courses from one plate
@@ -45,7 +45,7 @@ The original data is all interpolated to a common/average 'master' time
 }
 \examples{
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",")
+raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="\%H:\%M:\%S")
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

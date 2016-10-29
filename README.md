@@ -11,9 +11,9 @@ data, blank normalization, and summarization over replicates.
 A few data conversion routines allow to interface other R
 packages for analysis of microbial growth such as
 [grofit](https://cran.r-project.org/web/packages/grofit/index.html)
-and (TODO)
+and 
 [growthcurver](https://cran.r-project.org/web/packages/growthcurver/index.html)
-and quickly display their results within `platexpress`.
+(TODO) and quickly display their results within `platexpress`.
 
 
 ## A Typical Workflow in `platexpress`
@@ -29,8 +29,19 @@ plate <- readPlateMap(file="AP12_layout.csv", blank.id="blank",fsep="\n", fields
 ... and parse the data, as exported from platereader software:
 
 ```R
-raw <- readPlateData(file="AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535"))
+raw <- readPlateData(file="AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
 ```
+
+Here we include some specifics for this data set. E.g. the file was
+exported with times in format HH:MM:SS, and we need to tell it to
+our parser. Also, the time is in seconds but we would prefer
+hours, i.e., divide it by 3600. This is done by the `time.conversion`
+argument. 
+
+Generally, parsing a new data file, freshly exported from the plate-reader
+or from a spread-sheet program is likely to cause problems. You should take 
+care at this step. Problems with data parsing are usually the most 
+time-consuming step.
 
 ### 2) Inspect and process the raw data
 
@@ -40,23 +51,40 @@ Take a first look:
 viewPlate(raw)
 ```
 
-... and note that there is no growth in A9, so let's skip it:
+... and note that there is no growth in well A9, so let's skip it. To
+be safe, let's also skip it from the plate layout map.
 
 ```R
 raw <- skipWells(raw, skip="A9")
+plate <- skipWells(plate, skip="A9")
 ```
 
 ... correct for blank well measurements (defined in the plate layout
-map!) and view only the present rows (A, B and C) and columns (1-9):
+map!), assign colors and nicer IDs, and view only the present 
+rows (A, B and C) and columns (1-9):
 
 ```R
 data <- correctBlanks(data=raw, plate=plate)
 viewPlate(data, rows=c("A","B","C"),cols=1:9)
 ```
 
+Now the raw data processing is done, so let's assign more informative IDs 
+and select nicer colors, as R RGB strings:
+
+```R
+data <- prettyData(data=raw,dids=c(OD="600",YFP="YFP_50:500,535"), 
+                   colors=c(OD="#000000",YFP="#FFFF00"))
+```
+
+Note that helper functions `showSpectrum()` and `findWavelength(1)`
+allow to select colors from a spectrum of visible light and gives
+you the required RGB strings. Or you can convert a wavlength in nm
+directly to RGB using `wavelength2RGB(500)` for the estimated RGB value
+of 500 nm light.
+
 ### 3) Group replicates
 
-And finally, generate groups over replicates and strains
+Next, generate groups over replicates and strains
 and view summarized growth vs. expression curves for these groups.
 The areas indicate the t-test based 95% confidence interval,
 the thick line is the mean, and optionally, you can keep also
@@ -65,4 +93,75 @@ the original data in the plot (by choosing a lwd.orig > 0):
 ```R
 groups <- getGroups(plate, by="strain")
 viewGroups(data,groups=groups,lwd.orig=0,nrow=1)
+```
+or view all in one
+```R
+viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
+```
+
+### 4) Advanced analyses
+
+#### Correct For Lag Phase
+
+The above plots already include a statistical analysis. If the 95% confidence
+intervals don't overlap between different groups you already have
+your signficant result. However, we can see for the example data
+that the lag phase of the group "EVC" is much longer. We could
+estimate the lag-phase by using the R package `grofit` (available at CRAN) via
+`platexpress` conversion function `data2grofit`. However, here we can see
+that a 3 h lag phase for "EVC" wells may do. First we need to assign
+a lag-phase to each well, simply by generating an R vector with the well
+ID as names. First we need to assign a lag-phase to each well, simply by 
+generating an R vector with the well ID as names.
+
+```R
+lag <- rep(3, length(groups[["EVC"]]))
+names(lag) <- groups[["EVC"]]
+data <- shiftData(data, lag=lag)
+viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
+```
+Great! Now the OD curves are aligned, and they seem to be very similar,
+allowing a direct comparison of fluorescence over time.
+
+#### Generate Box- or Barplots 
+
+For some applications you may want to boil data down to core messages. 
+Diverse further functions allow to further summarize and visualize results, 
+e.g., 
+
+```R
+boxData(data,rng=7,groups=groups,did="YFP")
+boxData(data,rng=7,groups=groups,did="YFP",type="bar")
+```
+
+gives you boxplots or barplots (with standard errors or 95% confidence
+intervals as errors bars) of the selected data at 7 h (or the time-point
+closest to 7h).
+
+#### Retrieve and Process Data
+
+The OD growth curves were nicely aligned, however, you may still want to 
+normalize your data by OD and look at YFP expression in dependence of OD.
+You can `getData` and `addData`, e.g., to calculate YFP/OD:
+
+```R
+yfp <- getData(data, "YFP")
+od <- getData(data, "OD")
+data <- addData(data, dat=yfp/od, ID="YFP/OD", col=wavelength2RGB(500))
+viewGroups(data,groups2=groups,lwd.orig=0,dids=c("OD","YFP/OD"))
+```
+
+#### Interpolate to new x-axis
+
+You could also plot data against another x-axis, any data set in 
+your data, e.g., by using `xid="OD"` in the call to `viewPlate`
+or `viewGroup`. However, since the x-axis is distinct for each data point,
+you won't get the nice 95% confidence intervals for this plot. For
+this we can interpolate data to a common value. This generates a 
+new data structure, and the two should not be mixed up:
+
+```R
+od.data <- interpolatePlateData(data, xid="OD")
+viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
+boxData(od.data,rng=0.7,groups=groups,did="YFP",type="bar")
 ```

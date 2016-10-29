@@ -4,12 +4,13 @@
 \alias{viewPlate}
 \title{\code{\link{viewPlate}} plots all data in plate format}
 \usage{
-viewPlate(data, wells, rows = toupper(letters[1:8]), cols = 1:12,
-  xid = "Time", xscale = FALSE, xlim, dids, pcols, yscale = TRUE, ylims,
-  ylim, log = "", legpos = "topleft", add.legend = TRUE)
+viewPlate(data, wells, rows = toupper(letters[1:8]), cols = 1:12, xid,
+  xscale = FALSE, xlim, dids, pcols, yscale = TRUE, ylims, ylim, log = "",
+  legpos = "topleft", add.legend = TRUE)
 }
 \arguments{
-\item{data}{the list of measurement data as provided by \code{\link{readPlateData}}}
+\item{data}{the list of measurement data as provided by
+\code{\link{readPlateData}}}
 
 \item{wells}{a list of wells to plot, overrules \code{rows} and \code{cols}}
 
