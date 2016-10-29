@@ -347,29 +347,42 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
 #' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
 #' @export
-readPlateData <- function(files, type, data.ids, interpolate=TRUE,
-                          skip=0, sep="\t", dec=".", verb=TRUE, ...) {
+readPlateData <- function(files, type, data.ids, 
+                          skip=0, sep="\t", dec=".", verb=TRUE,
+                          interpolate=TRUE, time.conversion, ...) {
 
     if ( type=="BMG" )
-      readBMGPlate(files=files, data.ids=data.ids, interpolate=interpolate,
-                   verb=verb, skip=5, sep=";", dec=".", ...)
+        data <- readBMGPlate(files=files, data.ids=data.ids,
+                             verb=verb, skip=5, sep=";", dec=".", ...)
     else if ( type=="Synergy" )
-      readSynergyPlate(file=files, data.ids=data.ids, interpolate=interpolate,
-                       verb=verb, skip=58, sep=";", dec=".", ...)
+        data <- readSynergyPlate(file=files, data.ids=data.ids, 
+                                 verb=verb, skip=58, sep=";", dec=".", ...)
+
+    ## NOW PREPARE DATA
+    ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
+    ## interpolate data: this adds a master time and temperature
+    ## and interpolates all data to this time; if this step
+    ## is omitted, there will be no global master time!
+    if ( interpolate )
+      data <- interpolatePlateTimes(data, verb=verb)
+
+    if ( !missing(time.conversion) )
+        data$Time <- data$Time * time.conversion
+    data
 } 
 
 # Read Synergy Mx-exported files
 #' @inheritParams readPlateData
 #' @seealso \code{\link{readPlateData}}
 #' @export
-readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
+readSynergyPlate <- function(file, data.ids,
                              skip=58, sep=";", dec=".", skiplastcol=FALSE,
                              time.format="numeric",
-                             pcols, verb=TRUE) {
+                             verb=TRUE) {
 
     indat <- read.csv(file, header=FALSE,stringsAsFactors=FALSE,
-                     sep=sep, dec=dec, skip=skip)
-
+                      sep=sep, dec=dec, skip=skip)
+    
     ## data IDs are in column 1, followed by data matrices starting
     ## in column 2; skip internal result calculation
     didx <- c(which(indat[,1]!="" & indat[,1]!="Results"))
@@ -429,22 +442,9 @@ readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
     for ( i in 1:length(data) ) 
       data[[i]]$time <- data[[i]]$time - t0
     
-    ## add colors
-    ## TODO: use these in plots
-    ## TODO: check passed pcols
-    #if ( missing(pcols) ) 
-    #    data$colors <- getColors(dataIDs)
-    #else data$colors <- pcols
-
     ## SET DATA ID 
     data$dataIDs <- names(data)
-    
-    ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
-    ## interpolate data: this adds a master time and temperature
-    ## and interpolates all data to this time; if this step
-    ## is omitted, there will be no global master time!
-    if ( interpolate )
-      data <- interpolatePlateTimes(data, verb=verb)
+
     data
 
 }
@@ -458,8 +458,8 @@ readSynergyPlate <- function(file, data.ids, interpolate=TRUE,
 #' @inheritParams readPlateData
 #' @seealso \code{\link{readPlateData}}
 #' @export
-readBMGPlate <- function(files, data.ids, interpolate=TRUE,
-                         skip=5, sep=";", dec=".", verb=TRUE, pcols) {
+readBMGPlate <- function(files, data.ids, 
+                         skip=5, sep=";", dec=".", verb=TRUE) {
 
     data <- list()
     ## 1) PARSE ALL DATA FILES and collect the individual measurements
@@ -541,13 +541,6 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
         data <- append(data,dlst)
     }
 
-    ## add colors
-    ## TODO: use these in plots
-    ## TODO: check passed pcols
-    #if ( missing(pcols) ) 
-    #    data$colors <- getColors(ptypes)
-    #else data$colors <- pcols
-
     ## NOTE: at this stage, data between different plate-readers
     ## should already look similar; each entry containing separate
     ## time and temperature vectors
@@ -555,13 +548,6 @@ readBMGPlate <- function(files, data.ids, interpolate=TRUE,
     ## SET DATA ID 
     data$dataIDs <- names(data)
 
-    ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
-    ## interpolate data: this adds a master time and temperature
-    ## and interpolates all data to this time; if this step
-    ## is omitted, there will be no global master time!
-
-    if ( interpolate )
-      data <- interpolatePlateTimes(data, verb=verb)
     data
 }
 
@@ -1147,8 +1133,18 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
     data
 }
 
-## interpolate one dataset to common points of another
-## data set, e.g., fluorescence to OD
+#' interpolate one dataset to common points of another
+#' data set, e.g., fluorescence to OD
+#' @param data the list of measurement data as provided by
+#' \code{\link{readPlateData}}
+#' @param xid ID of the data set which should serve as the new x-axis
+#' all data will be interpolated to equi-spaced points along the range
+#' of measured values
+#' @param dids restrict interpolation to these data IDs
+#' @param n specify the number of interpolation points, if missing the
+#' original number of rows will be used
+#' @param xout specify the interpolation points directly
+#' @export
 interpolatePlateData <- function(data, xid, dids, n, xout) {
 
     if ( missing(dids) )
@@ -1203,7 +1199,8 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 
 
 #' \code{\link{viewPlate}} plots all data in plate format
-#' @param data the list of measurement data as provided by \code{\link{readPlateData}}
+#' @param data the list of measurement data as provided by
+#' \code{\link{readPlateData}}
 #' @param wells a list of wells to plot, overrules \code{rows} and \code{cols}
 #' @param rows a list of strings/characters used as row ID in the composite
 #' row:col well description in the plate layout (map) and plate data
@@ -1230,7 +1227,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' @export
 viewPlate <- function(data, wells, 
                       rows=toupper(letters[1:8]),cols=1:12,
-                      xid="Time", xscale=FALSE,xlim,
+                      xid, xscale=FALSE,xlim,
                       dids, pcols, yscale=TRUE,ylims,ylim,log="",
                       legpos="topleft",add.legend=TRUE) {
 
@@ -1253,6 +1250,9 @@ viewPlate <- function(data, wells,
     }
     
     ## get x-axis data: time and temperature or another data set
+    if ( missing(xid) )
+        xid <- data$mids[1]
+    
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
     global.x <- xid %in% data$mids
@@ -1514,7 +1514,7 @@ groupStats <- function(data, groups, dids) {
 #' vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
 #' @export
 viewGroups <- function(data, groups, groups2,
-                       xid="Time", xscale=FALSE, xlim,
+                       xid, xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
@@ -1540,6 +1540,9 @@ viewGroups <- function(data, groups, groups2,
     }
 
     ## get x-axis data: time and temperature or another data set
+    if ( missing(xid) )
+        xid <- data$mids[1]
+    
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
     global.x <- xid %in% data$mids
