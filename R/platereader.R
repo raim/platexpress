@@ -725,9 +725,23 @@ cutData <- function(data, rng, mid) {
     data
 }
 
-## returns all data for group of wells in a given range of the x-axis for
-###' @export
-boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", etype="se") {
+#' returns data for group of wells in a given range of the x-axis
+#' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
+#' @param groups a grouping of wells, see \code{\link{getGroups}}
+#' @param rng x-axis range or a single point, for the latter the closest
+#' point will be selected
+#' @param mid the x-axis ID, if multiple x-axes are present
+#' @param did the y-axis data to be grouped
+#' @param stat if FALSE (default) the full grouped data will be returned as
+#' a list (which can be used for \code{boxplot} or statistics afterwards),
+#' if TRUE the means of the data will be returned (as plotted)
+#' @param plot if TRUE a box-plot or bar-plot will be plotted
+#' @param type either "box" (default) or "bar" for box-plot or bar-plot
+#' @param etype type of statistics to be used for error bars in the bar-plot,
+#' either "ci" (default) for the 95%-confidence interval or "se" for
+#' the standard error
+#' @export
+boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, type="box", etype="ci") {
     if ( missing(mid) )
         mid <- data$mids[1]
     cdat <- cutData(data, rng, mid)
@@ -761,8 +775,8 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
         if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
         legend("topright",paste("at",mid, "=",paste(rng,collapse="-")))
     }
-    
-    result <- pdat
+    if ( stat ) bdat <- pdat
+    result <- bdat
 }
 
 
