@@ -6,13 +6,14 @@ library("platexpress")
 ## this is the code exemplified in the README.md file, see
 ## https://github.com/raim/platexpress
 
-cat(paste("This demo demonstrates the code explained the README.md at https://github.com/raim/platexpress\n\n"))
 
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
 plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
 raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
+
+cat(paste("This demo demonstrates the code explained the README.md at https://github.com/raim/platexpress\n\n"))
 
 viewPlate(raw)
 
