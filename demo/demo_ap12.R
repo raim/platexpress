@@ -35,7 +35,6 @@ names(lag) <- groups$EVC
 data <- shiftData(data, lag=lag)
 viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
 
-par(mai=c(1,1,.1,.1))
 boxData(data,rng=7,groups=groups,did="YFP")
 boxData(data,rng=7,groups=groups,did="YFP",type="bar")
 
@@ -47,6 +46,5 @@ viewGroups(data,groups2=groups,lwd.orig=0,dids=c("OD","YFP/OD"))
 od.data <- interpolatePlateData(data, xid="OD")
 viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
 
-par(mai=c(1,1,.1,.1))
 boxData(od.data,rng=0.7,groups=groups,did="YFP/OD",type="bar")
 

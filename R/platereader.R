@@ -1326,6 +1326,7 @@ viewPlate <- function(data, wells,
     } 
 
     ## plot plate
+    orig.par <- par(c("mfcol","mai")) # store parameters
     par(mfcol=c(length(rows),length(cols)),mai=rep(0,4))
     for ( j in cols ) 
       for ( i in rows ) {
@@ -1370,7 +1371,8 @@ viewPlate <- function(data, wells,
     if ( add.legend )
       legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")   
 
-    ## TODO: reset par!!
+    ## reset par
+    par(orig.par)
 
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
@@ -1618,12 +1620,16 @@ viewGroups <- function(data, groups, groups2,
     #    pcols <- getRGB(length(ptypes))
     #    names(pcols) <- ptypes
     #}
-
+    orig.par <- NULL
     if ( length(groups)>1 | !embed ) {
         ncol <- ceiling(length(groups)/nrow)
+        orig.par <- list(mfcol=par("mfcol"))
         par(mfcol=c(nrow,ncol))
     }
-    if ( !no.par ) par(mai=mai,mgp=mgp)
+    if ( !no.par ) {
+        orig.par <- append(orig.par, par(c("mai","mgp")))
+        par(mai=mai,mgp=mgp)
+    }
     for ( g in 1:length(groups) ) {
 
         wells <- groups[[g]]
@@ -1738,7 +1744,8 @@ viewGroups <- function(data, groups, groups2,
     if ( add.legend )
         legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")
 
-    ## TODO: reset par!!
+    ## reset par!
+    par(orig.par)
     
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
