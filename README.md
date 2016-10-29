@@ -1,13 +1,12 @@
 # `platexpress` - Microbial Growth & Gene Expression
 
+![platexpress](doc/ecoli_20141014.png)
+
 
 The platexpress package provides a quick & easy interface to microbial
 growth & gene expression data as measured in parallel growth platforms
 such as microplate readers. It allows for quick inspection of raw
 data, blank normalization, and summarization over replicates.
-
-![platexpress](doc/ecoli_20141014.png)
-
 
 A few data conversion routines allow to interface other R
 packages for analysis of microbial growth such as
