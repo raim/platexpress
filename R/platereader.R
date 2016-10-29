@@ -1370,6 +1370,8 @@ viewPlate <- function(data, wells,
     if ( add.legend )
       legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")   
 
+    ## TODO: reset par!!
+
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
     plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols)
@@ -1736,6 +1738,8 @@ viewGroups <- function(data, groups, groups2,
     if ( add.legend )
         legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")
 
+    ## TODO: reset par!!
+    
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
     #if ( global.x ) xid <- "Time"
