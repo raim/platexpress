@@ -736,10 +736,11 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
     names(bdat) <- names(groups)
     for ( sg in 1:length(groups) ) 
         bdat[[sg]] <- cdat[[did]]$data[,groups[[sg]],drop=FALSE]
+    ## get means for all groups
+    pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
 
     if ( plot ) {
-        par(mai=c(1,.75,.1,.1))
-        pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
+        #par(mai=c(1,.75,.1,.1))
         if ( type=="box" )
             boxplot(pdat,ylab=did,las=2)
         else if ( type=="bar" ) {
@@ -753,14 +754,15 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
             }
             
             x <- barplot(mn,ylim=c(0,max(mn+ci)),ylab=did,las=2)
-            arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,length=.05,lwd=1.5)            
+            arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
+                   length=.05,lwd=1.5)            
         }
         ## get actual point if only one points was chosen
         if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
         legend("topright",paste("at",mid, "=",paste(rng,collapse="-")))
     }
     
-    result <- bdat
+    result <- pdat
 }
 
 
