@@ -6,10 +6,13 @@ growth & gene expression data as measured in parallel growth platforms
 such as microplate readers. It allows for quick inspection of raw
 data, blank normalization, and summarization over replicates.
 
-(TODO) A few data conversion routines allow to interface other R
+![platexpress](doc/ecoli_20141014.png)
+
+
+A few data conversion routines allow to interface other R
 packages for analysis of microbial growth such as
 [grofit](https://cran.r-project.org/web/packages/grofit/index.html)
-and
+and (TODO)
 [growthcurver](https://cran.r-project.org/web/packages/growthcurver/index.html)
 and quickly display their results within `platexpress`.
 
