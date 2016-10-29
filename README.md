@@ -126,8 +126,8 @@ ID as names. First we need to assign a lag-phase to each well, simply by
 generating an R vector with the well ID as names.
 
 ```R
-lag <- rep(3, length(groups[["EVC"]]))
-names(lag) <- groups[["EVC"]]
+lag <- rep(3, length(groups$EVC))
+names(lag) <- groups$EVC
 data <- shiftData(data, lag=lag)
 viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
 ```
@@ -179,5 +179,5 @@ viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
 And now we are ready for nice compact result figure:
 
 ```R
-boxData(od.data,rng=0.7,groups=groups,did="YFP",type="bar")
+boxData(od.data,rng=0.7,groups=groups,did="YFP/OD",type="bar")
 ```
