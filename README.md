@@ -20,17 +20,20 @@ and
 ### 1) Parse the plate layout and measurements 
 
 The plate layout will later allow to do blank correction and group
-experiments:
+experiments. Here, we take the example file that ships with the 
+`platexpress` library:
 
 ```R
-plate <- readPlateMap(file="AP12_layout.csv", blank.id="blank",fsep="\n", fields=c("strain","samples"))
+plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
+plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 ```
 
 ... and parse the data, as exported from platereader "Synergy Mx" 
-software:
+software in the shipped example file:
 
 ```R
-raw <- readPlateData(file="AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
+data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
+raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
 ```
 
 Here we include some specifics for this data set. First, we need to
@@ -161,15 +164,20 @@ viewGroups(data,groups2=groups,lwd.orig=0,dids=c("OD","YFP/OD"))
 
 #### Interpolate to new x-axis
 
-You could also plot data against another x-axis, any data set in 
-your data, e.g., by using `xid="OD"` in the call to `viewPlate`
-or `viewGroup`. However, since the x-axis is distinct for each data point,
-you won't get the nice 95% confidence intervals for this plot. For
-this we can interpolate data to a common value. This generates a 
-new data structure, and the two should not be mixed up:
+You could also plot data against another x-axis, any data set in your
+data, e.g., by using `xid="OD"` in the call to `viewPlate` or
+`viewGroup`. However, since the x-axis is distinct for each data
+point, you won't get the nice 95% confidence intervals. For this we
+can interpolate data to a common value. This generates a new data
+structure, and the two should not be mixed up:
 
 ```R
 od.data <- interpolatePlateData(data, xid="OD")
 viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
+```
+
+And now we are ready for nice compact result figure:
+
+```R
 boxData(od.data,rng=0.7,groups=groups,did="YFP",type="bar")
 ```
