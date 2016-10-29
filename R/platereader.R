@@ -44,18 +44,25 @@ NULL
 
 
 ### UTILS
-plotdev <- function(file.name="test", type="png", width=5, height=5, res=100) {
-  file.name <- paste(file.name, type, sep=".")
+
+#' plots to png, eps or pdf, taking the same arguments
+#' @param file the name of the file without the extension (.pdf)
+#' @param type type of the figure, either png, pdf or eps
+#' @param width the figure width in inches
+#' @param height the figure height in inches
+#' @param res the figure resolution in ppi (pixels per inch), only used
+#' png
+#' @export
+plotdev <- function(file="test", type="png", width=5, height=5, res=100) {
+  file <- paste(file, type, sep=".")
   if ( type == "png" )
-    png(file.name, width=width, height=height, units="in", res=res)
+    png(file, width=width, height=height, units="in", res=res)
   if ( type == "eps" )
-    postscript(file.name, width=width, height=height, paper="special")
+    postscript(file, width=width, height=height, paper="special")
   if ( type == "pdf" )
-    pdf(file.name, width=width, height=height)
+    pdf(file, width=width, height=height)
 }
 
-
-### HELPERS
 
 ## return R colors as RGB, to allow setting alpha
 getRGB <- function(n) {
@@ -338,7 +345,7 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @examples
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-#' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",")
+#' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
 #' @export
 readPlateData <- function(files, type, data.ids, interpolate=TRUE,
                           skip=0, sep="\t", dec=".", verb=TRUE, ...) {
