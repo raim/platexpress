@@ -55,7 +55,6 @@ experiments. Here, we take the example file that ships with the
 
 ```{r}
 library(platexpress)
-source("~/programs/platexpress/R/platereader.R")
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
 plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 ```

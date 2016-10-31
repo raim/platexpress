@@ -95,7 +95,6 @@ R CMD INSTALL platexpress_0.1.tar.gz</code></pre>
 <h3>1) Parse the plate layout and measurements</h3>
 <p>The plate layout will later allow to do blank correction and group experiments. Here, we take the example file that ships with the <code>platexpress</code> library:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(platexpress)
-<span class="kw">source</span>(<span class="st">&quot;~/programs/platexpress/R/platereader.R&quot;</span>)
 plate.file &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;AP12_layout.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;platexpress&quot;</span>)
 plate &lt;-<span class="st"> </span><span class="kw">readPlateMap</span>(<span class="dt">file=</span>plate.file, <span class="dt">blank.id=</span><span class="st">&quot;blank&quot;</span>,<span class="dt">fsep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="dt">fields=</span><span class="kw">c</span>(<span class="st">&quot;strain&quot;</span>,<span class="st">&quot;samples&quot;</span>))</code></pre></div>
 <p>… and parse the data, as exported from platereader “Synergy Mx” software in the shipped example file:</p>
