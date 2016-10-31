@@ -2,9 +2,9 @@
 % Please edit documentation in R/platereader.R
 \name{readPlateData}
 \alias{readPlateData}
-\title{\code{\link{readPlateData}} parses data files in CSV, as exported by
+\title{Parses data files in CSV, as exported by
 the plate reader software. Header IDs in the data file should match with 
-IDs in the plate map, see \code{link{readPlateMap}}. Pre-defined read-in
+IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
 functions exist for a couple of plate-readers.}
 \usage{
 readPlateData(files, type, data.ids, skip = 0, sep = "\\t", dec = ".",
@@ -30,14 +30,19 @@ as a list of strings}
 \item{interpolate}{if true a master time, the average time between distinct
 measurements of one timepoint, is calculated and all values are interpolated
 to this mastertime. This is currently obligatory for further processing.}
+
+\item{time.conversion}{conversion factor for the plate time, e.g., 1/3600
+to convert from hours to seconds}
+
+\item{...}{further parameters to plate-reader specific parsing functions}
 }
 \value{
 a list of distinct measurement time-courses from one plate
 }
 \description{
-\code{\link{readPlateData}} parses data files in CSV, as exported by
+Parses data files in CSV, as exported by
 the plate reader software. Header IDs in the data file should match with 
-IDs in the plate map, see \code{link{readPlateMap}}. Pre-defined read-in
+IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
 functions exist for a couple of plate-readers.
 }
 \note{
@@ -45,7 +50,7 @@ The original data is all interpolated to a common/average 'master' time
 }
 \examples{
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="\%H:\%M:\%S")
+raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="\%H:\%M:\%S")
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

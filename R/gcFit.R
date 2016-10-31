@@ -1,7 +1,24 @@
-## hack of grofit function gcFit to run without interaction but with plots
-gcFit.2 <- function (time, data, control = grofit.control()) 
+## @importFrom grofit  grofit.control gcFitModel gcFitSpline gcBootspline
+## @importFrom methods is
+
+#' hack of grofit function \code{\link[grofit:grofit]{gcFit}} to allow plotting
+#' without interaction
+#' @param time a matrix of measurment times for each well as required by
+#' \code{\link[grofit:grofit]{grofit}}, provided by \code{\link{data2grofit}}
+#' @param data the data as produced by \code{\link{data2grofit}}
+#' @param control the \code{\link[grofit:grofit]{grofit}} control structure, see
+#' \code{\link[grofit:grofit]{grofit.control}}, but with an additional
+#' entry "plot", which is set to TRUE or FALSE
+#' @details Adding the field "plot" allows to de-activate
+#' \code{control$interactive}, so the whole fitting procedure runs
+#' through all wells, yet results are plotted.
+#' @export
+gcFit.2 <- function (time, data, control = grofit::grofit.control()) 
 {
-    if (is(control) != "grofit.control") 
+
+    
+    
+    if (methods::is(control) != "grofit.control") 
         stop("control must be of class grofit.control!")
     if ((dim(time)[1]) != (dim(data)[1])) 
         stop("gcFit: Different number of datasets in data and time")
@@ -9,6 +26,11 @@ gcFit.2 <- function (time, data, control = grofit.control())
         warning("fit.opt must be set to 's', 'm' or 'b'. Changed to 'b'!")
         fit.opt = "b"
     }
+
+     ## add gcFit.2 specific controls
+    if ( !"plot"%in%names(control) )
+      control$plot <- TRUE
+   
     out.table <- NULL
     used.model <- NULL
     fitpara.all <- list()
@@ -28,7 +50,7 @@ gcFit.2 <- function (time, data, control = grofit.control())
             cat("----------------------------------------------------\n")
         }
         if ((control$fit.opt == "m") || (control$fit.opt == "b")) {
-            fitpara <- gcFitModel(acttime, actwell, gcID, control)
+            fitpara <- grofit::gcFitModel(acttime, actwell, gcID, control)
             fitpara.all[[i]] <- fitpara
         }
         else {
@@ -40,7 +62,7 @@ gcFit.2 <- function (time, data, control = grofit.control())
             fitpara.all[[i]] <- fitpara
         }
         if ((control$fit.opt == "s") || (control$fit.opt == "b")) {
-            nonpara <- gcFitSpline(acttime, actwell, gcID, control)
+            nonpara <- grofit::gcFitSpline(acttime, actwell, gcID, control)
             fitnonpara.all[[i]] <- nonpara
         }
         else {
@@ -56,15 +78,15 @@ gcFit.2 <- function (time, data, control = grofit.control())
             2]), as.character(data[i, 3]), sep = "-")
         if ((control$plot == TRUE)) {
             if (fitpara$fitFlag == TRUE) {
-                plot(fitpara, colData = 1, colModel = 3, cex = 0.5)
+                plot(fitpara, colData = "black", colModel = "green", cex = 0.5)
                 plot(nonpara, add = TRUE, raw = FALSE, colData = 0, 
-                  colSpline = 2, cex = 1.5)
+                  colSpline = "red", cex = 1.5)
                 ## TODO: why is it two
                 abline(v=summary(fitpara)$lambda) #fitpara$parameters$lambda)
             }
             else {
-                plot(nonpara, add = FALSE, raw = TRUE, colData = 1, 
-                  colSpline = 4, cex = 0.5)
+                plot(nonpara, add = FALSE, raw = TRUE, colData = "black", 
+                  colSpline = "red", cex = 0.5)
             }
             title(wellname)
             if (control$fit.opt == "m") 
@@ -75,7 +97,7 @@ gcFit.2 <- function (time, data, control = grofit.control())
                   col = "red", lty = 1)
             if (control$fit.opt == "b") 
                 legend(x = "bottomright", legend = c(fitpara$model, 
-                  "spline fit"), col = c("black", "red"), lty = c(1, 
+                  "spline fit"), col = c("green", "red"), lty = c(1, 
                   1))
         }
         reliability_tag <- NA
@@ -100,7 +122,7 @@ gcFit.2 <- function (time, data, control = grofit.control())
         if (control$interactive == TRUE) 
             graphics.off()
         if ((control$nboot.gc > 0) && (reliability_tag == TRUE)) {
-            bt <- gcBootSpline(acttime, actwell, gcID, control)
+            bt <- grofit::gcBootSpline(acttime, actwell, gcID, control)
             boot.all[[i]] <- bt
         }
         else {

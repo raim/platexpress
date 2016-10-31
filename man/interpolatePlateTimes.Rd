@@ -26,4 +26,7 @@ master time: calculates average time for each measurement point
 and interpolates all values to this time; this is also used for
 well temperatures
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 

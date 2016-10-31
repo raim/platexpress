@@ -7,29 +7,36 @@
 viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, dids, pcols,
   yscale = TRUE, ylims, ylim, log = "", show.ci95 = TRUE,
   show.mean = TRUE, emphasize.mean = FALSE, lty.orig = 1,
-  lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2, legpos = "topleft",
+  lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2, g2.legpos = "topleft",
   g2.legend = TRUE, embed = FALSE, no.par = FALSE, mai = c(0.5, 0, 0,
   0), mgp = c(1.5, 0.5, 0), nrow = 1, xaxis = TRUE, yaxis = c(1, 2),
-  add.legend = TRUE)
+  g1.legpos = "topright", g1.legend = TRUE)
 }
 \arguments{
-\item{data}{the list of measurement data as provided by \code{\link{readPlateData}}}
+\item{data}{the list of measurement data as provided by
+\code{\link{readPlateData}}}
 
-\item{groups}{a list of well grouped wells, as produced by \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2}}
+\item{groups}{a list of well grouped wells, as produced by
+\code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2}}
 
-\item{groups2}{sub-groups of \code{groups}, group2 must be constructed as \code{groups}, but with one additional grouping, e.g. \code{\link{getGroups}}(platemap, by=c("media","strain")) following the example for parameter see \code{groups}}
+\item{groups2}{sub-groups of \code{groups}, group2 must be constructed as
+\code{groups}, but with one additional grouping, e.g.
+\code{\link{getGroups}}(platemap, by=c("media","strain")) following the
+example for parameter see \code{groups}}
 
 \item{xid}{ID of a data-set in the input data that can be used as x-axis
 instead of the default Time vector}
 
-\item{xscale}{use a global range for the x-axes; only relevant if xid specifies a subset of the data as x-axis}
+\item{xscale}{use a global range for the x-axes; only relevant if xid
+specifies a subset of the data as x-axis}
 
 \item{xlim}{plot range of the x-axis}
 
 \item{dids}{IDs of the data to be plotted; if missing, all data will
 be plotted}
 
-\item{pcols}{a named list of RGB colors to be used the plotted data types; the color vector must have names according to the data IDs}
+\item{pcols}{a named list of RGB colors to be used the plotted data types;
+the color vector must have names according to the data IDs}
 
 \item{yscale}{if TRUE (default) global y-axis limits will be calculated from
 all plotted wells; if FALSE each well be locally scaled}
@@ -41,27 +48,52 @@ all plotted wells; if FALSE each well be locally scaled}
 \item{log}{plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 
-\item{lty.orig}{line type of the original single data, set to 0 to supress plotting of all original data}
+\item{show.ci95}{show the 95\% condifence intervals of groups}
 
-\item{lwd.orig}{line-width of the original single data, set to 0 to supress plotting of all original data}
+\item{show.mean}{show the mean of groups as lines}
 
-\item{legpos}{position of the well IDs on the plots}
+\item{emphasize.mean}{show the means in black instead of group colors,}
 
-\item{g2.legend}{plot a legend for group2 subgroups}
+\item{lty.orig}{line type of the original single data, set to 0 to supress
+plotting of all original data}
 
-\item{embed}{setting TRUE allows to embed plots of single groups within in layouted plots, see ?layout and par("mfcol")}
+\item{lwd.orig}{line-width of the original single data, set to 0 to
+supress plotting of all original data}
 
-\item{no.par}{setting TRUE supresses all internal plot defaults (e.g., mai, mgp)}
+\item{lty.mean}{line style for the mean lines, see \code{(par("lty")}
+this can help to emphasize the means in noisy data (broad overlapping
+confidence intervals}
+
+\item{lwd.mean}{line width for the mean lines, see \code{(par("lwd")}}
+
+\item{g2.legpos}{position of the \code{groups2} legend, see \code{g2.legend}}
+
+\item{g2.legend}{plot a legend for groups in argument \code{groups2}}
+
+\item{embed}{setting TRUE allows to embed plots of single groups within
+in layouted plots, see ?layout and par("mfcol"); also see argument
+\code{no.par}}
+
+\item{no.par}{setting TRUE supresses all internal plot defaults (e.g.,
+mai, mgp), useful to style your own plots, also see argument \code{embed}}
 
 \item{mai}{set the outer margins around plot areas, see ?par}
 
 \item{mgp}{set the position of axis title, tick marks and tick lengths}
 
+\item{nrow}{number of plot rows, number of columns will be selected
+automatically; NOTE: to change the ordering of the plots
+you can change the ordering of the input \code{groups}/}
+
 \item{xaxis}{plot x-axis if TRUE}
 
-\item{yaxis}{plot y-axis if TRUE}
+\item{yaxis}{the data types for which axes are to be plotted, corresponds
+to the order in argument \code{dids} and as plotted in the legend 
+(see argument \code{g1.legend}}
 
-\item{nrows}{number of plot rows}
+\item{g1.legpos}{position of the \code{groups} legend, see \code{g1.legend}}
+
+\item{g1.legend}{show the main legend, giving plot colors}
 }
 \description{
 plot grouped wells as summary plots, incl. confidence intervals and means
@@ -71,7 +103,11 @@ data(ap12)
 groups <- getGroups(plate=ap12plate, by=c("strain"))
 vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 \seealso{
-\code{\link{viewPlate}}, \code{\link{getGroups}}, \code{\link{readPlateMap}}
+\code{\link{viewPlate}}, \code{\link{getGroups}},
+\code{\link{readPlateMap}}
 }
 

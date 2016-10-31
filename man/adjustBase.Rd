@@ -7,6 +7,8 @@
 adjustBase(data, base = 0, wells, dids, add.fraction, xlim, each = FALSE)
 }
 \arguments{
+\item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
+
 \item{base}{the new minimum for the data, default is 0, but it could
 e.g. be the OD used for inoculation}
 
@@ -32,5 +34,8 @@ dids where raised to a minimum level in
 \details{
 Adjusts data to a new mininum, this is useful for adjustment
 of negative values after blank corrections
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 

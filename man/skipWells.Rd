@@ -7,7 +7,9 @@
 skipWells(data, skip)
 }
 \arguments{
-\item{data}{data structures from \code{platexpress}; either data (\code{\link{readPlateData}}), a plate layout map (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})}
+\item{data}{data structures from \code{\link{platexpress}}; either data
+(\code{\link{readPlateData}}), a plate layout map
+(\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})}
 
 \item{skip}{a list of strings identifiying the wells to be skipped,
 e.g. "B3" to skip the well in row B/column 3}
@@ -16,10 +18,18 @@ e.g. "B3" to skip the well in row B/column 3}
 \code{\link{skipWells}} rm wells from both data, plate maps and groupings
 }
 \details{
-removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
+Removes specific wells from \code{\link{platexpress}} data,
+groupings and plate layout maps. If the first argument is
+\code{\link{platexpress}} data, the specified wells will be set to NA.
+If the first argument is a \code{platexpress} well grouping or plate
+layout map, the specified wells will be removed.
 }
 \examples{
 data(ap12)
-raw <- skipWells(ap12data, skip="A9")
+raw <- skipWells(ap12data, skip="A9") # rm data from well "A9"
+plate <- skipWells(ap12plate, skip="A9") # rm well "A9" from the plate layout
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 

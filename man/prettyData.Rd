@@ -7,12 +7,17 @@
 prettyData(data, dids, colors)
 }
 \arguments{
+\item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
+
 \item{dids}{a vector of data IDs, data will be filtered and sorted by this list; of the vector is named the IDs will be replaced by these names}
 
 \item{colors}{a vector of plot colors as RGB strings, optionally already named by dataIDs}
 }
 \description{
 \code{\link{prettyData}} : set colors and order or filter the data set
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 \seealso{
 \code{\link{readPlateData}}

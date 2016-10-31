@@ -2,8 +2,8 @@
 % Please edit documentation in R/platereader.R
 \name{data2grofit}
 \alias{data2grofit}
-\title{\code{\link{data2grofit}} : converts \code{package:platexpress} data to
-\code{package:grofit} data format}
+\title{\code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
+\code{\link[grofit:grofit]{grofit}} data format}
 \usage{
 data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
 }
@@ -20,22 +20,26 @@ data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
 are taken}
 
 \item{plate}{plate layout map, see \code{\link{readPlateMap}}, columns
-of this map can be converted to \code{package:grofit} data annotation}
+of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+annotation}
 
 \item{eid}{column IDs in the plate layout map to be used for
-\code{package:groFit} data annotation; if missing but \code{plate} is
-present, the columns 2 and 3 are used}
+\code{\link[grofit:grofit]{grofit}} data annotation; if missing but
+\code{plate} is present, the columns 2 and 3 are used}
 
 \item{dose}{vector of doses in each well, used as the third column of
-\code{package:grofit} data annotation, where it can be used for
+ \code{\link[grofit:grofit]{grofit}}data annotation, where it can be used for
 dose-response calculations}
 }
 \description{
-\code{\link{data2grofit}} : converts \code{package:platexpress} data to
-\code{package:grofit} data format
+\code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
+\code{\link[grofit:grofit]{grofit}} data format
 }
 \details{
 Returns a simple list with two entries \code{time} and \code{data},
-as required for \code{package:grofit}.
+as required for \code{\link[grofit:grofit]{grofit}}.
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 

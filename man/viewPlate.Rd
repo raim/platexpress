@@ -43,14 +43,13 @@ log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 
 \item{legpos}{position of the well IDs on the plots}
 
-\item{mids}{vector of named strings, indicating the IDs of the master
-time and temperature vectors in the data}
+\item{add.legend}{add a legend for the plotted data types (see
+argument \code{dids}) in the last plotted well}
 }
 \description{
 \code{\link{viewPlate}} plots all data in plate format
 }
-\examples{
-data(ap12)
-vp <- viewPlate(ap12data)
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 

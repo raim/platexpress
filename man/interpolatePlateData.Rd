@@ -26,4 +26,7 @@ original number of rows will be used}
 interpolate one dataset to common points of another
 data set, e.g., fluorescence to OD
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 

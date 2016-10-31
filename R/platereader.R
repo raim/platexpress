@@ -1,4 +1,3 @@
-
 ### ANALYZING PLATE-READER GROWTH & EXPRESSION CURVES
 #' platexpress: A package for analysing microbial growth & expression.
 #'
@@ -6,42 +5,17 @@
 #' microbial growth & gene expression data as measured in typical
 #' microplate-readers or other parallel growth systems.
 #' 
-#' @section Platexpress Workflow:
-#' see README.md at https://github.com/raim/platexpress or demo/demo_AP12.R
-#' type \code{demo("demo_AP12", package="platexpress")}
-#' @examples
-#' ### A TYPICAL WORKFLOW
-#' ## 1) parse the plate layout map
-#' 
-#' plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
-#' plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
-#' 
-#' ## 2) parse the data, exported from platereader software
-#' 
-#' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-#' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",", time.format="%H:%M:%S", time.conversion=1/3600)
-#' 
-#' ## 3) inspect the raw data
-#' 
-#' vp <- viewPlate(raw)
-#' 
-#' ## 4) Note that there is no growth in A9, so let's skip it
-#' 
-#' raw <- skipWells(raw, skip="A9")
-#' 
-#' ## 5) Now correct for blank well measurements, and view only present
-#' ## rows/cols
-#' 
-#' data <- correctBlanks(data=raw, plate=plate)
-#' vp <- viewPlate(data, rows=c("A","B","C"),cols=1:9)
-#' 
-#' ## 6) group replicates and view summarized growth/exprssion curves
-#' 
-#' groups <- getGroups(plate, by=c("strain","samples"))
-#' vg <- viewGroups(data,groups=groups,lwd.orig=0.5,nrow=3)
-#' 
-#' @docType package
-#' @name platexpress
+#'@author Rainer Machne
+#'@docType package
+#'@name platexpress
+#'@section Dependencies: The package uses mostly functionality from R base,
+#' (graphics, grDevices, stats) but more functionality is available when
+#' \code{\link[grofit:grofit]{grofit}} is installed.
+#'@importFrom stats median sd qt approx spline filter
+#'@importFrom graphics plot matplot boxplot barplot legend arrows locator
+#' abline lines points polygon box axis par text title 
+#'@importFrom grDevices rainbow rgb col2rgb png pdf postscript graphics.off
+#'@importFrom utils read.csv read.table
 NULL
 
 
@@ -53,6 +27,7 @@ NULL
 #' @param width the figure width in inches
 #' @param height the figure height in inches
 #' @param res the figure resolution in ppi (pixels per inch), only used
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' png
 #' @export
 plotdev <- function(file="test", type="png", width=5, height=5, res=100) {
@@ -84,6 +59,7 @@ getRGB <- function(n) {
 #' @param xlab xlab, see ?plot
 #' @param main main, see ?plot
 #' @param ... further arguments to plot
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @details Plots the color spectrum over the selected wavelengths in nm.
 #' The utility functions  \code{\link{plotWavelength}} and
 #' \code{\link{findWavelength}} can be used to plot and interactively (click
@@ -111,6 +87,7 @@ showSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
 #' @param ych y position of the symbol
 #' @param pch the plot symbol type, see ?par("pch")
 #' @param cex the plot symbol size, see ?par("cex")
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{showSpectrum}}, \code{\link{findWavelength}},
 #' \code{\link{wavelength2RGB}}
 #' @export
@@ -127,9 +104,10 @@ plotWavelength <- function(x=534, y=1.09, ych=0.95, cex=5, pch=19, ...) {
 #' click on the spectrum, then draws a vertical line at the clicked
 #' wavelength using \code{\link{plotWavelength}} and records the wavelength
 #' in nm.
-#' @param n number of clicks to record
+#' @param n number of clicks/wavelengths to record
 #' @param ... further arguments to \code{\link{plotWavelength}}, for
 #' selecting plot symbol and text size, and positions
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{showSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
 #' @export
 findWavelength <- function(n=1, ...) {
@@ -153,11 +131,13 @@ findWavelength <- function(n=1, ...) {
 #' http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb .
 #' Also see http://www.fourmilab.ch/documents/specrend/ for original code and
 #' why not all wavelengths can be converted to RGB.
+#' @param wavelength the wavelength in nm to convert to RGB
 #' @examples
 #' wavelengths <- seq(380,780,1)
 #' cols <- sapply(wavelengths, wavelength2RGB)
 #' bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
 #' barplot(bars,border=cols,col=cols,las=2)
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{showSpectrum}}
 #' @export
 wavelength2RGB <- function(wavelength)
@@ -260,7 +240,7 @@ se <- function(data,na.rm=TRUE) {
 ## in the fields can be passed via argument "fields" as a vector of
 ## strings.
 ## TODO: repair this in example:
-#' \code{\link{readPlateMap}} parses a plate design file in CSV. Rows and 
+#' Parses a plate design file in CSV. Rows and 
 #' columns should be named as in the corresponding data files.
 #' @param file text file containing the plate layout.
 #' @param sep column separator, as in read.table
@@ -270,6 +250,8 @@ se <- function(data,na.rm=TRUE) {
 #' @param fields names for the field descriptors
 #' @param formatted indicates whether the file is already in the required
 #'                  format; all other paramaters but 'sep' will be ignored
+#' @param nrows number of rows to expect, defaults to 8 for rows A to H in
+#' a typical 96 well plate
 #' @return a table of well content descriptors, where the first column 'wells'
 #'         maps the plate map to the data files.
 #' @seealso \code{\link{readPlateData}}
@@ -325,9 +307,9 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 
 ## TODO: repair this in example
 #
-#' \code{\link{readPlateData}} parses data files in CSV, as exported by
+#' Parses data files in CSV, as exported by
 #' the plate reader software. Header IDs in the data file should match with 
-#' IDs in the plate map, see \code{link{readPlateMap}}. Pre-defined read-in
+#' IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
 #' functions exist for a couple of plate-readers.
 #' @param files list of one or more data files
 #' @param sep column separator, as in read.table
@@ -341,13 +323,16 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' @param skip lines to skip from the data file
 #' @param dec decimal operator used in the data file
 #' @param verb print messages if true
+#' @param time.conversion conversion factor for the plate time, e.g., 1/3600
+#' to convert from hours to seconds
+#' @param ... further parameters to plate-reader specific parsing functions
 #' @note The original data is all interpolated to a common/average 'master' time
 #' @return a list of distinct measurement time-courses from one plate
 #' @seealso \code{\link{readPlateMap}}, \code{\link{viewPlate}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @examples
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-#' raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
+#' raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
 #' @export
 readPlateData <- function(files, type, data.ids, 
                           skip=0, sep="\t", dec=".", verb=TRUE,
@@ -357,7 +342,7 @@ readPlateData <- function(files, type, data.ids,
         data <- readBMGPlate(files=files, data.ids=data.ids,
                              verb=verb, skip=5, sep=";", dec=".", ...)
     else if ( type=="Synergy" )
-        data <- readSynergyPlate(file=files, data.ids=data.ids, 
+        data <- readSynergyPlate(files=files, data.ids=data.ids, 
                                  verb=verb, skip=58, sep=";", dec=".", ...)
 
     ## NOW PREPARE DATA
@@ -373,16 +358,21 @@ readPlateData <- function(files, type, data.ids,
     data
 } 
 
-# Read Synergy Mx-exported files
+#' Read Synergy Mx-exported files
+#' @param time.format format of the time, e.g., "%H:%M"%S", see
+#' \code{strptime}
+#' @param skiplastcol the last column is often empty, set to TRUE if
+#' this is the case for the current data set
 #' @inheritParams readPlateData
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
 #' @export
-readSynergyPlate <- function(file, data.ids,
+readSynergyPlate <- function(files, data.ids,
                              skip=58, sep=";", dec=".", skiplastcol=FALSE,
                              time.format="numeric",
                              verb=TRUE) {
 
-    indat <- read.csv(file, header=FALSE,stringsAsFactors=FALSE,
+    indat <- read.csv(files, header=FALSE,stringsAsFactors=FALSE,
                       sep=sep, dec=dec, skip=skip)
     
     ## data IDs are in column 1, followed by data matrices starting
@@ -458,6 +448,7 @@ readSynergyPlate <- function(file, data.ids,
 ##       - perhaps newer versions can give exact time for each
 #' Read BMG Optima/MARS-exported files
 #' @inheritParams readPlateData
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
 #' @export
 readBMGPlate <- function(files, data.ids, 
@@ -555,8 +546,10 @@ readBMGPlate <- function(files, data.ids,
 
 
 #' \code{\link{prettyData}} : set colors and order or filter the data set
+#' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param dids a vector of data IDs, data will be filtered and sorted by this list; of the vector is named the IDs will be replaced by these names
 #' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
 #' @export
 prettyData <- function(data, dids, colors) {
@@ -614,6 +607,7 @@ getColors <- function(ptypes,type="R") {
 #' @param col plot color for the new data, an RGB string w/o alpha suffix
 #' @param processing optional processing note
 #' @param replace replace existing data, default: FALSE
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
 #' @export
 addData <- function(data, ID, dat, col, processing,replace=FALSE) {
@@ -649,9 +643,11 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
 
 
 #' \code{\link{rmData}} : remove a data set
-#' @param data the current platexpress data set
+#' @param data a \code{\link{platexpress}} data set
 #' @param ID a vector of IDs of the data to be removed
-#' @param dat the new data, must be a matrix akin to other data in the set
+#' @return Returns the new \\code{\link{platexpress}} data, with 
+#' data set <\code{ID}> removed
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{addData}}
 #' @export
 rmData <- function(data, ID) {
@@ -677,12 +673,17 @@ getData <- function(data, ID, type="data") {
 
 
 #' \code{\link{shiftData}} : shift x-axis by a lag-phase to align growth curves
-#' @param lag a named vector given the lag-phase to be removed; the names correspond to the wells in data
+#' @param data \code{\link{platexpress}} data set
+#' @param lag a named vector given the lag-phase to be removed; the names
+#' correspond to the wells in data
+#' @param mid the x-axis to be used, defaults to the first available
+#' (usually "Time")
 #' @export
-shiftData <- function(data, lag, dids, mid) {
+shiftData <- function(data, lag, mid) {
 
-    if ( missing(dids) ) 
-        dids <- data$dataIDs
+    ## NOTE: not optional, since data don't fit anymore
+    ## if only some are shifted for a given well list (names of lag)
+    dids <- data$dataIDs
 
     if ( missing(mid) )
         mid <- data$mids[1]
@@ -708,6 +709,7 @@ shiftData <- function(data, lag, dids, mid) {
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
 #' @param rng a single value or a data range
 #' @param mid ID of the x-axis data to be used for cutting
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @details Cuts the passed \code{\link{platexpress}} data to ranges of
 #' of the x-axis (time or other, see \code{data$mids}). If paramter \code{rng}
 #' is a single value, data for the closest x value will be returned
@@ -746,6 +748,7 @@ cutData <- function(data, rng, mid) {
 #' @param etype type of statistics to be used for error bars in the bar-plot,
 #' either "ci" (default) for the 95%-confidence interval or "se" for
 #' the standard error
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, type="box", etype="ci") {
     if ( missing(mid) )
@@ -793,8 +796,8 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
 ## fit <- gcFit.2(grdat$time, grdat$data)
 
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
-#' \code{\link{data2grofit}} : converts \code{package:platexpress} data to
-#' \code{package:grofit} data format
+#' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
+#' \code{\link[grofit:grofit]{grofit}} data format
 #' @param data the current platexpress data set, see \code{\link{readPlateData}}
 #' @param did data ID of the data to be converted, from \code{data$dataIDs}
 #' @param min.time minimal time of the data to be used
@@ -802,15 +805,17 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
 #' @param wells column IDs of the data set to use, if missing all wells
 #' are taken
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
-#' of this map can be converted to \code{package:grofit} data annotation
+#' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+#' annotation
 #' @param eid column IDs in the plate layout map to be used for
-#' \code{package:groFit} data annotation; if missing but \code{plate} is
-#' present, the columns 2 and 3 are used
+#' \code{\link[grofit:grofit]{grofit}} data annotation; if missing but
+#' \code{plate} is present, the columns 2 and 3 are used
 #' @param dose vector of doses in each well, used as the third column of
-#' \code{package:grofit} data annotation, where it can be used for
+#'  \code{\link[grofit:grofit]{grofit}}data annotation, where it can be used for
 #' dose-response calculations
 #' @details Returns a simple list with two entries \code{time} and \code{data},
-#' as required for \code{package:grofit}.
+#' as required for \code{\link[grofit:grofit]{grofit}}.
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) {
 
@@ -863,13 +868,21 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
 }
 
 #' \code{\link{skipWells}} rm wells from both data, plate maps and groupings
-#' @param data data structures from \code{platexpress}; either data (\code{\link{readPlateData}}), a plate layout map (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})
+#' @param data data structures from \code{\link{platexpress}}; either data
+#' (\code{\link{readPlateData}}), a plate layout map
+#' (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})
 #' @param skip a list of strings identifiying the wells to be skipped,
 #' e.g. "B3" to skip the well in row B/column 3
-#' @details removes specific wells from both data and groupins. If the first argument is \code{platexpress} data, the specified wells will be set to NA. If the first argument is a \code{platexpress} well grouping, the specified wells will be removed from the groups.
+#' @details Removes specific wells from \code{\link{platexpress}} data,
+#' groupings and plate layout maps. If the first argument is
+#' \code{\link{platexpress}} data, the specified wells will be set to NA.
+#' If the first argument is a \code{platexpress} well grouping or plate
+#' layout map, the specified wells will be removed.
 #' @examples
 #' data(ap12)
-#' raw <- skipWells(ap12data, skip="A9")
+#' raw <- skipWells(ap12data, skip="A9") # rm data from well "A9"
+#' plate <- skipWells(ap12plate, skip="A9") # rm well "A9" from the plate layout
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 skipWells <- function(data, skip) {
 
@@ -904,6 +917,7 @@ skipWells <- function(data, skip) {
 #' @examples
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbins=1) {
 
@@ -1022,6 +1036,7 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
 #' \code{\link{adjustBase}} adjust data to a minimal base
 #' @details Adjusts data to a new mininum, this is useful for adjustment
 #' of negative values after blank corrections
+#' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param dids vector of ID strings for which base correction should be
 #' executed
 #' @param base the new minimum for the data, default is 0, but it could
@@ -1033,6 +1048,7 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
 #' @param each add base for each well separately!
 #' @return Returns `data' where all data sets or only those selected by option
 #' dids where raised to a minimum level in 
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE) {
 
@@ -1134,6 +1150,7 @@ listAverage <- function(lst, id) {
 #' @param xid TODO
 #' @return returns a copy of the full data list with a master time and
 #' temperature added at the top level
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 interpolatePlateTimes <- function(data, verb=TRUE, xid) {
 
@@ -1186,6 +1203,7 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
 #' @param n specify the number of interpolation points, if missing the
 #' original number of rows will be used
 #' @param xout specify the interpolation points directly
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 interpolatePlateData <- function(data, xid, dids, n, xout) {
 
@@ -1247,8 +1265,6 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' @param rows a list of strings/characters used as row ID in the composite
 #' row:col well description in the plate layout (map) and plate data
 #' @param cols as rows but plate column IDs
-#' @param mids vector of named strings, indicating the IDs of the master
-#' time and temperature vectors in the data
 #' @param xid ID of a data-set in the input data that can be used as x-axis
 #' instead of the default Time vector
 #' @param dids IDs of the data to be plotted; if missing, all data will
@@ -1263,9 +1279,9 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' @param log plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
 #' @param legpos position of the well IDs on the plots
-#' @examples
-#' data(ap12)
-#' vp <- viewPlate(ap12data)
+#' @param add.legend add a legend for the plotted data types (see
+#' argument \code{dids}) in the last plotted well
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 viewPlate <- function(data, wells, 
                       rows=toupper(letters[1:8]),cols=1:12,
@@ -1418,12 +1434,11 @@ viewPlate <- function(data, wells,
     ## assigning it makes it silent!
     plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols)
 }
-
-
-## TODO - repair example code
 ## @example
 ## data(ap12)
 ## groups <- getGroups(plate=ap12plate, by=c("strain"))
+
+
 #' group wells by experiment annotations (in plate map file)
 #' @param plate the plate layout map, see \code{\link{readPlateMap}}
 #' @param by a list of column IDs of the plate layout
@@ -1432,8 +1447,10 @@ viewPlate <- function(data, wells,
 #' @details Calculates the distinct groups from the plate layout by the selected
 #' experimental parameters.
 #' @return Returns a list of well IDs for the identified grouping. This list
-#' can be used in viewGroups(data,groups) to summarize data for these groups.
+#' can be used, e.g., in viewGroups(data,groups) or \code{link{groupStats}}
+#' to summarize data for these groups.
 #' @seealso \code{\link{readPlateMap}}, \code{\link{viewGroups}}
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 
@@ -1494,8 +1511,9 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 #' (means, 95% confidence intervals, stdandard errors) along the x-axis
 #' (usually time).
 #' @return Returns a data structure similar to the input data, but
-#' where actual data is replaced  statistics over grouped wells.
+#' where actual data is replaced  by statistics over grouped wells.
 #' @seealso \code{\link{readPlateMap}}, \code{\link{viewGroups}}
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 groupStats <- function(data, groups, dids) {
 
@@ -1525,55 +1543,79 @@ groupStats <- function(data, groups, dids) {
     data
 }
 
-## TODO - repair example
-## @example
-## groups <- getGroups(plate=plate, by=c("strain"))
-## vg <- viewGroups(data,groups=groups,lwd.orig=0.1,nrow=3)
 
 #' plot grouped wells as summary plots, incl. confidence intervals and means
-#' @param data the list of measurement data as provided by \code{\link{readPlateData}}
-#' @param groups a list of well grouped wells, as produced by \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2} 
-#' @param groups2 sub-groups of \code{groups}, group2 must be constructed as \code{groups}, but with one additional grouping, e.g. \code{\link{getGroups}}(platemap, by=c("media","strain")) following the example for parameter see \code{groups}
-#' @param nrows number of plot rows
+#' @param data the list of measurement data as provided by
+#' \code{\link{readPlateData}}
+#' @param groups a list of well grouped wells, as produced by
+#' \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2} 
+#' @param groups2 sub-groups of \code{groups}, group2 must be constructed as
+#' \code{groups}, but with one additional grouping, e.g.
+#' \code{\link{getGroups}}(platemap, by=c("media","strain")) following the
+#' example for parameter see \code{groups}
 #' @param xid ID of a data-set in the input data that can be used as x-axis
 #' instead of the default Time vector
 #' @param dids IDs of the data to be plotted; if missing, all data will
 #' be plotted
-#' @param xscale use a global range for the x-axes; only relevant if xid specifies a subset of the data as x-axis
+#' @param xscale use a global range for the x-axes; only relevant if xid
+#' specifies a subset of the data as x-axis
 #' @param xlim plot range of the x-axis
-#' @param pcols a named list of RGB colors to be used the plotted data types; the color vector must have names according to the data IDs
+#' @param pcols a named list of RGB colors to be used the plotted data types;
+#' the color vector must have names according to the data IDs
 #' @param yscale if TRUE (default) global y-axis limits will be calculated from
 #' all plotted wells; if FALSE each well be locally scaled
 #' @param ylims a named list of y-axis ranges pairs for each data ID
 #' @param ylim one y-axis limit range that will be used for all plotted data
 #' @param log plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
-#' @param legpos position of the well IDs on the plots
-#' @param g2.legend plot a legend for group2 subgroups
-#' @param lwd.orig line-width of the original single data, set to 0 to supress plotting of all original data
-#' @param lty.orig line type of the original single data, set to 0 to supress plotting of all original data
+#' @param show.ci95 show the 95\% condifence intervals of groups
+#' @param show.mean show the mean of groups as lines
+#' @param emphasize.mean show the means in black instead of group colors,
+#' @param lwd.mean line width for the mean lines, see \code{(par("lwd")}
+#' @param lty.mean line style for the mean lines, see \code{(par("lty")}
+#' this can help to emphasize the means in noisy data (broad overlapping
+#' confidence intervals
+#' @param g1.legend show the main legend, giving plot colors
+#  of the plotted data types (\code{dids})
+#' @param g1.legpos position of the \code{groups} legend, see \code{g1.legend}
+#' @param g2.legend plot a legend for groups in argument \code{groups2} 
+#' @param g2.legpos position of the \code{groups2} legend, see \code{g2.legend}
+#' @param lwd.orig line-width of the original single data, set to 0 to
+#' supress plotting of all original data
+#' @param lty.orig line type of the original single data, set to 0 to supress
+#' plotting of all original data
+#' @param nrow number of plot rows, number of columns will be selected
+#' automatically; NOTE: to change the ordering of the plots
+#' you can change the ordering of the input \code{groups}/
 #' @param mai set the outer margins around plot areas, see ?par
 #' @param mgp set the position of axis title, tick marks and tick lengths
 #' @param xaxis plot x-axis if TRUE
-#' @param yaxis plot y-axis if TRUE
-#' @param embed setting TRUE allows to embed plots of single groups within in layouted plots, see ?layout and par("mfcol")
-#' @param no.par setting TRUE supresses all internal plot defaults (e.g., mai, mgp)
-#' @seealso \code{\link{viewPlate}}, \code{\link{getGroups}}, \code{\link{readPlateMap}}
+#' @param yaxis the data types for which axes are to be plotted, corresponds
+#' to the order in argument \code{dids} and as plotted in the legend 
+#' (see argument \code{g1.legend}
+#' @param embed setting TRUE allows to embed plots of single groups within
+#' in layouted plots, see ?layout and par("mfcol"); also see argument
+#' \code{no.par}
+#' @param no.par setting TRUE supresses all internal plot defaults (e.g.,
+#' mai, mgp), useful to style your own plots, also see argument \code{embed}
+#' @seealso \code{\link{viewPlate}}, \code{\link{getGroups}},
+#' \code{\link{readPlateMap}}
 #' @examples
 #' data(ap12)
 #' groups <- getGroups(plate=ap12plate, by=c("strain"))
 #' vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 viewGroups <- function(data, groups, groups2,
                        xid, xscale=FALSE, xlim,
                        dids, pcols, yscale=TRUE, ylims, ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
-                       legpos="topleft", g2.legend=TRUE,
+                       g2.legpos="topleft", g2.legend=TRUE,
                        embed=FALSE, no.par=FALSE,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
-                       add.legend=TRUE) {
+                       g1.legpos="topright", g1.legend=TRUE) {
     
 
     if ( missing(groups) ) {
@@ -1775,19 +1817,19 @@ viewGroups <- function(data, groups, groups2,
             }
             if ( length(sgroups)>1 & g2.legend )
                 if ( global.x ) 
-                    legend(legpos,names(sgroups),lty=1:length(sgroups),
+                    legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
                            col=1,bty="n")
                 else
-                    legend(legpos,names(sgroups),lty=1:length(sgroups),
+                    legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
                            col=orig.cols,bg="#FFFFFFAA")
               else
-                legend(legpos,id, bty="n")
+                legend(g2.legpos,id, bty="n")
             if ( xaxis ) axis(1)
         }
     }
     ## add legend to last plot
-    if ( add.legend )
-        legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")
+    if ( g1.legend )
+        legend(g1.legpos,ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")
 
     ## reset par!
     par(orig.par)
@@ -1802,9 +1844,25 @@ viewGroups <- function(data, groups, groups2,
 ### COMMENTS FOR EXAMPLE DATA
   
  
-#' ap12: example data by Dennis Dienst and Alice Pawloski, incl. the
+#' ap12plate. example plate layout map by Dennis Dienst and Alice Pawloski,
+#' fitting to the experimental data in \code{\link{ap12data}}
+#' The plate layout table indicates the different strains tested, biological
+#' replicates (B1 to B3), and blank wells (containing only growth medium) 
+#'
+#' @name ap12plate
+#' @docType data
+NULL
+## @keywords datasets
+## @format the plate layou map as a a data.frame, as produced by
+## readPlateMap("AP12_layout.csv", fields=c("strain","samples"))
+## @seealso \code{\link{ap12data}}, \code{\link{readPlateData}} and
+## \code{\link{readPlateMap}}
+
+
+#' ap12data. data by Dennis Dienst and Alice Pawloski, incl. the
 #' plate reader measurements of E.coli growth, expressing a fluorescent
-#' proteins, in a Synergy Mx platereader  
+#' proteins, in a Synergy Mx platereader; the corresponding plate layout
+#' map is in \code{\link{ap12plate}}.
 #' 
 #' \itemize{
 #'   \item Data:
@@ -1812,16 +1870,13 @@ viewGroups <- function(data, groups, groups2,
 #'   \item Temperature: the temperature time-course
 #'   \item Data matrix '600': well absorbance at 600 nm, i.e., the OD,
 #'   \item Data matrix 'YFP_50:500,535': the YFP fluorescence measured by excitation at 500 nm and emission at 535 nm 
-#'   \item Plate Layout:
-#'   \item The plate layout table indicates the different strains tested, biological replicates (B1 to B3), and blank wells (containing only growth medium) 
 #' }
 #'
+#' @name ap12data
 #' @docType data
-#' @keywords datasets
-#' @name ap12
-#' @usage data(ap12)
-#' @format a list of time-courses of absorbance and fluorescence data, read
-#' in by readPlateData("AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535")) and the plate layou map, read in  by
-#' readPlateMap("AP12_layout.csv", fields=c("strain","samples"))
-#' @seealso \code{\link{readPlateData}} and \code{\link{readPlateMap}} 
 NULL
+## @keywords datasets
+## @format a list of time-courses of absorbance and fluorescence data, read
+## in by readPlateData("AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
+## @seealso \code{link{ap12plate}}, \code{\link{readPlateData}} and
+## \code{\link{readPlateMap}} 

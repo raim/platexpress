@@ -17,7 +17,8 @@ getGroups(plate, by = "medium", order = FALSE, verb = TRUE)
 }
 \value{
 Returns a list of well IDs for the identified grouping. This list
-can be used in viewGroups(data,groups) to summarize data for these groups.
+can be used, e.g., in viewGroups(data,groups) or \code{link{groupStats}}
+to summarize data for these groups.
 }
 \description{
 group wells by experiment annotations (in plate map file)
@@ -25,6 +26,9 @@ group wells by experiment annotations (in plate map file)
 \details{
 Calculates the distinct groups from the plate layout by the selected
 experimental parameters.
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 \seealso{
 \code{\link{readPlateMap}}, \code{\link{viewGroups}}

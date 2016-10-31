@@ -7,14 +7,19 @@
 rmData(data, ID)
 }
 \arguments{
-\item{data}{the current platexpress data set}
+\item{data}{a \code{\link{platexpress}} data set}
 
 \item{ID}{a vector of IDs of the data to be removed}
-
-\item{dat}{the new data, must be a matrix akin to other data in the set}
+}
+\value{
+Returns the new \\code{\link{platexpress}} data, with 
+data set <\code{ID}> removed
 }
 \description{
 \code{\link{rmData}} : remove a data set
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 \seealso{
 \code{\link{addData}}

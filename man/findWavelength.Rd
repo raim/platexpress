@@ -11,7 +11,7 @@ in nm.}
 findWavelength(n = 1, ...)
 }
 \arguments{
-\item{n}{number of clicks to record}
+\item{n}{number of clicks/wavelengths to record}
 
 \item{...}{further arguments to \code{\link{plotWavelength}}, for
 selecting plot symbol and text size, and positions}
@@ -22,6 +22,9 @@ a color selector for \code{\link{showSpectrum}}; expects the user to
 click on the spectrum, then draws a vertical line at the clicked
 wavelength using \code{\link{plotWavelength}} and records the wavelength
 in nm.
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 \seealso{
 \code{\link{showSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}

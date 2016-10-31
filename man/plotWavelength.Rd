@@ -26,6 +26,9 @@ plotWavelength(x = 534, y = 1.09, ych = 0.95, cex = 5, pch = 19, ...)
 a color selector for \code{\link{showSpectrum}}; draws a vertical line,
 the wavelength, and a filled circle at a given wavelength in nm.
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 \seealso{
 \code{\link{showSpectrum}}, \code{\link{findWavelength}},
 \code{\link{wavelength2RGB}}

@@ -36,4 +36,7 @@ along the x-axis, see \code{mid}}
 data(ap12)
 data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 

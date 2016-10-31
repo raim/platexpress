@@ -10,41 +10,12 @@ The platexpress package provides a quick&easy interface to
 microbial growth & gene expression data as measured in typical
 microplate-readers or other parallel growth systems.
 }
-\section{Platexpress Workflow}{
-
-see README.md at https://github.com/raim/platexpress or demo/demo_AP12.R
-type \code{demo("demo_AP12", package="platexpress")}
+\section{Dependencies}{
+ The package uses mostly functionality from R base,
+but more functionality is available when \code{\link[grofit:grofit]{grofit}}
+is installed.
 }
-\examples{
-### A TYPICAL WORKFLOW
-## 1) parse the plate layout map
-
-plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
-plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\\n", fields=c("strain","samples"))
-
-## 2) parse the data, exported from platereader software
-
-data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",", time.format="\%H:\%M:\%S", time.conversion=1/3600)
-
-## 3) inspect the raw data
-
-vp <- viewPlate(raw)
-
-## 4) Note that there is no growth in A9, so let's skip it
-
-raw <- skipWells(raw, skip="A9")
-
-## 5) Now correct for blank well measurements, and view only present
-## rows/cols
-
-data <- correctBlanks(data=raw, plate=plate)
-vp <- viewPlate(data, rows=c("A","B","C"),cols=1:9)
-
-## 6) group replicates and view summarized growth/exprssion curves
-
-groups <- getGroups(plate, by=c("strain","samples"))
-vg <- viewGroups(data,groups=groups,lwd.orig=0.5,nrow=3)
-
+\author{
+Rainer Machne
 }
 

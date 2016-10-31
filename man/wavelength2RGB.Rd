@@ -7,6 +7,9 @@ converts wavelength in nm (visible light: 380:780 nm) to RGB.}
 \usage{
 wavelength2RGB(wavelength)
 }
+\arguments{
+\item{wavelength}{the wavelength in nm to convert to RGB}
+}
 \description{
 \code{\link{wavelength2RGB}}:
 converts wavelength in nm (visible light: 380:780 nm) to RGB.
@@ -22,6 +25,9 @@ wavelengths <- seq(380,780,1)
 cols <- sapply(wavelengths, wavelength2RGB)
 bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
 barplot(bars,border=cols,col=cols,las=2)
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 \seealso{
 \code{\link{showSpectrum}}

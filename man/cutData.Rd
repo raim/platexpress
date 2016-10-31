@@ -22,4 +22,7 @@ of the x-axis (time or other, see \code{data$mids}). If paramter \code{rng}
 is a single value, data for the closest x value will be returned
 if rng is a single value
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 

@@ -18,7 +18,7 @@ if missing stats for all data will be reported}
 }
 \value{
 Returns a data structure similar to the input data, but
-where actual data is replaced  statistics over grouped wells.
+where actual data is replaced  by statistics over grouped wells.
 }
 \description{
 calculates simple statistics for groups as plotted in
@@ -28,6 +28,9 @@ calculates simple statistics for groups as plotted in
 Calculates the simple statistics over grouped wells
 (means, 95% confidence intervals, stdandard errors) along the x-axis
 (usually time).
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
 }
 \seealso{
 \code{\link{readPlateMap}}, \code{\link{viewGroups}}

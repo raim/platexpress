@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{readPlateMap}
 \alias{readPlateMap}
-\title{\code{\link{readPlateMap}} parses a plate design file in CSV. Rows and 
+\title{Parses a plate design file in CSV. Rows and 
 columns should be named as in the corresponding data files.}
 \usage{
 readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
@@ -20,6 +20,9 @@ combined with other well descriptors for separate blanking}
 
 \item{fields}{names for the field descriptors}
 
+\item{nrows}{number of rows to expect, defaults to 8 for rows A to H in
+a typical 96 well plate}
+
 \item{formatted}{indicates whether the file is already in the required
 format; all other paramaters but 'sep' will be ignored}
 }
@@ -28,7 +31,7 @@ a table of well content descriptors, where the first column 'wells'
         maps the plate map to the data files.
 }
 \description{
-\code{\link{readPlateMap}} parses a plate design file in CSV. Rows and 
+Parses a plate design file in CSV. Rows and 
 columns should be named as in the corresponding data files.
 }
 \examples{

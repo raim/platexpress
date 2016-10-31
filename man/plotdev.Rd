@@ -15,10 +15,13 @@ plotdev(file = "test", type = "png", width = 5, height = 5, res = 100)
 
 \item{height}{the figure height in inches}
 
-\item{res}{the figure resolution in ppi (pixels per inch), only used
-png}
+\item{res}{the figure resolution in ppi (pixels per inch), only used}
 }
 \description{
 plots to png, eps or pdf, taking the same arguments
+}
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+png
 }
 

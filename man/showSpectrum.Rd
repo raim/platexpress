@@ -39,6 +39,9 @@ The utility functions  \code{\link{plotWavelength}} and
 on plot) find wavelengths. The function \code{\link{wavelength2RGB}} can
 then be used to convert this wavelength to RGB colors.
 }
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}
 \seealso{
 \code{\link{wavelength2RGB}}, \code{\link{findWavelength}},
 \code{\link{plotWavelength}}
