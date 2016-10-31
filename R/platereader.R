@@ -215,6 +215,7 @@ ma <- function(x,n=5){filter(x,rep(1/n,n), sides=2)}
 ci95 <- function(data,na.rm=FALSE) {
     if ( na.rm ) data <- data[!is.na(data)]
     n <- length(data)
+    if ( n<2 ) return(NA)
     error <- qt(0.975, df=n-1) * sd(data)/sqrt(n)
     return(error)
 }
@@ -224,6 +225,7 @@ ci95 <- function(data,na.rm=FALSE) {
 se <- function(data,na.rm=TRUE) {
     if ( na.rm ) data <- data[!is.na(data)]
     n <- length(data)
+    if ( n<1 ) return(NA)
     error <- sd(data)/sqrt(n)
     error
 }
@@ -782,7 +784,8 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
         }
         ## get actual point if only one points was chosen
         if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
-        legend("topright",paste("at",mid, "=",paste(rng,collapse="-")))
+        legend("topright",paste("at",mid, "=",paste(rng,collapse="-")),
+               bty="n",box.lwd=0)
     }
     if ( stat ) bdat <- pdat
     result <- bdat
