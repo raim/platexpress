@@ -1,7 +1,13 @@
-# `platexpress` - Microbial Growth & Gene Expression
-
-![platexpress](doc/ecoli_20141014.png)
-
+---
+title: "platexpress: Microbial Growth & Gene Expression"
+author: "Rainer Machne"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 The platexpress package provides a quick & easy interface to microbial
 growth & gene expression data as measured in parallel growth platforms
@@ -11,10 +17,6 @@ data, blank normalization, and summarization over replicates.
 A few data conversion routines allow to interface other R
 packages for analysis of microbial growth such as
 [grofit](https://cran.r-project.org/web/packages/grofit/index.html)
-and 
-[growthcurver](https://cran.r-project.org/web/packages/growthcurver/index.html)
-(TODO) and quickly display their results within `platexpress`.
-
 
 ## Installation
 
@@ -34,7 +36,6 @@ library(devtools)
 install_github("raim/platexpress")
 ```
 
-
 ## A Typical Workflow in `platexpress`
 
 NOTE: the following examples are all executed step-by-step in an R
@@ -52,7 +53,9 @@ The plate layout will later allow to do blank correction and group
 experiments. Here, we take the example file that ships with the 
 `platexpress` library:
 
-```R
+```{r}
+library(platexpress)
+source("~/programs/platexpress/R/platereader.R")
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
 plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 ```
@@ -60,7 +63,7 @@ plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("str
 ... and parse the data, as exported from platereader "Synergy Mx" 
 software in the shipped example file:
 
-```R
+```{r}
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
 raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
 ```
@@ -87,14 +90,14 @@ parsing are usually the most time-consuming step in data analysis!
 
 Take a first look:
 
-```R
+```{r fig.width=7, fig.height=5,echo=FALSE}
 viewPlate(raw)
 ```
 
 ... and note that there is no growth in well A9, so let's skip it. To
 be safe, let's also skip it from the plate layout map.
 
-```R
+```{r}
 raw <- skipWells(raw, skip="A9")
 plate <- skipWells(plate, skip="A9")
 ```
@@ -103,7 +106,7 @@ plate <- skipWells(plate, skip="A9")
 map!), assign colors and nicer IDs, and view only the present 
 rows (A, B and C) and columns (1-9):
 
-```R
+```{r fig.width=5, fig.height=3,echo=FALSE}
 data <- correctBlanks(data=raw, plate=plate)
 viewPlate(data, rows=c("A","B","C"),cols=1:9)
 ```
@@ -111,7 +114,7 @@ viewPlate(data, rows=c("A","B","C"),cols=1:9)
 Now the raw data processing is done, so let's assign more informative IDs 
 and select nicer colors, as R RGB strings:
 
-```R
+```{r}
 data <- prettyData(data=raw,dids=c(OD="600",YFP="YFP_50:500,535"), 
                    colors=c(OD="#000000",YFP=wavelength2RGB(690)))
 ```
@@ -130,12 +133,14 @@ The areas indicate the t-test based 95% confidence interval,
 the thick line is the mean, and optionally, you can keep also
 the original data in the plot (by choosing a lwd.orig > 0):
 
-```R
+```{r fig.width=5, fig.height=3,echo=FALSE}
 groups <- getGroups(plate, by="strain")
 viewGroups(data,groups=groups,lwd.orig=0,nrow=1)
 ```
+
 or view all in one
-```R
+
+```{r}
 viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
 ```
 
@@ -154,12 +159,13 @@ a lag-phase to each well, simply by generating an R vector with the well
 ID as names. First we need to assign a lag-phase to each well, simply by 
 generating an R vector with the well ID as names.
 
-```R
+```{r}
 lag <- rep(3, length(groups$EVC))
 names(lag) <- groups$EVC
 data <- shiftData(data, lag=lag)
 viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
 ```
+
 Great! Now the OD curves are aligned, and they seem to be very similar,
 allowing a direct comparison of fluorescence over time.
 
@@ -167,16 +173,17 @@ allowing a direct comparison of fluorescence over time.
 
 For some applications you may want to boil data down to core messages. 
 Diverse further functions allow to further summarize and visualize results, 
-e.g., 
+e.g., \code{boxData} gives you boxplots or barplots (with standard errors or 95% confidence
+intervals as errors bars) of the selected data at 7 h (or the time-point
+closest to 7h).
 
-```R
+```{r}
+par(mai=c(1,1,.1,.1))
 boxData(data,rng=7,groups=groups,did="YFP")
 boxData(data,rng=7,groups=groups,did="YFP",type="bar")
 ```
 
-gives you boxplots or barplots (with standard errors or 95% confidence
-intervals as errors bars) of the selected data at 7 h (or the time-point
-closest to 7h).
+
 
 #### Retrieve and Process Data
 
@@ -184,7 +191,7 @@ The OD growth curves were nicely aligned, however, you may still want to
 normalize your data by OD and look at YFP expression in dependence of OD.
 You can `getData` and `addData`, e.g., to calculate YFP/OD:
 
-```R
+```{r}
 yfp <- getData(data, "YFP")
 od <- getData(data, "OD")
 data <- addData(data, dat=yfp/od, ID="YFP/OD", col=wavelength2RGB(459))
@@ -200,13 +207,15 @@ point, you won't get the nice 95% confidence intervals. For this we
 can interpolate data to a common value. This generates a new data
 structure, and the two should not be mixed up:
 
-```R
+```{r}
 od.data <- interpolatePlateData(data, xid="OD")
 viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
 ```
 
 And now we are ready for nice compact result figure:
 
-```R
+```{r}
+par(mai=c(1,1,.1,.1))
 boxData(od.data,rng=0.7,groups=groups,did="YFP/OD",type="bar")
 ```
+

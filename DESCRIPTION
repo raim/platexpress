@@ -1,7 +1,8 @@
 Package: platexpress
 Title: Inspection and Analysis of Microbial Growth and Gene Expression Data
 Version: 0.1
-Authors@R: person("Rainer", "Machne", email = "raim@tbi.univie.ac.at", role = c("aut", "cre"))
+Author: Rainer Machne <raim@tbi.univie.ac.at>
+Maintainer: Rainer Machne <raim@tbi.univie.ac.at>
 Description: The platexpress package provides a quick&easy interface to
     microbial growth and gene expression data as measured in typical microplate-
     readers or other parallel growth systems. It allows for a quick display of
@@ -9,8 +10,11 @@ Description: The platexpress package provides a quick&easy interface to
 Depends:
     R (>= 2.5.0)
 Suggests:
-    grofit
+    grofit,
+    knitr,
+    rmarkdown
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
+VignetteBuilder: knitr
