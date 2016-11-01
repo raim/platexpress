@@ -16,7 +16,6 @@
 #' abline lines points polygon box axis par text title 
 #'@importFrom grDevices rainbow rgb col2rgb png pdf postscript graphics.off
 #'@importFrom utils read.csv read.table
-#'@importFrom methods is
 NULL
 
 
