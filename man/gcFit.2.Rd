@@ -2,10 +2,10 @@
 % Please edit documentation in R/gcFit.R
 \name{gcFit.2}
 \alias{gcFit.2}
-\title{hack of grofit function \code{\link[grofit:grofit]{gcFit}} to allow plotting
+\title{hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
 without interaction}
 \usage{
-gcFit.2(time, data, control = grofit::grofit.control())
+gcFit.2(time, data, control = grofit.2.control())
 }
 \arguments{
 \item{time}{a matrix of measurment times for each well as required by
@@ -18,12 +18,17 @@ gcFit.2(time, data, control = grofit::grofit.control())
 entry "plot", which is set to TRUE or FALSE}
 }
 \description{
-hack of grofit function \code{\link[grofit:grofit]{gcFit}} to allow plotting
+hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
 without interaction
 }
 \details{
 Adding the field "plot" allows to de-activate
 \code{control$interactive}, so the whole fitting procedure runs
-through all wells, yet results are plotted.
+through all wells, yet results are plotted. \code{\link{platexpress}}
+also offers a hack of \code{\link[grofit:grofit.control]{grofit.control}}
+names \code{\link{grofit.2.control}} that adds these options.
+}
+\seealso{
+\code{\link{gcFit.2}}
 }
 

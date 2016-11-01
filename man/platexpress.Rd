@@ -12,8 +12,8 @@ microplate-readers or other parallel growth systems.
 }
 \section{Dependencies}{
  The package uses mostly functionality from R base,
-but more functionality is available when \code{\link[grofit:grofit]{grofit}}
-is installed.
+(graphics, grDevices, stats) but more functionality is available when
+\code{\link[grofit:grofit]{grofit}} is installed.
 }
 \author{
 Rainer Machne
