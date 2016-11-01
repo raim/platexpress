@@ -1,7 +1,22 @@
 ## @importFrom grofit  grofit.control gcFitModel gcFitSpline gcBootspline
 ## @importFrom methods is
 
-#' hack of grofit function \code{\link[grofit:grofit]{gcFit}} to allow plotting
+#' hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
+#' which adds the new "plot" switch used in \link{\code{gcFit.2}}
+#' @param ... parameters passed on to
+#' \code{\link[grofit:grofit.control]{grofit.control}}
+#' @param interactive set to TRUE for interactive growth curve fitting
+#' @param plot set to TRUE for plots even without \code{interactive} use
+#' @seealso \code{\link{gcFit.2}}
+#' @export
+grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
+    control <- grofit::control(...)
+    control$interactive <- interactive
+    control$plot <- plot
+    control
+}
+
+#' hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
 #' without interaction
 #' @param time a matrix of measurment times for each well as required by
 #' \code{\link[grofit:grofit]{grofit}}, provided by \code{\link{data2grofit}}
@@ -11,12 +26,12 @@
 #' entry "plot", which is set to TRUE or FALSE
 #' @details Adding the field "plot" allows to de-activate
 #' \code{control$interactive}, so the whole fitting procedure runs
-#' through all wells, yet results are plotted.
+#' through all wells, yet results are plotted. \code{\link{platexpress}}
+#' also offers a hack of \code{\link[grofit:grofit.control]{grofit.control}}
+#' names \code{\link{grofit.2.control}} that adds these options.
+#' @seealso \code{\link{gcFit.2}}
 #' @export
-gcFit.2 <- function (time, data, control = grofit::grofit.control()) 
-{
-
-    
+gcFit.2 <- function (time, data, control = grofit.2.control())  {
     
     if (methods::is(control) != "grofit.control") 
         stop("control must be of class grofit.control!")
