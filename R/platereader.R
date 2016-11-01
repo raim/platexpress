@@ -827,7 +827,9 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
     dat <- data[[did]]$data
     if ( missing(wells) )
         wells <- colnames(dat)
+
     dat <- dat[,wells]
+
     ## expand time to full matrix
     ## TODO: use internal time and non-interpolated data?
     time <- data$Time
@@ -853,14 +855,15 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
                                        rep("",ncol(dat))))
     ## dose information for grofit dose-response calculations
     ## TODO: this is ugly, do nicer!
-    if ( missing(dose) ) 
+    found.dose <- !missing(dose)
+    if ( !found.dose ) 
         if ( !missing(plate) ) ## get dose info from plate layout: TODO
             if ( "dose" %in% colnames(plate) ) {
                 idx <- match(wells,as.character(plate[,"dose"]))
                 dose <- as.numeric(plate[idx,"dose"])
                 found.dose <- TRUE
             }
-    if ( missing(dose) )
+    if ( !found.dose )
         dose <- rep(0,ncol(dat))
 
     ## construct grofit data
