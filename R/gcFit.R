@@ -10,7 +10,7 @@
 #' @seealso \code{\link{gcFit.2}}
 #' @export
 grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
-    control <- grofit::control(...)
+    control <- grofit::grofit.control(...)
     control$interactive <- interactive
     control$plot <- plot
     control
