@@ -1,7 +1,7 @@
 # `platexpress` - Microbial Growth & Gene Expression
 
 ![platexpress](doc/ecoli_20141014.png) 
-![fritz](doc/fritz_the_platypus.gif) 
+![fritz](doc/fritz_the_platypus.gif =200) 
 
 
 
