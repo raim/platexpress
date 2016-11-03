@@ -1,6 +1,8 @@
 # `platexpress` - Microbial Growth & Gene Expression
 
-![platexpress](doc/ecoli_20141014.png)
+![platexpress](doc/ecoli_20141014.png) 
+![fritz](doc/fritz_the_platypus.gif) 
+
 
 
 The platexpress package provides a quick & easy interface to microbial
