@@ -787,7 +787,17 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
         legend("topright",paste("at",mid, "=",paste(rng,collapse="-")),
                bty="n",box.lwd=0)
     }
-    if ( stat ) bdat <- pdat
+    tmp <- data.frame(well=unlist(lapply(bdat, function(x) colnames(x))),
+                      group=unlist(sapply(1:length(bdat),
+                           function(x) rep(names(bdat)[x],length(bdat[[x]])))),
+                      data=unlist(bdat))
+    colnames(tmp)[3] <- paste(did,paste(rng,collapse="-"),sep="_")
+    bdat <- tmp
+    rownames(bdat) <- NULL
+    
+    if ( stat ) {
+        bdat <- pdat
+    }   
     result <- bdat
 }
 
