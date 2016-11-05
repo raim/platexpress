@@ -4,8 +4,8 @@
 \alias{boxData}
 \title{returns data for group of wells in a given range of the x-axis}
 \usage{
-boxData(data, rng, groups, mid, did = "OD", stat = FALSE, plot = TRUE,
-  type = "box", etype = "ci")
+boxData(data, rng, groups, mid, did = "OD", plot = TRUE, type = "box",
+  etype = "ci")
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
@@ -19,10 +19,6 @@ point will be selected}
 
 \item{did}{the y-axis data to be grouped}
 
-\item{stat}{if FALSE (default) the full grouped data will be returned as
-a list (which can be used for \code{boxplot} or statistics afterwards),
-if TRUE the means of the data will be returned (as plotted)}
-
 \item{plot}{if TRUE a box-plot or bar-plot will be plotted}
 
 \item{type}{either "box" (default) or "bar" for box-plot or bar-plot}
@@ -30,6 +26,12 @@ if TRUE the means of the data will be returned (as plotted)}
 \item{etype}{type of statistics to be used for error bars in the bar-plot,
 either "ci" (default) for the 95%-confidence interval or "se" for
 the standard error}
+}
+\value{
+Returns an annotated \code{data.frame} of the values, with well
+and group IDs in the first two columns. The values in the third column are
+raw values (if argument \code{rng} was a single point
+on the x-axis) or mean values (if argument\code{rng} was a range).
 }
 \description{
 returns data for group of wells in a given range of the x-axis
