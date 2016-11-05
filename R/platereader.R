@@ -742,20 +742,26 @@ cutData <- function(data, rng, mid) {
 #' point will be selected
 #' @param mid the x-axis ID, if multiple x-axes are present
 #' @param did the y-axis data to be grouped
-#' @param stat if FALSE (default) the full grouped data will be returned as
-#' a list (which can be used for \code{boxplot} or statistics afterwards),
-#' if TRUE the means of the data will be returned (as plotted)
 #' @param plot if TRUE a box-plot or bar-plot will be plotted
 #' @param type either "box" (default) or "bar" for box-plot or bar-plot
 #' @param etype type of statistics to be used for error bars in the bar-plot,
 #' either "ci" (default) for the 95%-confidence interval or "se" for
 #' the standard error
+#' @return Returns an annotated \code{data.frame} of the values, with well
+#' and group IDs in the first two columns. The values in the third column are
+#' raw values (if argument \code{rng} was a single point
+#' on the x-axis) or mean values (if argument\code{rng} was a range).
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, type="box", etype="ci") {
+boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", etype="ci") {
+
     if ( missing(mid) )
         mid <- data$mids[1]
+    ## cut data to selected range (closest point if length(rng)==1)
     cdat <- cutData(data, rng, mid)
+
+    ## get the actual point if only one points was chosen
+    if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
 
     bdat <- rep(list(NA),length(groups))
     names(bdat) <- names(groups)
@@ -782,11 +788,19 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
             arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
                    length=.05,lwd=1.5)            
         }
-        ## get actual point if only one points was chosen
-        if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
         legend("topright",paste("at",mid, "=",paste(rng,collapse="-")),
                bty="n",box.lwd=0)
     }
+
+    ## if a range was chosen and not a single point,
+    ## report mean values 
+    if ( length(rng)>1 ) {
+        bdat <- lapply(pdat,function(x) {
+            y<-matrix(x,nrow=1)
+            colnames(y) <- names(x)
+            y})
+    }
+    ## summarize results if only one value was requested!
     tmp <- data.frame(well=unlist(lapply(bdat, function(x) colnames(x))),
                       group=unlist(sapply(1:length(bdat),
                            function(x) rep(names(bdat)[x],length(bdat[[x]])))),
@@ -794,10 +808,7 @@ boxData <- function(data, rng, groups, mid, did="OD", stat=FALSE, plot=TRUE, typ
     colnames(tmp)[3] <- paste(did,paste(rng,collapse="-"),sep="_")
     bdat <- tmp
     rownames(bdat) <- NULL
-    
-    if ( stat ) {
-        bdat <- pdat
-    }   
+
     result <- bdat
 }
 
