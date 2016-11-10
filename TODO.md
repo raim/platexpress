@@ -26,7 +26,8 @@ viewPlate and viewGroups
 
 ## Others
 
-The bioconductor cellGrowth 
+The bioconductor cellGrowth features non-parametric models and automatic
+bandwith selection. 
 
 ### OmniLog to record respiration https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3334903/
 ### https://www.bioconductor.org/packages/release/bioc/html/cellGrowth.html
