@@ -172,8 +172,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
 
 ## TODO:
 ## select bandwidths from data$Time
-## pass dids
-## bandwidthCV: 
+## hack of cellGrowth bandwidthCV to work with platexpress data format
 bandwidthCV.2 = function(data, did, mid,
   wells,
   bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
@@ -187,7 +186,7 @@ bandwidthCV.2 = function(data, did, mid,
     if ( missing(mid) )
       mid <- data$mids[1]
     
-    if ( !missing(did) ) # only use requested data 
+    if ( missing(did) ) # only use requested data 
       did <- data$dataIDs[1]
     
     ## function to split sample in n folds
@@ -282,13 +281,15 @@ bandwidthCV.2 = function(data, did, mid,
                 oneStdOfMini=onestd_of_mini))
 }
 
-## hack of cellGrowth::fitCellGrowth as batch function
+## batch wrapper for fitCellGrowth
+## TODO: adapt results either to fitCellGrowths or align
+## with gcFit.2 results
 fitCellGrowths.2 = function(data, did, mid, wells, ...) {
 
     if ( missing(mid) )
       mid <- data$mids[1]
     
-    if ( !missing(did) ) # only use requested data 
+    if ( missing(did) ) # only use requested data 
       did <- data$dataIDs[1]
 
     if ( missing(wells) )
@@ -305,6 +306,7 @@ fitCellGrowths.2 = function(data, did, mid, wells, ...) {
         ##fits[well,] <- unlist(attributes(fit)[c(3,4,5,6)])
         fits <- append(fits, list(fit))
     }
+    names(fits) <- wells
     fits
 }
  
