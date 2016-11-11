@@ -4,6 +4,11 @@
 ### fix example data to reflect current use
 
 ## DATA HANDLING
+### use class "plate" and redirect plot.plate to viewPlate and viewGroups
+depending on argument groups and groups2
+### handle multiple plates!? see cellGrowth
+-> additional plate column in plate layout
+-> function: mergePlates 
 ### default data IDs and colors for defined plates
 ### order group by "by"
 
