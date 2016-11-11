@@ -301,7 +301,8 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     plate <- plate[,colnames(plate)!=blank.id]
     ## and add new blank
     plate <- cbind(data.frame(plate),blank=blanks)
-    
+
+    class(plate) <- "platemap"
     return(plate)
 }
 
@@ -357,6 +358,8 @@ readPlateData <- function(files, type, data.ids,
 
     if ( !missing(time.conversion) )
         data$Time <- data$Time * time.conversion
+
+    class(data) <- "platedata"
     data
 } 
 
@@ -924,6 +927,30 @@ skipWells <- function(data, skip) {
       for ( g in 1:length(data) )
         data[[g]] <- data[[g]][!data[[g]]%in%skip]
     data
+}
+
+#' get a filtered list of wells
+#' @param plate the plate layout map, see \code{\link{readPlateMap}}
+#' @param blanks if set to \code{TRUE} (default) the argument \code{values}
+#' is optional, and only blank values will be returned.
+#' @param values a named list of strings, key:value pairs, where the
+#' list names (keys) correspond to column names in the plate layout map
+#' and the values are entries in these columns
+#' @return Returns the list of wells according to argument \code{values},
+#' or a list of blanks if \code{blanks==TRUE}
+#' @export
+getWells <- function(plate, blanks=FALSE, values) {
+    if ( !missing(values) ) {
+        for ( i in 1:length(values) ) {
+            key <- names(values)[i]
+            val <- values[[i]]
+            plate <- plate[as.character(plate[,key])%in%val,]
+        }
+    } else blanks <- TRUE # return blank as default
+    if ( blanks ) 
+      plate <- plate[plate[,"blank"]==TRUE,]
+    res <- plate[,"well"]
+    return(as.character(res[!is.na(res)]))
 }
 
 #' \code{\link{correctBlanks}} correct for blanks
