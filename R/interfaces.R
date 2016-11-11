@@ -164,6 +164,9 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
         gcFittedModels = fitpara.all, gcFittedSplines = fitnonpara.all, 
         gcBootSplines = boot.all, control = control)
     class(gcFit) <- "gcFit"
+    ## TODO: add fits to data
+    ## wrapper: use platexpress data as input
+    ## and add fits to data, aligned with cellGrowth::fitCellGrowth.2 wrapper
     gcFit
 }
 
@@ -173,8 +176,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
 ## TODO:
 ## select bandwidths from data$Time
 ## hack of cellGrowth bandwidthCV to work with platexpress data format
-bandwidthCV.2 = function(data, did, mid,
-  wells,
+bandwidthCV.2 = function(data, did, mid, wells,
   bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
   nFold=10,
   nWell=50,
@@ -200,9 +202,8 @@ bandwidthCV.2 = function(data, did, mid,
           cv,
           function(fo){
               fit = tryCatch(
-                cellGrowth::fitCellGrowth(x = x[-fo],
-                                          z = z[-fo], model = "locfit",
-                                          locfit.h = h),
+                cellGrowth::fitCellGrowth(x = x[-fo], z = z[-fo],
+                                          model = "locfit", locfit.h = h),
                 warning=function(w){NA}, error=function(e){NA})
               if( !is.null(attr(fit,"maxGrowthRate")) ) {
                   rv = list(pred=stats::predict( fit, x[fo]),
@@ -211,14 +212,13 @@ bandwidthCV.2 = function(data, did, mid,
                   rv = list(pred=rep(NA, length(fo)), mu = NA)
               }
               rv
-          }
-          )
+          })
         list(pred = unlist(lapply(ls, function(x) x$pred)),
              mu = unlist(lapply(ls, function(x) x$mu)))
     }
     
     ## function to calculate error and std
-    err2_mustd_well = function(dat, w, hs){
+    err2_mustd_well = function(dat, w, hs) {
         x = dat$Time
         y = dat[[did]]$data[ , match(w, wells)]
         ## negative ODs?
@@ -235,9 +235,9 @@ bandwidthCV.2 = function(data, did, mid,
         mu = sapply(pms, function(x) x$mu)
         
         err = pred - z[unlist(cv)]
-        list( err2 = colMeans(err^2),
+        list(err2 = colMeans(err^2),
              err2std = apply(err^2, 2, sd),
-             mustd =  apply(mu, 2, sd) )
+             mustd =  apply(mu, 2, sd))
     }
     
     ## do cv
@@ -247,7 +247,7 @@ bandwidthCV.2 = function(data, did, mid,
     
     ## calculate mu error and std
     err2_mustd = lapply(ws,
-      function(w){
+      function(w) {
           cat(paste("Treating well",w,colnames(data[[did]]$data)[w],"\n"))
           data <- err2_mustd_well(dat=data, w=wells[w], hs=hs)
       })
@@ -259,7 +259,7 @@ bandwidthCV.2 = function(data, did, mid,
     
     ## which bandwidth are at one std of mini in average
     onestd_of_mini = sapply(1:ncol(err2),
-      function(i){
+      function(i) {
           m = which.min(err2[,i])
           err2[,i] <= err2[m,i] + err2std[m,i]
       })
@@ -282,8 +282,7 @@ bandwidthCV.2 = function(data, did, mid,
 }
 
 ## batch wrapper for fitCellGrowth
-## TODO: adapt results either to fitCellGrowths or align
-## with gcFit.2 results
+## TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
 fitCellGrowths.2 = function(data, did, mid, wells, ...) {
 
     if ( missing(mid) )
@@ -305,6 +304,12 @@ fitCellGrowths.2 = function(data, did, mid, wells, ...) {
         fit <- cellGrowth::fitCellGrowth(x, z=y, ...)
         ##fits[well,] <- unlist(attributes(fit)[c(3,4,5,6)])
         fits <- append(fits, list(fit))
+
+        ## TODO: align with grofit output and add to data
+        ## calculate lag from pointOfMaxGrowthRate and MaxGrowthRate
+        ## calculate X(0)
+        ## TODO: add fits to data for plots
+        ## data[[did]]$fit <- fit...data
     }
     names(fits) <- wells
     fits
