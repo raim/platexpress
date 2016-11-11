@@ -31,7 +31,7 @@ R CMD INSTALL platexpress_0.1.tar.gz
 or use the library `devtools`:
 
 ```R
-install.packages("devtools")
+install.packages("devtools") # if not installed already
 library(devtools)
 install_github("raim/platexpress")
 ```
