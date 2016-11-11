@@ -4,8 +4,11 @@
 ### fix example data to reflect current use
 
 ## DATA HANDLING
-### use class "plate" and redirect plot.plate to viewPlate and viewGroups
-depending on argument groups and groups2
+### high-level wrapper readPlate, where params are passed as lists,
+blank correction, base adjustment, colors, IDs, and perhaps fits
+are all done automatically; perhaps even groupings
+### use classes "plate", "platedata" and "platemap" and redirect 
+plot.plate to viewPlate and viewGroups depending on argument groups and groups2
 ### handle multiple plates!? see cellGrowth
 -> additional plate column in plate layout
 -> function: mergePlates 
@@ -27,6 +30,11 @@ depending on argument groups and groups2
 viewPlate and viewGroups
 ### use groupStats in viewGroups
 ### add interfaces to growthrater and cellGrowth
+### add function alignLag, using grofit to find lags, and subtracting
+### difference to the longest lag
+### add function fitData, where OD is fitted by grofit and all others by
+cellGrowth; and fitted data are added as data$OD$fit and model parameters
+added
 ### add dynamic models, see e.g. BGFit
 
 ## Others
