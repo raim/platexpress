@@ -1,5 +1,5 @@
 ---
-title: "platexpress: Microbial Growth & Gene Expression"
+title: "`platexpress`: Microbial Growth & Gene Expression"
 author: "Rainer Machne"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -9,14 +9,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-The platexpress package provides a quick & easy interface to microbial
+The `platexpress` package provides a quick & easy interface to microbial
 growth & gene expression data as measured in parallel growth platforms
 such as microplate readers. It allows for quick inspection of raw
 data, blank normalization, and summarization over replicates.
 
-A few data conversion routines allow to interface other R
-packages for analysis of microbial growth such as
+A few data conversion routines allow to interface to R
+packages 
 [grofit](https://cran.r-project.org/web/packages/grofit/index.html)
+and [cellGrowth](https://www.bioconductor.org/packages/release/bioc/html/cellGrowth.html) to fit a variety of microbial growth models.
 
 ## Installation
 
@@ -105,7 +106,7 @@ plate <- skipWells(plate, skip="A9")
 map!), assign colors and nicer IDs, and view only the present 
 rows (A, B and C) and columns (1-9):
 
-```{r fig.width=5, fig.height=3, echo=FALSE}
+```{r fig.width=5, fig.height=3, echo=TRUE}
 data <- correctBlanks(data=raw, plate=plate)
 viewPlate(data, rows=c("A","B","C"),cols=1:9)
 ```
@@ -132,15 +133,15 @@ The areas indicate the t-test based 95% confidence interval,
 the thick line is the mean, and optionally, you can keep also
 the original data in the plot (by choosing a lwd.orig > 0):
 
-```{r fig.width=5, fig.height=3,echo=FALSE}
+```{r fig.width=5, fig.height=2.25, echo=TRUE}
 groups <- getGroups(plate, by="strain")
-viewGroups(data,groups=groups,lwd.orig=0,nrow=1)
+viewGroups(data,groups=groups,lwd.orig=0.1,nrow=1)
 ```
 
 or view all in one
 
-```{r}
-viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
+```{r fig.width=5, fig.height=2.25}
+viewGroups(data,groups2=groups,lwd.orig=0.1,nrow=1)
 ```
 
 ### 4) Advanced analyses
@@ -176,8 +177,8 @@ e.g., \code{boxData} gives you boxplots or barplots (with standard errors or 95%
 intervals as errors bars) of the selected data at 7 h (or the time-point
 closest to 7h).
 
-```{r}
-par(mai=c(1,1,.1,.1))
+```{r fig.width=5, fig.height=2.25,}
+par(mfcol=c(1,2), mai=c(1,1,.1,.1))
 boxData(data,rng=7,groups=groups,did="YFP")
 boxData(data,rng=7,groups=groups,did="YFP",type="bar")
 ```
