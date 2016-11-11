@@ -302,7 +302,7 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     ## and add new blank
     plate <- cbind(data.frame(plate),blank=blanks)
 
-    class(plate) <- "platemap"
+    #class(plate) <- "platemap"
     return(plate)
 }
 
