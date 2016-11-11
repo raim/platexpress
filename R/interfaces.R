@@ -1,6 +1,8 @@
 ## @importFrom grofit  grofit.control gcFitModel gcFitSpline gcBootspline
 ## @importFrom methods is
 
+### GROFIT INTERFACE
+
 #' hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
 #' which adds the new "plot" switch used in \code{\link{gcFit.2}}
 #' @param ... parameters passed on to
@@ -164,6 +166,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
     gcFit
 }
 
+## not working:
 plot.gcFit.2 <- function (x, opt = "m", raw = TRUE, slope = FALSE, pch = 1,
                           colModel = 1, 
                           colSpline = 2, colData = 1, cex = 1, ...) 
@@ -227,7 +230,8 @@ plot.gcFit.2 <- function (x, opt = "m", raw = TRUE, slope = FALSE, pch = 1,
         }
         if ((x$control$log.x.gc == TRUE) && (x$control$log.y.gc == 
             TRUE)) {
-            plot(tspan0, yspan0, xlab = "log(1+time)", ylab = "log(1+growth X(t))", 
+            plot(tspan0, yspan0, xlab = "log(1+time)",
+                 ylab = "log(1+growth X(t))", 
                 type = "n")
         }
         counter <- 0
@@ -242,7 +246,8 @@ plot.gcFit.2 <- function (x, opt = "m", raw = TRUE, slope = FALSE, pch = 1,
                   counter <- counter + 1
                   id[counter] <- i
                   for (m in 1:length(x$gcFittedModels[[i]]$gcID)) {
-                    leg[counter] = paste(leg[counter], as.character((x$gcFittedModels[[i]]$gcID[m])))
+                      leg[counter] = paste(leg[counter],
+                           as.character((x$gcFittedModels[[i]]$gcID[m])))
                   }
                   plot(x$gcFittedModels[[i]], add = TRUE, raw = raw, 
                     slope = slope, pch = pch[i], colData = colData[i], 
@@ -261,7 +266,8 @@ plot.gcFit.2 <- function (x, opt = "m", raw = TRUE, slope = FALSE, pch = 1,
                   counter <- counter + 1
                   id[counter] <- i
                   for (m in 1:length(x$gcFittedSplines[[i]]$gcID)) {
-                    leg[counter] = paste(leg[counter], as.character((x$gcFittedSplines[[i]]$gcID[m])))
+                      leg[counter] = paste(leg[counter],
+                           as.character((x$gcFittedSplines[[i]]$gcID[m])))
                   }
                   plot(x$gcFittedSplines[[i]], add = TRUE, raw = raw, 
                     slope = slope, pch = pch[i], colData = colData[i], 
@@ -274,3 +280,144 @@ plot.gcFit.2 <- function (x, opt = "m", raw = TRUE, slope = FALSE, pch = 1,
         title(sub = names(distinct)[j])
     }
 }
+
+### cellGrowth INTERFACE
+
+## TODO:
+## select bandwidths from data$Time
+## pass dids
+## bandwidthCV: 
+bandwidthCV.2 = function(data, did, mid,
+  wells,
+  bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
+  nFold=10,
+  nWell=50,
+  cutoff=0.95,
+  ##calibration=identity,
+  scaleY=identity # log2
+  ) {
+
+    if ( missing(mid) )
+      mid <- data$mids[1]
+    
+    if ( !missing(did) ) # only use requested data 
+      did <- data$dataIDs[1]
+    
+    ## function to split sample in n folds
+    cv.folds = function (n ) {
+        split(sample(1:n), rep(1:nFold, length = n))
+    }
+	
+    ## function to predict max growth rate
+    cvpred_mu = function(cv, h, x, z) {
+        ls = lapply(
+          cv,
+          function(fo){
+              fit = tryCatch(
+                cellGrowth::fitCellGrowth(x = x[-fo],
+                                          z = z[-fo], model = "locfit",
+                                          locfit.h = h),
+                warning=function(w){NA}, error=function(e){NA})
+              if( !is.null(attr(fit,"maxGrowthRate")) ) {
+                  rv = list(pred=predict( fit, x[fo]),
+                    mu = attr(fit, "maxGrowthRate"))
+              }else{
+                  rv = list(pred=rep(NA, length(fo)), mu = NA)
+              }
+              rv
+          }
+          )
+        list(pred = unlist(lapply(ls, function(x) x$pred)),
+             mu = unlist(lapply(ls, function(x) x$mu)))
+    }
+    
+    ## function to calculate error and std
+    err2_mustd_well = function(dat, w, hs){
+        x = dat$Time
+        y = dat[[did]]$data[ , match(w, wells)]
+        ## negative ODs?
+        if ( !all(y>=0)) {
+            warning("Negative values ",did," found. If you are using a calibration function, this might be the problem. Values are set to NAs")
+            y[y<0] = NA
+        }
+        
+        z = scaleY( y )
+        
+        cv = cv.folds(length(x))
+        pms = lapply(hs, function(h) cvpred_mu(cv,h,x,z))
+        pred = sapply(pms, function(x) x$pred)
+        mu = sapply(pms, function(x) x$mu)
+        
+        err = pred - z[unlist(cv)]
+        list( err2 = colMeans(err^2),
+             err2std = apply(err^2, 2, sd),
+             mustd =  apply(mu, 2, sd) )
+    }
+    
+    ## do cv
+    ws = sample(length(wells),nWell) # wells to perform cv on
+    hs = bandwidths # possible bandwidths
+    
+    
+    ## calculate mu error and std
+    err2_mustd = lapply(ws,
+      function(w){
+          cat(paste("Treating well",w,colnames(data[[did]]$data)[w],"\n"))
+          data <- err2_mustd_well(dat=data, w=wells[w], hs=hs)
+      })
+    
+    
+    err2 = sapply(err2_mustd, function(x) x$err2)
+    err2std = sapply(err2_mustd, function(x) x$err2std)
+    mustd = sapply(err2_mustd, function(x) x$mustd)
+    
+    ## which bandwidth are at one std of mini in average
+    onestd_of_mini = sapply(1:ncol(err2),
+      function(i){
+          m = which.min(err2[,i])
+          err2[,i] <= err2[m,i] + err2std[m,i]
+      })
+    
+    ## onestd_of_mini returns a list
+    if( is.list(onestd_of_mini) )
+      onestd_of_mini = do.call(cbind,onestd_of_mini)
+    
+    ## calculate "optimal" bandwidth
+    bandwidth = hs[max( which(rowMeans(onestd_of_mini,na.rm=TRUE)>= cutoff))]
+
+    
+    return(list(bandwidth=bandwidth,
+                wells=wells,
+                bandwidths=hs, 
+                err2=err2,
+                err2std=err2std,
+                muStd=mustd,
+                oneStdOfMini=onestd_of_mini))
+}
+
+## hack of cellGrowth::fitCellGrowth as batch function
+fitCellGrowths.2 = function(data, did, mid, wells, ...) {
+
+    if ( missing(mid) )
+      mid <- data$mids[1]
+    
+    if ( !missing(did) ) # only use requested data 
+      did <- data$dataIDs[1]
+
+    if ( missing(wells) )
+      wells <- colnames(data[[did]]$data)
+
+    ##fits <- matrix(NA,ncol=4,nrow=length(wells))
+    ##rownames(fits) <- wells
+    fits <- NULL
+    x <- data[[mid]]
+    for ( well in wells ) {
+        cat(paste("well", well, "\n"))
+        y <- data[[did]]$data[,well]
+        fit <- fitCellGrowth(x, z=y, ...)
+        ##fits[well,] <- unlist(attributes(fit)[c(3,4,5,6)])
+        fits <- append(fits, list(fit))
+    }
+    fits
+}
+ 
