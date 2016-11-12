@@ -1,4 +1,4 @@
-# `platexpress` - Microbial Growth & Gene Expression
+# `platexpress` - microbial growth & gene expression
 
 <img src="doc/fritz_the_platypus.gif" alt="https://upload.wikimedia.org/wikipedia/en/c/c2/Platypus_sketch_by_Hmich176.gif" height="200">
 ![platexpress](doc/ecoli_20141014.png)
