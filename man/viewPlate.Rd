@@ -5,8 +5,8 @@
 \title{\code{\link{viewPlate}} plots all data in plate format}
 \usage{
 viewPlate(data, wells, rows = toupper(letters[1:8]), cols = 1:12, xid,
-  xscale = FALSE, xlim, dids, pcols, yscale = TRUE, ylims, ylim, log = "",
-  legpos = "topleft", add.legend = TRUE)
+  xscale = FALSE, xlim, dids, dtype = "data", pcols, yscale = TRUE, ylims,
+  ylim, log = "", legpos = "topleft", add.legend = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by

@@ -2,11 +2,13 @@
 
 export(addData)
 export(adjustBase)
+export(bandwidthCV.2)
 export(boxData)
 export(correctBlanks)
 export(cutData)
 export(data2grofit)
 export(findWavelength)
+export(fitCellGrowths.2)
 export(gcFit.2)
 export(getData)
 export(getGroups)

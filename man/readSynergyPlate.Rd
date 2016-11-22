@@ -4,7 +4,7 @@
 \alias{readSynergyPlate}
 \title{Read Synergy Mx-exported files}
 \usage{
-readSynergyPlate(files, data.ids, skip = 58, sep = ";", dec = ".",
+readSynergyPlate(files, data.ids, skip, sep = ";", dec = ".",
   skiplastcol = FALSE, time.format = "numeric", verb = TRUE)
 }
 \arguments{
