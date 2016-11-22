@@ -338,15 +338,15 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
 #' @export
 readPlateData <- function(files, type, data.ids, 
-                          skip=0, sep="\t", dec=".", verb=TRUE,
+                          sep="\t", dec=".", verb=TRUE,
                           interpolate=TRUE, time.conversion, ...) {
 
     if ( type=="BMG" )
         data <- readBMGPlate(files=files, data.ids=data.ids,
-                             verb=verb, skip=5, sep=";", dec=".", ...)
+                             verb=verb, sep=";", dec=".", ...)
     else if ( type=="Synergy" )
         data <- readSynergyPlate(files=files, data.ids=data.ids, 
-                                 verb=verb, skip=58, sep=";", dec=".", ...)
+                                 verb=verb, sep=";", dec=".", ...)
 
     ## NOW PREPARE DATA
     ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
@@ -373,10 +373,15 @@ readPlateData <- function(files, type, data.ids,
 #' @seealso \code{\link{readPlateData}}
 #' @export
 readSynergyPlate <- function(files, data.ids,
-                             skip=58, sep=";", dec=".", skiplastcol=FALSE,
+                             skip, sep=";", dec=".", skiplastcol=FALSE,
                              time.format="numeric",
                              verb=TRUE) {
 
+    if ( missing(skip) )
+      skip <- 58
+
+    cat(paste("SKIPPING", skip, "\n"))
+    
     indat <- read.csv(files, header=FALSE,stringsAsFactors=FALSE,
                       sep=sep, dec=dec, skip=skip)
     
@@ -426,10 +431,11 @@ readSynergyPlate <- function(files, data.ids,
         if ( length(emptycols)>0 )
           dat <- dat[,-emptycols]
         ## check last rows (sometimes empty, sometimes not)
-        ## -> just use NA values in time
-        dat  <- dat[!is.na(time),]
-        temp <- temp[!is.na(time)]
-        time <- time[!is.na(time)]
+        ## -> either NA values in time or in all wells
+        present <-!is.na(time) & ncol(dat) > apply(dat,1,function(x) sum(is.na(x)))
+        dat  <- dat[ present,]
+        temp <- temp[present]
+        time <- time[present]
         data[[dataID]] <- list(time=time, temp=temp, data=dat)
     }
 
@@ -457,8 +463,11 @@ readSynergyPlate <- function(files, data.ids,
 #' @seealso \code{\link{readPlateData}}
 #' @export
 readBMGPlate <- function(files, data.ids, 
-                         skip=5, sep=";", dec=".", verb=TRUE) {
+                         skip, sep=";", dec=".", verb=TRUE) {
 
+    if ( missing(skip) )
+      skip <- 5
+    
     data <- list()
     ## 1) PARSE ALL DATA FILES and collect the individual measurements
     for ( i in 1:length(files) ) {
@@ -1340,7 +1349,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 viewPlate <- function(data, wells, 
                       rows=toupper(letters[1:8]),cols=1:12,
                       xid, xscale=FALSE,xlim,
-                      dids, pcols, yscale=TRUE,ylims,ylim,log="",
+                      dids, dtype="data", pcols, yscale=TRUE,ylims,ylim,log="",
                       legpos="topleft",add.legend=TRUE) {
 
     ## which wells to plot?
@@ -1355,7 +1364,7 @@ viewPlate <- function(data, wells,
     
     ## filter for present wells
     pwells <- unique(c(sapply(data$dataIDs,
-                              function(id) colnames(data[[id]]$data))))
+                              function(id) colnames(data[[id]][[dtype]]))))
     if ( sum(!wells%in%pwells)>0 ) {
         #warning("wells ", wells[!wells%in%pwells]," not present, skipped!")
         wells <- wells[wells%in%pwells]
@@ -1371,7 +1380,7 @@ viewPlate <- function(data, wells,
     if ( global.x ) {
         time <- data[[xid]]
     } else if ( xid %in% data$dataIDs )
-        xdat <- data[[xid]]$data[,wells,drop=FALSE]
+        xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
     else
         stop("x-axis data: \"", xid, "\" not found")
     cat(paste("x-axis:", xid, "\n"))
@@ -1383,7 +1392,7 @@ viewPlate <- function(data, wells,
     ## if xid is not present in data$mids, get it from dataIDs
     #time <- data[[data$mids[1]]]
     #if ( !missing(xid) ) { # or use other data-set as x
-    #    xdat <- data[[xid]]$data[,wells,drop=FALSE]
+    #    xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
     #} else xid <- NULL
 
     ## get plot params - colors
@@ -1420,7 +1429,7 @@ viewPlate <- function(data, wells,
         pidx <- 1:length(ptypes)
         ylim <- rep(list(c(NA,NA)),length(ptypes)) # initiliaze
         for ( k in pidx ) {
-            dat <- data[[ptypes[k]]]$data[,wells,drop=FALSE] # get plotted wells
+            dat <- data[[ptypes[k]]][[dtype]][,wells,drop=FALSE] # get plotted wells
             if ( global.x ) # if x is time, limit to plot xlim
               dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE] 
             ylm <- range(c(dat[is.finite(dat)]),na.rm=TRUE) # get range
@@ -1452,7 +1461,7 @@ viewPlate <- function(data, wells,
           for ( k in 1:length(ptypes) ) {
               # y data
               ptyp <- ptypes[k]
-              y <- data[[ptyp]]$data[,well]
+              y <- data[[ptyp]][[dtype]][,well]
               if ( k>1 ) par(new=TRUE)
               #cat(paste("hallo",k))
               ## TODO: obsolete? since we filter for wells above and
@@ -1662,7 +1671,7 @@ groupStats <- function(data, groups, dids) {
 #' @export
 viewGroups <- function(data, groups, groups2,
                        xid, xscale=FALSE, xlim,
-                       dids, pcols, yscale=TRUE, ylims, ylim, log="",
+                       dids, dtype="data",pcols,yscale=TRUE,ylims,ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
                        g2.legpos="topleft", g2.legend=TRUE,
@@ -1680,7 +1689,7 @@ viewGroups <- function(data, groups, groups2,
 
     ## filter for present wells
     pwells <- unique(c(sapply(data$dataIDs,
-                              function(id) colnames(data[[id]]$data))))
+                              function(id) colnames(data[[id]][[dtype]]))))
     if ( sum(!wells%in%pwells)>0 ) {
         warning("wells ", wells[!wells%in%pwells]," not present, skipped!")
         wells <- wells[wells%in%pwells]
@@ -1696,7 +1705,7 @@ viewGroups <- function(data, groups, groups2,
     if ( global.x ) 
         time <- data[[xid]]
     else if ( xid %in% data$dataIDs )
-        xdat <- data[[xid]]$data[,wells,drop=FALSE]
+        xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
     else
         stop("x-axis data: \"", xid, "\" not found")
     cat(paste("x-axis:", xid, "\n"))
@@ -1730,7 +1739,7 @@ viewGroups <- function(data, groups, groups2,
     if ( missing(ylim) ) {
         ylim <- list()
         for ( k in 1:length(ptypes) ) {
-            dat <- data[[ptypes[k]]]$data[,wells,drop=FALSE] # get plotted wells
+            dat <- data[[ptypes[k]]][[dtype]][,wells,drop=FALSE] # get plotted wells
             if ( global.x ) {
                 dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE]
             } else {
@@ -1810,7 +1819,7 @@ viewGroups <- function(data, groups, groups2,
                 else x <- time
 
                 ## get data for selected wells
-                dat <- data[[ptyp]]$data[,wells]
+                dat <- data[[ptyp]][[dtype]][,wells]
                 ## calculate stats only for common x!
                 ## TODO: instead bin data on x and calculate ci there
                 ## or interpolate data to common x (on the fly)?
