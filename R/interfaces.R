@@ -173,9 +173,9 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
 
 ### cellGrowth INTERFACE
 
-## TODO:
-## select bandwidths from data$Time
-## hack of cellGrowth bandwidthCV to work with platexpress data format
+#' hack of cellGrowth bandwidthCV to work with platexpress data format
+#' TODO: select bandwidths from data$Time
+#' @export
 bandwidthCV.2 = function(data, did, mid, wells,
   bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
   nFold=10,
@@ -281,8 +281,9 @@ bandwidthCV.2 = function(data, did, mid, wells,
                 oneStdOfMini=onestd_of_mini))
 }
 
-## batch wrapper for fitCellGrowth
-## TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
+#' batch wrapper for fitCellGrowth
+#' TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
+#' @export
 fitCellGrowths.2 = function(data, did, mid, wells, ...) {
 
     if ( missing(mid) )
