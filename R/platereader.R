@@ -1795,7 +1795,7 @@ viewGroups <- function(data, groups, groups2,
         ## TODO: actually search by wells instead of
         ## grepping name, since this doesnt allow name extensions
         if ( !missing(groups2) ) {
-            gidx <- grep(id, names(groups2))
+            gidx <- grep(id, names(groups2),fixed=ifelse(id=="*",FALSE,TRUE))
             sgroups <- groups2[gidx]
         } else
           sgroups <- groups[g]
@@ -1817,6 +1817,7 @@ viewGroups <- function(data, groups, groups2,
                 if ( !global.x )
                   x <- xdat[,wells]
                 else x <- time
+
 
                 ## get data for selected wells
                 dat <- data[[ptyp]][[dtype]][,wells]
