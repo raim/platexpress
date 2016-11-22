@@ -796,7 +796,7 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
                 ci <-  sd / n2
             }
             
-            x <- barplot(mn,ylim=c(0,max(mn+ci)),ylab=did,las=2)
+            x <- barplot(mn,ylim=c(0,max(mn+ci,na.rm=TRUE)),ylab=did,las=2)
             arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
                    length=.05,lwd=1.5)            
         }
