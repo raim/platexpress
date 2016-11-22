@@ -1,5 +1,5 @@
 ---
-title: "`platexpress`: Microbial Growth & Gene Expression"
+title: "`platexpress`: microbial growth & gene expression"
 author: "Rainer Machne"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
