@@ -338,15 +338,15 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
 #' @export
 readPlateData <- function(files, type, data.ids, 
-                          sep="\t", dec=".", verb=TRUE,
+                          verb=TRUE,
                           interpolate=TRUE, time.conversion, ...) {
 
     if ( type=="BMG" )
         data <- readBMGPlate(files=files, data.ids=data.ids,
-                             verb=verb, sep=";", dec=".", ...)
+                             verb=verb, ...)
     else if ( type=="Synergy" )
         data <- readSynergyPlate(files=files, data.ids=data.ids, 
-                                 verb=verb, sep=";", dec=".", ...)
+                                 verb=verb, ...)
 
     ## NOW PREPARE DATA
     ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
@@ -380,14 +380,13 @@ readSynergyPlate <- function(files, data.ids,
     if ( missing(skip) )
       skip <- 58
 
-    cat(paste("SKIPPING", skip, "\n"))
-    
     indat <- read.csv(files, header=FALSE,stringsAsFactors=FALSE,
                       sep=sep, dec=dec, skip=skip)
     
     ## data IDs are in column 1, followed by data matrices starting
     ## in column 2; skip internal result calculation
     didx <- c(which(indat[,1]!="" & indat[,1]!="Results"))
+
     ## filter only requested data
     dataIDs <- indat[didx,1]
     didx <- c(didx, which(indat[,1]=="Results")) # add "Results" index
