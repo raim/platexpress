@@ -1790,11 +1790,22 @@ viewGroups <- function(data, groups, groups2,
           x <- xdat[,wells]
         else x <- time
 
-        ## get subgroups
-        ## TODO: actually search by wells instead of
-        ## grepping name, since this doesnt allow name extensions
+        ## get subgroups:
+        ## each subgroup must be fully contained in
+        ## the group!
+        ## TODO: better check of conflicts! 
         if ( !missing(groups2) ) {
-            gidx <- grep(id, names(groups2),fixed=ifelse(id=="*",FALSE,TRUE))
+            gidx <- NULL
+            if ( id=="*" )
+              gidx <- 1:length(groups2)
+            else
+              for ( i in 1:length(groups2) ) 
+                if ( sum(wells%in%groups2[[i]])==length(groups2[[i]]) ) 
+                  gidx <- c(gidx,i)
+                else if ( any(wells%in%groups2[[i]]) )
+                  stop("Some but not all wells from groups group ",id,
+                       " in groups2 group ",names(groups2)[i],
+                       ". Groups in groups2 MUST be sub-sets of groups groups")
             sgroups <- groups2[gidx]
         } else
           sgroups <- groups[g]
