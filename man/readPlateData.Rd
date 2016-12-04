@@ -7,8 +7,8 @@ the plate reader software. Header IDs in the data file should match with
 IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
 functions exist for a couple of plate-readers.}
 \usage{
-readPlateData(files, type, data.ids, sep = "\\t", dec = ".", verb = TRUE,
-  interpolate = TRUE, time.conversion, ...)
+readPlateData(files, type, data.ids, verb = TRUE, interpolate = TRUE,
+  time.conversion, ...)
 }
 \arguments{
 \item{files}{list of one or more data files}
@@ -18,10 +18,6 @@ for BMG Optima/Mars, ('BMG') and Synergy Mx ('Synergy').}
 
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
-
-\item{sep}{column separator, as in read.table}
-
-\item{dec}{decimal operator used in the data file}
 
 \item{verb}{print messages if true}
 
@@ -34,7 +30,11 @@ to convert from hours to seconds}
 
 \item{...}{further parameters to plate-reader specific parsing functions}
 
+\item{sep}{column separator, as in read.table}
+
 \item{skip}{lines to skip from the data file}
+
+\item{dec}{decimal operator used in the data file}
 }
 \value{
 a list of distinct measurement time-courses from one plate
