@@ -431,7 +431,9 @@ readSynergyPlate <- function(files, data.ids,
           dat <- dat[,-emptycols]
         ## check last rows (sometimes empty, sometimes not)
         ## -> either NA values in time or in all wells
-        present <-!is.na(time) & ncol(dat) > apply(dat,1,function(x) sum(is.na(x)))
+        present <- (!is.na(time) &
+                    ncol(dat) > apply(dat,1,function(x) sum(is.na(x))))
+        
         dat  <- dat[ present,]
         temp <- temp[present]
         time <- time[present]
@@ -1218,6 +1220,12 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
 
     if ( verb )
       cat(paste("Interpolating all data to a single master time.\n"))
+
+    ## 0) TODO: check whether all data items have the same
+    ## number of time-points, and cut end - this can stem from
+    ## termination of the measurement before programmed end
+    ## 0a: first, cut data at non-increasing time steps, 00:00:00 in Synergy
+    ## 0b: check length
     
     ## 1) calculate average (MASTER) time
     mtime <- listAverage(data, "time")
