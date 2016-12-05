@@ -70,7 +70,7 @@ getRGB <- function(n) {
 #' @export
 showSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
                          ylab="approximate color",
-                         main="use findWavelength(353)",
+                         main="use findWavelength(3)",
                          xlab="wavelength, nm", ...) {
     cols <- wavelength2RGB(wavelengths)
     plot(wavelengths,rep(1,length(wavelengths)),
