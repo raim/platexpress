@@ -819,7 +819,7 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
                         function(x) rep(names(bdat)[x],length(bdat[[x]])),
                         simplify = FALSE)),
                       data=unlist(bdat))
-    colnames(tmp)[3] <- paste(did,paste(rng,collapse="-"),sep="_")
+    colnames(tmp)[3] <- paste(did,paste(rng,collapse="-"),sep="@")
     bdat <- tmp
     rownames(bdat) <- NULL
 
