@@ -15,7 +15,8 @@ gcFit.2(time, data, control = grofit.2.control())
 
 \item{control}{the \code{\link[grofit:grofit]{grofit}} control structure, see
 \code{\link[grofit:grofit]{grofit.control}}, but with an additional
-entry "plot", which is set to TRUE or FALSE}
+argument "plot" (TRUE or FALSE), allowing to plot individual fits
+even if interactive is set to FALSE.}
 }
 \description{
 hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting

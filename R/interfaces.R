@@ -3,6 +3,88 @@
 
 ### GROFIT INTERFACE
 
+### This would require to depend on grofit
+## @examples
+## data(ap12)
+## grdat <- data2grofit(ap12data)
+## fit <- gcFit.2(grdat$time, grdat$data)
+
+### data2grofit: see AP12.R for example, TODO: fix example data and update file
+#' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
+#' \code{\link[grofit:grofit]{grofit}} data format
+#' @param data the current platexpress data set, see \code{\link{readPlateData}}
+#' @param did data ID of the data to be converted, from \code{data$dataIDs}
+#' @param min.time minimal time of the data to be used
+#' @param max.time maximal time of the data to be used
+#' @param wells column IDs of the data set to use, if missing all wells
+#' are taken
+#' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
+#' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+#' annotation
+#' @param eid column IDs in the plate layout map to be used for
+#' \code{\link[grofit:grofit]{grofit}} data annotation; if missing but
+#' \code{plate} is present, the columns 2 and 3 are used
+#' @param dose vector of doses in each well, used as the third column of
+#'  \code{\link[grofit:grofit]{grofit}}data annotation, where it can be used for
+#' dose-response calculations
+#' @details Returns a simple list with two entries \code{time} and \code{data},
+#' as required for \code{\link[grofit:grofit]{grofit}}.
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
+#' @export
+data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) {
+
+    if ( missing(did) )
+        did <- data$dataIDs[1]
+    dat <- data[[did]]$data
+    if ( missing(wells) )
+        wells <- colnames(dat)
+
+    dat <- dat[,wells]
+
+    ## expand time to full matrix
+    ## TODO: use internal time and non-interpolated data?
+    time <- data$Time
+    if ( !missing(max.time) ) {
+        dat <- dat[time<=max.time,]
+        time <- time[time<=max.time]
+    }
+    if ( !missing(min.time) ) {
+        dat <- dat[time>=min.time,]
+        time <- time[time>=min.time]
+    }
+    time <- t(matrix(rep(time, ncol(dat)), c(length(time), ncol(dat))))
+
+    ## well annotation
+    if ( !missing(plate) ) {
+        if ( missing(eid) )
+            eid <- colnames(plate)[2:3]
+        idx <- match(wells,as.character(plate[,"well"]))
+        annotation <- data.frame(cbind(as.character(plate[idx,eid[1]]),
+                                       as.character(plate[idx,eid[2]])))
+    } else
+        annotation <- data.frame(cbind(colnames(dat),
+                                       rep("",ncol(dat))))
+    ## dose information for grofit dose-response calculations
+    ## TODO: this is ugly, do nicer!
+    found.dose <- !missing(dose)
+    if ( !found.dose ) 
+        if ( !missing(plate) ) ## get dose info from plate layout: TODO
+            if ( "dose" %in% colnames(plate) ) {
+                idx <- match(wells,as.character(plate[,"dose"]))
+                dose <- as.numeric(plate[idx,"dose"])
+                found.dose <- TRUE
+            }
+    if ( !found.dose )
+        dose <- rep(0,ncol(dat))
+
+    ## construct grofit data
+    grdat <- data.frame(annotation,
+                        dose,
+                        t(dat))
+    list(time=time, data=grdat)
+}
+
+
 #' hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
 #' which adds the new "plot" switch used in \code{\link{gcFit.2}}
 #' @param ... parameters passed on to
@@ -25,7 +107,8 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 #' @param data the data as produced by \code{\link{data2grofit}}
 #' @param control the \code{\link[grofit:grofit]{grofit}} control structure, see
 #' \code{\link[grofit:grofit]{grofit.control}}, but with an additional
-#' entry "plot", which is set to TRUE or FALSE
+#' argument "plot" (TRUE or FALSE), allowing to plot individual fits
+#' even if interactive is set to FALSE.
 #' @details Adding the field "plot" allows to de-activate
 #' \code{control$interactive}, so the whole fitting procedure runs
 #' through all wells, yet results are plotted. \code{\link{platexpress}}
@@ -168,6 +251,16 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
     ## wrapper: use platexpress data as input
     ## and add fits to data, aligned with cellGrowth::fitCellGrowth.2 wrapper
     gcFit
+}
+
+#' Convenience function to quickly extract growth parameters
+#' from a \code{\link[grofit:grofit]{grofit}} results list.
+#' @param fits the list of results returned by \code{\link[grofit:gcFit]{gcFit}}
+#' or the platexpress interface \code{\link{gcFit.2}}
+#' @param p list of parameters to obtain from the table \code{fits$gcTable}
+#' @export
+grofitGetParameters <- function(fits, p=c("TestId","AddId","lambda.model","mu.model","A.model","used.model")) {
+    fits$gcTable[,p]
 }
 
 

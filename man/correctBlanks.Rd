@@ -4,7 +4,8 @@
 \alias{correctBlanks}
 \title{\code{\link{correctBlanks}} correct for blanks}
 \usage{
-correctBlanks(data, plate, type = "ci95", by, dids, mid, max.mid, mbins = 1)
+correctBlanks(data, plate, type = "ci95", by, dids, mid, max.mid, mbins = 1,
+  verb = TRUE)
 }
 \arguments{
 \item{data}{the \code{\link{platexpress}} data list to be blank-corrected}
@@ -28,6 +29,8 @@ by \code{mbins}>1}
 
 \item{mbins}{the number of bins the x-axis is to be divided, if blanked
 along the x-axis, see \code{mid}}
+
+\item{verb}{issued progress messages and info}
 }
 \description{
 \code{\link{correctBlanks}} correct for blanks
@@ -38,5 +41,8 @@ data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
+}
+\seealso{
+\code{\link{adjustBase}}
 }
 

@@ -4,7 +4,8 @@
 \alias{adjustBase}
 \title{\code{\link{adjustBase}} adjust data to a minimal base}
 \usage{
-adjustBase(data, base = 0, wells, dids, add.fraction, xlim, each = FALSE)
+adjustBase(data, base = 0, wells, dids, add.fraction, xlim, each = FALSE,
+  verb = TRUE)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
@@ -23,6 +24,8 @@ executed}
 \item{xlim}{min and max row number of the data to be adjusted}
 
 \item{each}{add base for each well separately!}
+
+\item{verb}{print messages if true}
 }
 \value{
 Returns `data' where all data sets or only those selected by option
@@ -37,5 +40,8 @@ of negative values after blank corrections
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
+}
+\seealso{
+\code{\link{correctBlanks}}
 }
 

@@ -11,7 +11,7 @@ viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, dids,
   g2.legpos = "topleft", g2.legend = TRUE, embed = FALSE,
   no.par = FALSE, mai = c(0.5, 0, 0, 0), mgp = c(1.5, 0.5, 0), nrow = 1,
   xaxis = TRUE, yaxis = c(1, 2), g1.legpos = "topright",
-  g1.legend = TRUE)
+  g1.legend = TRUE, verb = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by
@@ -95,6 +95,8 @@ to the order in argument \code{dids} and as plotted in the legend
 \item{g1.legpos}{position of the \code{groups} legend, see \code{g1.legend}}
 
 \item{g1.legend}{show the main legend, giving plot colors}
+
+\item{verb}{print messages if true}
 }
 \description{
 plot grouped wells as summary plots, incl. confidence intervals and means
@@ -103,6 +105,7 @@ plot grouped wells as summary plots, incl. confidence intervals and means
 data(ap12)
 groups <- getGroups(plate=ap12plate, by=c("strain"))
 vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
+vg <- viewGroups(ap12data,groups2=groups,lwd.orig=0.1,nrow=1)
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

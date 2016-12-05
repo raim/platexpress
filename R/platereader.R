@@ -816,7 +816,8 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
     ## summarize results if only one value was requested!
     tmp <- data.frame(well=unlist(lapply(bdat, function(x) colnames(x))),
                       group=unlist(sapply(1:length(bdat),
-                           function(x) rep(names(bdat)[x],length(bdat[[x]])))),
+                        function(x) rep(names(bdat)[x],length(bdat[[x]])),
+                        simplify = FALSE)),
                       data=unlist(bdat))
     colnames(tmp)[3] <- paste(did,paste(rng,collapse="-"),sep="_")
     bdat <- tmp
@@ -826,86 +827,6 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
 }
 
 
-### This would require to depend on grofit
-## @examples
-## data(ap12)
-## grdat <- data2grofit(ap12data)
-## fit <- gcFit.2(grdat$time, grdat$data)
-
-### data2grofit: see AP12.R for example, TODO: fix example data and update file
-#' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
-#' \code{\link[grofit:grofit]{grofit}} data format
-#' @param data the current platexpress data set, see \code{\link{readPlateData}}
-#' @param did data ID of the data to be converted, from \code{data$dataIDs}
-#' @param min.time minimal time of the data to be used
-#' @param max.time maximal time of the data to be used
-#' @param wells column IDs of the data set to use, if missing all wells
-#' are taken
-#' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
-#' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
-#' annotation
-#' @param eid column IDs in the plate layout map to be used for
-#' \code{\link[grofit:grofit]{grofit}} data annotation; if missing but
-#' \code{plate} is present, the columns 2 and 3 are used
-#' @param dose vector of doses in each well, used as the third column of
-#'  \code{\link[grofit:grofit]{grofit}}data annotation, where it can be used for
-#' dose-response calculations
-#' @details Returns a simple list with two entries \code{time} and \code{data},
-#' as required for \code{\link[grofit:grofit]{grofit}}.
-#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
-#' @export
-data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) {
-
-    if ( missing(did) )
-        did <- data$dataIDs[1]
-    dat <- data[[did]]$data
-    if ( missing(wells) )
-        wells <- colnames(dat)
-
-    dat <- dat[,wells]
-
-    ## expand time to full matrix
-    ## TODO: use internal time and non-interpolated data?
-    time <- data$Time
-    if ( !missing(max.time) ) {
-        dat <- dat[time<=max.time,]
-        time <- time[time<=max.time]
-    }
-    if ( !missing(min.time) ) {
-        dat <- dat[time>=min.time,]
-        time <- time[time>=min.time]
-    }
-    time <- t(matrix(rep(time, ncol(dat)), c(length(time), ncol(dat))))
-
-    ## well annotation
-    if ( !missing(plate) ) {
-        if ( missing(eid) )
-            eid <- colnames(plate)[2:3]
-        idx <- match(wells,as.character(plate[,"well"]))
-        annotation <- data.frame(cbind(as.character(plate[idx,eid[1]]),
-                                       as.character(plate[idx,eid[2]])))
-    } else
-        annotation <- data.frame(cbind(colnames(dat),
-                                       rep("",ncol(dat))))
-    ## dose information for grofit dose-response calculations
-    ## TODO: this is ugly, do nicer!
-    found.dose <- !missing(dose)
-    if ( !found.dose ) 
-        if ( !missing(plate) ) ## get dose info from plate layout: TODO
-            if ( "dose" %in% colnames(plate) ) {
-                idx <- match(wells,as.character(plate[,"dose"]))
-                dose <- as.numeric(plate[idx,"dose"])
-                found.dose <- TRUE
-            }
-    if ( !found.dose )
-        dose <- rep(0,ncol(dat))
-
-    ## construct grofit data
-    grdat <- data.frame(annotation,
-                        dose,
-                        t(dat))
-    list(time=time, data=grdat)
-}
 
 #' \code{\link{skipWells}} rm wells from both data, plate maps and groupings
 #' @param data data structures from \code{\link{platexpress}}; either data
@@ -978,12 +899,14 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' @param mbins the number of bins the x-axis is to be divided, if blanked
 #' along the x-axis, see \code{mid}
 #' @param max.mid the maximal x-axis value where blanks should be used
+#' @param verb issued progress messages and info
+#' @seealso \code{\link{adjustBase}}
 #' @examples
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbins=1) {
+correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbins=1, verb=TRUE) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
@@ -999,11 +922,10 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
     ptypes <- names(data)
     if ( !missing(dids) ) # only use requested data 
       ptypes <- ptypes[ptypes%in%dids]
-    if ( length(ptypes)==0 ) {
-        cat(paste("no data to blank\n"))
-        return()
-    }else
-        cat(paste("blanking", paste(ptypes,collapse=";"),"\n"))
+    if ( length(ptypes)==0 )
+        stop("no data to blank")
+    else if ( verb )
+      cat(paste("blanking", paste(ptypes,collapse=";"),"\n"))
 
     ## get present wells
     pwells <- unique(c(sapply(corr$dataIDs,
@@ -1042,8 +964,9 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
         dwells <- dwells[dwells%in%pwells]
         bwells <- bwells[bwells%in%pwells]
         
-        cat(paste("blanking", btyp, ":", length(dwells), "wells, using",
-                  length(bwells), "blank wells\n"))
+        if ( verb )
+          cat(paste("blanking", btyp, ":", length(dwells), "wells, using",
+                    length(bwells), "blank wells\n"))
         for ( k in 1:length(ptypes) ) {
             ptyp <- ptypes[k]
             dat <- data[[ptyp]]$data
@@ -1053,24 +976,26 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
             nbin <- length(timebins)
             timebins <- cbind(ceiling(timebins[1:(nbin-1)]),
                               floor(timebins[2:nbin]))
-            cat(paste(ptyp, "\n"))
+            if ( verb ) cat(paste(ptyp, "\n"))
             ## calculate and subtract blanks for time bins (default: all)
             for ( t in 1:nrow(timebins) ) {
                 bin <- timebins[t,1]:timebins[t,2]
                 #if ( nrow(timebins)>1 )
-                    cat(paste("\ttime bin:",t,timebins[t,1],"-",timebins[t,2]))
+                if ( verb )
+                  cat(paste("\ttime bin:",t,timebins[t,1],"-",timebins[t,2]))
 
                 ## cut maximal time for blanking
                 bbin <- bin
                 if ( !missing(max.mid) ) {
-                    cat(paste("\tskipping",sum(time[bbin]>max.mid),
-                              "bins at",max.mid,"\n"))
+                    if ( verb ) 
+                      cat(paste("\tskipping",sum(time[bbin]>max.mid),
+                                "bins at",max.mid,"\n"))
                     bbin <- bbin[time[bbin]<=max.mid]
                 }
 
                 ## TODO: this should only happen if time is
                 if ( length(bbin)==0 ) {
-                    cat(paste("skipping time bin", t, "at", max.mid, "\n"))
+                    #cat(paste("skipping time bin", t, "at", max.mid, "\n"))
                     warning("no blank data at time bin", t, "at", max.mid)
                     blank <- 0
                     #next # TODO: warning?
@@ -1086,7 +1011,7 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
                 ## subtract blank
                 corr[[ptyp]]$data[bin,c(dwells,bwells)] <-
                                dat[bin,c(dwells,bwells)] - blank
-                cat(paste("\tblank:",blank,"\n"))
+                if ( verb ) cat(paste("\tblank:",blank,"\n"))
                 ##cat(paste("\tdata wells:",paste(dwells,collapse=";"),"\n",
                 ##          "\tblank wells:",paste(bwells,collapse=";"),"\n"))
             }
@@ -1110,11 +1035,13 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
 #' @param xlim min and max row number of the data to be adjusted
 #' @param add.fraction a fraction of the whole data range, added to base
 #' @param each add base for each well separately!
+#' @param verb print messages if true
 #' @return Returns `data' where all data sets or only those selected by option
 #' dids where raised to a minimum level in 
+#' @seealso \code{\link{correctBlanks}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE) {
+adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE, verb=TRUE) {
 
     if ( missing(dids) ) # only use requested data 
         dids <- data$dataIDs # use all
@@ -1143,8 +1070,10 @@ adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE
             if ( missing(xlim) )
                 xlim <- c(1,nrow(dat))
             xrng <- xlim[1]:xlim[2]
-            
-            cat(paste(paste(bin,collapse=";"), "adding", min(dat[xrng,],na.rm=TRUE), "\n"))
+
+            if ( verb )
+              cat(paste(paste(bin,collapse=";"),
+                        "adding", min(dat[xrng,],na.rm=TRUE), "\n"))
 
             dat <- dat - min(dat[xrng,],na.rm=TRUE) + base
             
@@ -1281,6 +1210,10 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
         dids <- data$dataIDs
     dids <- dids[dids!=xid] # rm target value
 
+    ## store original master data
+    orig.id <- data$mids[1]
+    orig <- data[[orig.id]]
+    
     ## get new master data
     xdat <- data[[xid]]$data
     if ( missing(n) ) n <- nrow(xdat)
@@ -1293,6 +1226,8 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
     for ( id in dids ) {
         data[[id]]$orig <- data[[id]]$data
         mdat <- data[[id]]$data
+        tmp <- mdat ## reverse interpolation of original master data
+        tmp[] <- NA
         for ( j in 1:ncol(data[[id]]$data) ) {
             x <- xdat[,j]
             y <- data[[id]]$data[,j]
@@ -1301,22 +1236,28 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
             ## interpolate data, NOTE that rule=2 will fill the end points
             if ( length(unique(x)) == 1 )
                 mdat[,j] <- NA
-            else ## TODO: replace by cubic spline fit with smart end handling!
+            else {
+                ## TODO: replace by cubic spline fit with smart end handling!
                 #mdat[,j] <- spline(x=x,y=y,xout=xout,method="natural")$y
                 mdat[,j] <- approx(x=x,y=y,xout=xout,rule=1)$y
+                ## TODO: reverse interpolation - store x data!
+                tmp[,j] <- approx(x=y,y=orig,xout=mdat[,j])$y
+            }
         }
         ## replace data
         data[[id]]$data <- mdat
         ## indicate interpolation
         data[[id]]$processing <- c(data[[id]]$processing,
                                    paste("interpolated to", xid))
+        data[[id]]$reverse <- tmp
+        names(data[[id]])[length(data[[id]])] <- orig.id
     }
 
     ## keep original master data to check
-    old.id <- paste("original_",xid,sep="")
-    names(data)[which(names(data)==xid)] <- 
-        data$dataIDs[data$dataIDs==xid] <- 
-        names(data$colors)[which(names(data$colors)==xid)] <- old.id
+    ##old.id <- paste("original_",xid,sep="")
+    ##names(data)[which(names(data)==xid)] <- 
+    ##    data$dataIDs[data$dataIDs==xid] <- 
+    ##   names(data$colors)[which(names(data$colors)==xid)] <- old.id
     
     data <- append(data, list(xout), after=0)
     names(data)[1] <- xid
@@ -1324,6 +1265,8 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
     data <- data[-which(names(data)%in%data$mids)]
     ## and set new master
     data$mids <- xid
+    ## set new data IDs
+    data$dataIDs <- dids
     data
 }
 
@@ -1670,10 +1613,12 @@ groupStats <- function(data, groups, dids) {
 #' mai, mgp), useful to style your own plots, also see argument \code{embed}
 #' @seealso \code{\link{viewPlate}}, \code{\link{getGroups}},
 #' \code{\link{readPlateMap}}
+#' @param verb print messages if true
 #' @examples
 #' data(ap12)
 #' groups <- getGroups(plate=ap12plate, by=c("strain"))
 #' vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
+#' vg <- viewGroups(ap12data,groups2=groups,lwd.orig=0.1,nrow=1)
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 viewGroups <- function(data, groups, groups2,
@@ -1685,7 +1630,7 @@ viewGroups <- function(data, groups, groups2,
                        embed=FALSE, no.par=FALSE,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
-                       g1.legpos="topright", g1.legend=TRUE) {
+                       g1.legpos="topright", g1.legend=TRUE, verb=TRUE) {
     
 
     if ( missing(groups) ) {
@@ -1714,8 +1659,9 @@ viewGroups <- function(data, groups, groups2,
     else if ( xid %in% data$dataIDs )
         xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
     else
-        stop("x-axis data: \"", xid, "\" not found")
-    cat(paste("x-axis:", xid, "\n"))
+      stop("x-axis data: \"", xid, "\" not found")
+    if ( verb )
+      cat(paste("x-axis:", xid, "\n"))
 
     ## get plot params - colors
     if ( missing(pcols) ) # if not missing: overrides set&default colors
@@ -1730,9 +1676,8 @@ viewGroups <- function(data, groups, groups2,
     if ( !missing(dids) ) # only use requested data for plots
       ptypes <- ptypes[ptypes%in%dids]
     if ( length(ptypes)==0 ) {
-        cat(paste("no data to plot\n"))
-        return()
-    }else
+        stop("no data to plot")
+    }else if ( verb )
       cat(paste("y-axis:", paste(ptypes,collapse=";"),"\n"))
     
     ## plot params
@@ -1740,7 +1685,7 @@ viewGroups <- function(data, groups, groups2,
       if ( !global.x ) 
         xlim <- range(c(xdat),na.rm=TRUE)
       else
-        xlim <- range(time)
+        xlim <- range(time,na.rm=TRUE)
     ## set local ylims
     ## TODO: generalize and align with code in viewPlate
     if ( missing(ylim) ) {
