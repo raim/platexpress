@@ -7,7 +7,7 @@ shows the color spectrum of visible light along wavelengths in nm.
 See \code{\link{wavelength2RGB}} for details.}
 \usage{
 showSpectrum(wavelengths = 380:780, alpha = 99, pch = 19, cex = 3,
-  ylab = "approximate color", main = "use findWavelength(353)",
+  ylab = "approximate color", main = "use findWavelength(3)",
   xlab = "wavelength, nm", ...)
 }
 \arguments{
