@@ -155,11 +155,16 @@ readSimplePlate <- function(files, data.ids, skip,
  
     if ( verb  )
       cat(paste("\tloading data", data.ids, "\n"))
-    
+
+    ## parse file and get data
     dat <- read.csv(files, sep="\t", skip=skip)
     time <- as.numeric(strptime(dat[,1],format=time.format)) # time in seconds
     time <- time - time[1]
     dat <- dat[, -1]
+
+    ## for convenience replase leading 0, e.g. A07 -> A7
+    ## in column namnes
+    colnames(dat) <- gsub("([A-Z])0(.*)", "\\1\\2", colnames(dat))
 
     ## generate local data
     data <-  list()
