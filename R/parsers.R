@@ -83,7 +83,6 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
 #' functions exist for a couple of plate-readers.
 #' @param files list of one or more data files
-#' @param sep column separator, as in read.table
 #' @param type pre-defined formats, as exported from platereaders; currently
 #' for BMG Optima/Mars, ('BMG') and Synergy Mx ('Synergy').
 #' @param interpolate if true a master time, the average time between distinct

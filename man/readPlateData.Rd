@@ -29,8 +29,6 @@ to this mastertime. This is currently obligatory for further processing.}
 to convert from hours to seconds}
 
 \item{...}{further parameters to plate-reader specific parsing functions}
-
-\item{sep}{column separator, as in read.table}
 }
 \value{
 a list of distinct measurement time-courses from one plate
