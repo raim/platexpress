@@ -31,10 +31,6 @@ to convert from hours to seconds}
 \item{...}{further parameters to plate-reader specific parsing functions}
 
 \item{sep}{column separator, as in read.table}
-
-\item{skip}{lines to skip from the data file}
-
-\item{dec}{decimal operator used in the data file}
 }
 \value{
 a list of distinct measurement time-courses from one plate

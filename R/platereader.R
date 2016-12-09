@@ -962,6 +962,9 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' instead of the default Time vector
 #' @param dids IDs of the data to be plotted; if missing, all data will
 #' be plotted
+#' @param dtype type of the data to be plotted, default is the main 'data', but
+#' e.g. 'orig' allows to plot the original data w/o processing (e.g.
+#' interpolation, blank correction, etc.)
 #' @param xscale use a global range for the x-axes; only relevant if xid specifies a subset of the data as x-axis
 #' @param xlim plot range of the x-axis
 #' @param pcols a named list of RGB colors to be used the plotted data types; the color vector must have names according to the data IDs
@@ -1250,6 +1253,9 @@ groupStats <- function(data, groups, dids) {
 #' instead of the default Time vector
 #' @param dids IDs of the data to be plotted; if missing, all data will
 #' be plotted
+#' @param dtype type of the data to be plotted, default is the main 'data', but
+#' e.g. 'orig' allows to plot the original data w/o processing (e.g.
+#' interpolation, blank correction, etc.)
 #' @param xscale use a global range for the x-axes; only relevant if xid
 #' specifies a subset of the data as x-axis
 #' @param xlim plot range of the x-axis

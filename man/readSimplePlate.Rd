@@ -5,7 +5,8 @@
 \title{Read in simple platereader data with only one data type, and time
 in the first column}
 \usage{
-readSimplePlate(files, data.ids, skip, time.format = "\%M:\%S", verb = TRUE)
+readSimplePlate(files, data.ids, skip, sep = "\\t", time.format = "\%M:\%S",
+  verb = TRUE)
 }
 \arguments{
 \item{files}{list of one or more data files}
@@ -15,12 +16,12 @@ as a list of strings}
 
 \item{skip}{lines to skip before parsing data}
 
-\item{verb}{print messages if true}
-
 \item{sep}{field separator used in the input tabular file}
 
-\item{dec}{decimal number symbol (e.g., ',' if data export was with
-german language settings)}
+\item{time.format}{format of the time, e.g., "%H:%M"%S" (see
+\code{strptime}), or "numeric" if the time is provided in normal numbers}
+
+\item{verb}{print messages if true}
 }
 \description{
 Read in simple platereader data with only one data type, and time

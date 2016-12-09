@@ -29,6 +29,10 @@ instead of the default Time vector}
 \item{dids}{IDs of the data to be plotted; if missing, all data will
 be plotted}
 
+\item{dtype}{type of the data to be plotted, default is the main 'data', but
+e.g. 'orig' allows to plot the original data w/o processing (e.g.
+interpolation, blank correction, etc.)}
+
 \item{pcols}{a named list of RGB colors to be used the plotted data types; the color vector must have names according to the data IDs}
 
 \item{yscale}{if TRUE (default) global y-axis limits will be calculated from

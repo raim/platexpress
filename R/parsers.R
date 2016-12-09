@@ -91,8 +91,6 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' to this mastertime. This is currently obligatory for further processing.
 #' @param data.ids an optional sub-selection of data types in the input file,
 #' as a list of strings
-#' @param skip lines to skip from the data file
-#' @param dec decimal operator used in the data file
 #' @param verb print messages if true
 #' @param time.conversion conversion factor for the plate time, e.g., 1/3600
 #' to convert from hours to seconds
@@ -105,8 +103,7 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
 #' raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
 #' @export
-readPlateData <- function(files, type, data.ids, 
-                          verb=TRUE,
+readPlateData <- function(files, type, data.ids, verb=TRUE,
                           interpolate=TRUE, time.conversion, ...) {
 
     if ( type=="BMG" )
@@ -137,11 +134,11 @@ readPlateData <- function(files, type, data.ids,
 #' Read in simple platereader data with only one data type, and time
 #' in the first column
 #' @param skip lines to skip before parsing data
+#' @param time.format format of the time, e.g., "%H:%M"%S" (see
+#' \code{strptime}), or "numeric" if the time is provided in normal numbers
 #' @param sep field separator used in the input tabular file
-#' @param dec decimal number symbol (e.g., ',' if data export was with
-#' german language settings)
 #' @inheritParams readPlateData
-readSimplePlate <- function(files, data.ids, skip,
+readSimplePlate <- function(files, data.ids, skip, sep="\t",
                             time.format="%M:%S", verb=TRUE) {
 
     if ( verb )
@@ -157,7 +154,7 @@ readSimplePlate <- function(files, data.ids, skip,
       cat(paste("\tloading data", data.ids, "\n"))
 
     ## parse file and get data
-    dat <- read.csv(files, sep="\t", skip=skip)
+    dat <- read.csv(files, sep=sep, skip=skip)
     time <- as.numeric(strptime(dat[,1],format=time.format)) # time in seconds
     time <- time - time[1]
     dat <- dat[, -1]
@@ -183,8 +180,8 @@ readSimplePlate <- function(files, data.ids, skip,
 #' @param time.format format of the time, e.g., "%H:%M"%S" (see
 #' \code{strptime}), or "numeric" if the time is provided in normal numbers
 #' @param sep field separator used in the input tabular file
-#' @param dec decimal number symbol (e.g., ',' if data export was with
-#' german language settings)
+#' @param dec decimal operator used in data file (e.g., ',' if data export
+#' was with german language settings)
 #' @param skiplastcol the last column is often empty, set to TRUE if
 #' this is the case for the current data set
 #' @inheritParams readPlateData

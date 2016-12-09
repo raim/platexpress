@@ -17,8 +17,8 @@ as a list of strings}
 
 \item{sep}{field separator used in the input tabular file}
 
-\item{dec}{decimal number symbol (e.g., ',' if data export was with
-german language settings)}
+\item{dec}{decimal operator used in data file (e.g., ',' if data export
+was with german language settings)}
 
 \item{skiplastcol}{the last column is often empty, set to TRUE if
 this is the case for the current data set}
