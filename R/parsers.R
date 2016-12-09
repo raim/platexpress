@@ -99,7 +99,7 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 #' @param ... further parameters to plate-reader specific parsing functions
 #' @note The original data is all interpolated to a common/average 'master' time
 #' @return a list of distinct measurement time-courses from one plate
-#' @seealso \code\link{readBMGPlate}}, \code{\link{readPlateMap}}, \code{\link{viewPlate}}
+#' @seealso \code{\link{readSimplePlate}}, \code{\link{readBMGPlate}}, \code{\link{readSynergyPlate}}, \code{\link{readPlateMap}}, \code{\link{viewPlate}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @examples
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
