@@ -4,6 +4,9 @@
 ### fix example data to reflect current use
 
 ## DATA HANDLING
+### readPlateData
+see https://www.r-bloggers.com/a-simple-example-of-using-replyrgapply/
+for approaches to the "split-apply-combine" process
 ### high-level wrapper readPlate, where params are passed as lists,
 blank correction, base adjustment, colors, IDs, and perhaps fits
 are all done automatically; perhaps even groupings
