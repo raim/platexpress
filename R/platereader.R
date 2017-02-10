@@ -702,8 +702,6 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
 #' executed
 #' @param base the new minimum for the data, default is 0, but it could
 #' e.g. be the OD used for inoculation
-#' @param wells column IDs of the data set to adjust, if missing all wells
-#' are taken
 #' @param xlim min and max row number of the data to be adjusted
 #' @param add.fraction a fraction of the whole data range, added to base
 #' @param each add base for each well separately!
@@ -713,15 +711,12 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
 #' @seealso \code{\link{correctBlanks}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE, verb=TRUE) {
+adjustBase <- function(data, base=0, dids, add.fraction, xlim, each=FALSE, verb=TRUE) {
 
     if ( missing(dids) ) # only use requested data 
         dids <- data$dataIDs # use all
     
     for ( did in dids ) {
-
-        #if ( missing(wells) )
-        #    wells <- colnames(data[[did]]$data)
 
         ## each well separately?
         if ( each )
@@ -729,15 +724,9 @@ adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE
         else
             bins <- list(1:ncol(data[[did]]$data))
 
-
         for ( bin in bins ) {
-
-            ## only requrested wells
-            #bin <- bin[colnames(data)[bin]%in%wells]
             
             dat <- data[[did]]$data[,bin,drop=FALSE]
-        
-
 
             if ( missing(xlim) )
                 xlim <- c(1,nrow(dat))
@@ -747,20 +736,12 @@ adjustBase <- function(data, base=0, wells, dids, add.fraction, xlim, each=FALSE
               cat(paste(paste(bin,collapse=";"),
                         "adding", min(dat[xrng,],na.rm=TRUE), "\n"))
 
+            ## TODO: smarter? only if any value is <0?
             dat <- dat - min(dat[xrng,],na.rm=TRUE) + base
             
             if ( !missing(add.fraction) ) 
                 dat <- dat + diff(range(dat[xrng,],na.rm=TRUE))*add.fraction
             
-            ## each separate?
-            
-        #for ( j in 1:ncol(dat) ) {
-        #    dat[,j] <- dat[,j] - min(dat[,j],na.rm=TRUE) + base
-        #    if ( !missing(add.fraction) ) {
-        #        diff(range(dat[,j],na.rm=TRUE))
-        #    }
-        #}
-        
             data[[did]]$data[,bin] <- dat
         }
         data[[did]]$processing <- c(data[[did]]$processing,
