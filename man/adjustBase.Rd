@@ -4,7 +4,7 @@
 \alias{adjustBase}
 \title{\code{\link{adjustBase}} adjust data to a minimal base}
 \usage{
-adjustBase(data, base = 0, wells, dids, add.fraction, xlim, each = FALSE,
+adjustBase(data, base = 0, dids, add.fraction, xlim, each = FALSE,
   verb = TRUE)
 }
 \arguments{
@@ -12,9 +12,6 @@ adjustBase(data, base = 0, wells, dids, add.fraction, xlim, each = FALSE,
 
 \item{base}{the new minimum for the data, default is 0, but it could
 e.g. be the OD used for inoculation}
-
-\item{wells}{column IDs of the data set to adjust, if missing all wells
-are taken}
 
 \item{dids}{vector of ID strings for which base correction should be
 executed}
