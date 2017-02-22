@@ -1240,6 +1240,7 @@ groupStats <- function(data, groups, dids) {
 #' @param xscale use a global range for the x-axes; only relevant if xid
 #' specifies a subset of the data as x-axis
 #' @param xlim plot range of the x-axis
+#' @param xlab custom x-axis label
 #' @param pcols a named list of RGB colors to be used the plotted data types;
 #' the color vector must have names according to the data IDs
 #' @param yscale if TRUE (default) global y-axis limits will be calculated from
@@ -1289,7 +1290,7 @@ groupStats <- function(data, groups, dids) {
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 viewGroups <- function(data, groups, groups2,
-                       xid, xscale=FALSE, xlim,
+                       xid, xscale=FALSE, xlim, xlab,
                        dids, dtype="data",pcols,yscale=TRUE,ylims,ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
@@ -1476,8 +1477,8 @@ viewGroups <- function(data, groups, groups2,
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
 
                 matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
-                        ylim=ylims[[ptyp]],col=tmp,xlim=xlim,xlab=xid,log=log)
-
+                        ylab=NA,xlab=NA,
+                        ylim=ylims[[ptyp]],col=tmp,xlim=xlim,log=log)
                 ## plot mean and confidence intervals
                 if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
                     if ( show.ci95 ) {
@@ -1502,24 +1503,28 @@ viewGroups <- function(data, groups, groups2,
                 }
 
                 ## add axes for first two values
-                if ( yaxis[1]==i ) axis(2, tcl=.25, mgp=c(0,-1,-.05),
-                            col=ifelse(global.x,col.orig,1),
-                            col.axis=ifelse(global.x,col.orig,1))
-                if ( yaxis[2]==i ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
+                if ( yaxis[1]==i & sg==1 ) 
+                    axis(2, tcl=.25, mgp=c(0,-1,-.05),
+                         col=ifelse(global.x,col.orig,1),
+                         col.axis=ifelse(global.x,col.orig,1))
+                if ( yaxis[2]==i & sg==1 ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
                             col=ifelse(global.x,col.orig,1),
                             col.axis=ifelse(global.x,col.orig,1))
             }
-            if ( length(sgroups)>1 & g2.legend )
-                if ( global.x ) 
-                    legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
-                           col=1,bty="n")
-                else
-                    legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
-                           col=orig.cols,bg="#FFFFFFAA")
+        }
+        if ( length(sgroups)>1 & g2.legend )
+          if ( global.x ) 
+            legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
+                   col=1,bty="n")
+          else
+            legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
+                   col=orig.cols,bg="#FFFFFFAA")
               else
                 legend(g2.legpos,id, bty="n")
-            if ( xaxis ) axis(1)
-        }
+        if ( xaxis ) axis(1)
+        if ( missing(xlab) ) 
+          xlab <- xid
+        mtext(xlab, 1, 2.5)
     }
     ## add legend to last plot
     if ( g1.legend )
