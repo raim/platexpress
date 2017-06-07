@@ -31,18 +31,20 @@
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
-                         fields, nrows=8, formatted=FALSE) {
+                         fields, nrows=8, formatted=FALSE, header=TRUE) {
 
 
     ## already in well format?
     if ( formatted ) {
-        dat <- read.table(file, sep=sep, header=TRUE, stringsAsFactors=FALSE)
+        dat <- read.table(file, sep=sep, header=header, stringsAsFactors=FALSE)
         return(dat)
     }
     
     ## plate map by columns and rows
-    dat <- read.table(file, sep=sep, header=TRUE, row.names=1, nrows=nrows,
+    dat <- read.table(file, sep=sep, header=header, row.names=1, nrows=nrows,
                       stringsAsFactors=FALSE)
+    if ( !header )
+      colnames(dat) <- 1:ncol(dat)
 
     ## generate well names from row and column names
     plate <- paste(rep(rownames(dat),ncol(dat)),
