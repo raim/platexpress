@@ -754,6 +754,7 @@ adjustBase <- function(data, base=0, dids, add.fraction, xlim, each=FALSE, verb=
 ## for a variable given in several list items,
 ## used for average (master) time and temperatures
 ## in interpolatePlateTimes()
+## TODO: allow different lengths?
 listAverage <- function(lst, id) {
 
     ## reduce to entries that have <id>
@@ -764,7 +765,15 @@ listAverage <- function(lst, id) {
     ## check length of lists and find missing time-points
     if ( any(diff(unlist(lapply(vals, length)))!=0) ) {
         stop("data have different lengths: ", id)
-        ## find point of discrepancy
+        ## TODO: simple solution: take longest vector
+        
+        ## TODO: find point of discrepancy
+        all <- unlist(vals) # concat all values
+        # get lengths
+        len <- unlist(sapply(1:length(vals),
+                             function(x) rep(x, length(vals[[x]]))))
+        ## for each set there should be one measurement per time point
+        idx <- which(diff(len[order(all)])==0)
         mn <- min(unlist(lapply(vals, length)))
         tmp <- lapply(vals, function(x) x[1:mn])
         tmp <- matrix(unlist(tmp), ncol = length(tmp), byrow = FALSE)
