@@ -124,7 +124,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
         stop("gcFit: Different number of datasets in data and time")
     if (!is.element(control$fit.opt, c("s", "m", "b"))) {
         warning("fit.opt must be set to 's', 'm' or 'b'. Changed to 'b'!")
-        fit.opt = "b"
+        control$fit.opt = "b"
     }
 
      ## add gcFit.2 specific controls
