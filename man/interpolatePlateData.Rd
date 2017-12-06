@@ -29,4 +29,3 @@ data set, e.g., fluorescence to OD
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
 }
-

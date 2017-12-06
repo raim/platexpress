@@ -16,10 +16,9 @@ prettyData(data, dids, colors)
 \description{
 \code{\link{prettyData}} : set colors and order or filter the data set
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{readPlateData}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

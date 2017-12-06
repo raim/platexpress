@@ -39,4 +39,3 @@ returns data for group of wells in a given range of the x-axis
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
 }
-

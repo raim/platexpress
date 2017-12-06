@@ -35,10 +35,9 @@ dids where raised to a minimum level in
 Adjusts data to a new mininum, this is useful for adjustment
 of negative values after blank corrections
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{correctBlanks}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

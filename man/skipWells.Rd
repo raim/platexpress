@@ -32,4 +32,3 @@ plate <- skipWells(ap12plate, skip="A9") # rm well "A9" from the plate layout
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
 }
-

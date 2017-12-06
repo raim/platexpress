@@ -26,10 +26,9 @@ cols <- sapply(wavelengths, wavelength2RGB)
 bars <- rep(1,length(wavelengths)); names(bars) <- wavelengths
 barplot(bars,border=cols,col=cols,las=2)
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{showSpectrum}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

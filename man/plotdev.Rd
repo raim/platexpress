@@ -24,4 +24,3 @@ plots to png, eps or pdf, taking the same arguments
 Rainer Machne \email{raim@tbi.univie.ac.at}
 png
 }
-

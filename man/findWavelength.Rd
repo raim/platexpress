@@ -23,10 +23,9 @@ click on the spectrum, then draws a vertical line at the clicked
 wavelength using \code{\link{plotWavelength}} and records the wavelength
 in nm.
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{showSpectrum}}, \code{\link{plotWavelength}}, \code{\link{wavelength2RGB}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

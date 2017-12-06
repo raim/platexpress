@@ -31,10 +31,9 @@ this is the case for the current data set}
 \description{
 Read Synergy Mx-exported files
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{readPlateData}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

@@ -12,4 +12,3 @@ bandwidthCV.2(data, did, mid, wells, bandwidths = seq(0.5, 10, length.out =
 hack of cellGrowth bandwidthCV to work with platexpress data format
 TODO: select bandwidths from data$Time
 }
-

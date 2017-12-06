@@ -11,4 +11,3 @@ fitCellGrowths.2(data, did, mid, wells, ...)
 batch wrapper for fitCellGrowth
 TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
 }
-

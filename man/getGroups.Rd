@@ -27,10 +27,9 @@ group wells by experiment annotations (in plate map file)
 Calculates the distinct groups from the plate layout by the selected
 experimental parameters.
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{readPlateMap}}, \code{\link{viewGroups}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

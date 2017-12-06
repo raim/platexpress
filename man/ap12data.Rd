@@ -16,4 +16,3 @@ map is in \code{\link{ap12plate}}.}
   \item Data matrix 'YFP_50:500,535': the YFP fluorescence measured by excitation at 500 nm and emission at 535 nm 
 }
 }
-

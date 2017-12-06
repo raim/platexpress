@@ -6,7 +6,7 @@
 columns should be named as in the corresponding data files.}
 \usage{
 readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
-  nrows = 8, formatted = FALSE)
+  nrows = 8, formatted = FALSE, header = TRUE)
 }
 \arguments{
 \item{file}{text file containing the plate layout.}
@@ -38,10 +38,9 @@ columns should be named as in the corresponding data files.
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
 plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\\n", fields=c("strain","samples"))
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{readPlateData}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

@@ -18,4 +18,3 @@ steps}
 \description{
 \code{\link{getData}} : get a specific data set, returns a data matrix
 }
-

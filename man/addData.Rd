@@ -22,10 +22,9 @@ addData(data, ID, dat, col, processing, replace = FALSE)
 \description{
 \code{\link{addData}} : add a data set, e.g., calculated ratios
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{readPlateData}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

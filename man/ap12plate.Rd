@@ -13,4 +13,3 @@ fitting to the experimental data in \code{\link{ap12data}}
 The plate layout table indicates the different strains tested, biological
 replicates (B1 to B3), and blank wells (containing only growth medium)
 }
-

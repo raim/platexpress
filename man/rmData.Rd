@@ -18,10 +18,9 @@ data set <\code{ID}> removed
 \description{
 \code{\link{rmData}} : remove a data set
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{addData}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

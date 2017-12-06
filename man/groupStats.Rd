@@ -29,10 +29,9 @@ Calculates the simple statistics over grouped wells
 (means, 95% confidence intervals, stdandard errors) along the x-axis
 (usually time).
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{readPlateMap}}, \code{\link{viewGroups}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

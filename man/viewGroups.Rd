@@ -4,7 +4,7 @@
 \alias{viewGroups}
 \title{plot grouped wells as summary plots, incl. confidence intervals and means}
 \usage{
-viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, dids,
+viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, dids,
   dtype = "data", pcols, yscale = TRUE, ylims, ylim, log = "",
   show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
   lty.orig = 1, lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2,
@@ -32,6 +32,8 @@ instead of the default Time vector}
 specifies a subset of the data as x-axis}
 
 \item{xlim}{plot range of the x-axis}
+
+\item{xlab}{custom x-axis label}
 
 \item{dids}{IDs of the data to be plotted; if missing, all data will
 be plotted}
@@ -111,11 +113,10 @@ groups <- getGroups(plate=ap12plate, by=c("strain"))
 vg <- viewGroups(ap12data,groups=groups,lwd.orig=0.1,nrow=1)
 vg <- viewGroups(ap12data,groups2=groups,lwd.orig=0.1,nrow=1)
 }
-\author{
-Rainer Machne \email{raim@tbi.univie.ac.at}
-}
 \seealso{
 \code{\link{viewPlate}}, \code{\link{getGroups}},
 \code{\link{readPlateMap}}
 }
-
+\author{
+Rainer Machne \email{raim@tbi.univie.ac.at}
+}

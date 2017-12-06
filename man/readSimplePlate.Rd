@@ -27,4 +27,3 @@ as a list of strings}
 Read in simple platereader data with only one data type, and time
 in the first column
 }
-

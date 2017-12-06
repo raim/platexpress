@@ -18,4 +18,3 @@ or the platexpress interface \code{\link{gcFit.2}}}
 Convenience function to quickly extract growth parameters
 from a \code{\link[grofit:grofit]{grofit}} results list.
 }
-

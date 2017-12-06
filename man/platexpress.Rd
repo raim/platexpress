@@ -15,7 +15,7 @@ microplate-readers or other parallel growth systems.
 (graphics, grDevices, stats) but more functionality is available when
 \code{\link[grofit:grofit]{grofit}} is installed.
 }
+
 \author{
 Rainer Machne
 }
-

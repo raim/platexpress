@@ -22,4 +22,3 @@ which adds the new "plot" switch used in \code{\link{gcFit.2}}
 \seealso{
 \code{\link{gcFit.2}}
 }
-

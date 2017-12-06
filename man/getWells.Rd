@@ -23,4 +23,3 @@ or a list of blanks if \code{blanks==TRUE}
 \description{
 get a filtered list of wells
 }
-

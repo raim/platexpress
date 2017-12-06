@@ -42,4 +42,3 @@ as required for \code{\link[grofit:grofit]{grofit}}.
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
 }
-

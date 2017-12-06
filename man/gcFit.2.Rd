@@ -32,4 +32,3 @@ names \code{\link{grofit.2.control}} that adds these options.
 \seealso{
 \code{\link{gcFit.2}}
 }
-

@@ -18,4 +18,3 @@ correspond to the wells in data}
 \description{
 \code{\link{shiftData}} : shift x-axis by a lag-phase to align growth curves
 }
-
