@@ -13,7 +13,7 @@
 #' \code{\link[grofit:grofit]{grofit}} is installed.
 #'@importFrom stats median sd qt approx spline filter
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
-#' abline lines points polygon box axis par text title 
+#' abline lines points polygon box axis par text title mtext
 #'@importFrom grDevices rainbow rgb col2rgb png pdf postscript graphics.off
 #'@importFrom utils read.csv read.table
 NULL
