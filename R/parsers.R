@@ -22,6 +22,8 @@
 #'                  format; all other paramaters but 'sep' will be ignored
 #' @param nrows number of rows to expect, defaults to 8 for rows A to H in
 #' a typical 96 well plate
+#' @param header logical argument indicating the presence/absence of a header
+#' row in the layout file
 #' @return a table of well content descriptors, where the first column 'wells'
 #'         maps the plate map to the data files.
 #' @seealso \code{\link{readPlateData}}

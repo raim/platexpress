@@ -25,6 +25,9 @@ a typical 96 well plate}
 
 \item{formatted}{indicates whether the file is already in the required
 format; all other paramaters but 'sep' will be ignored}
+
+\item{header}{logical argument indicating the presence/absence of a header
+row in the layout file}
 }
 \value{
 a table of well content descriptors, where the first column 'wells'
