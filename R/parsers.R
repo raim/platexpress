@@ -1,5 +1,15 @@
 ### PLATE DESIGN & DATA
 
+## TODO: wrapper to read both layout and data
+readPlates <- function(layout, data.path, type, settings) {
+    ## read plate layout, potentially multiple plates in one file
+    ## automatically read in each plate data
+    ## merge data from multiple plates?
+}
+## TODO: merge several plates and layouts
+mergePlates <- function(data=list(), layouts=list()) {
+}
+
 ## Plate Design: parses a plate design file in CSV. Rows and columns
 ## should be named as in the datafile. Each field can
 ## have multiple descriptors, separated by a specified separator (e.g.
