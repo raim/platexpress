@@ -525,7 +525,8 @@ skipWells <- function(data, skip) {
           data[[id]]$data <- data[[id]]$data[,-which(wells%in%skip),drop=FALSE]
       }
     else if ( !is.null(dim(data)) ) ## rm from plate layout map
-      data[match(skip,data[,"well"]),2:ncol(data)] <- NA
+        ##data[match(skip,data[,"well"]),2:ncol(data)] <- NA
+        data <- data[-match(skip,data[,"well"]),]
     else ## rm from grouping
       for ( g in 1:length(data) )
         data[[g]] <- data[[g]][!data[[g]]%in%skip]
