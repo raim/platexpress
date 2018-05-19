@@ -8,7 +8,7 @@
 data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
 }
 \arguments{
-\item{data}{the current platexpress data set, see \code{\link{readPlateData}}}
+\item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
 \item{did}{data ID of the data to be converted, from \code{data$dataIDs}}
 

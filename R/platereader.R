@@ -232,9 +232,9 @@ se <- function(data,na.rm=TRUE) {
 
 
 
-#' \code{\link{prettyData}} : set colors and order or filter the data set
+#' \code{\link{prettyData}} : set colors, rename, order or filter the data set
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
-#' @param dids a vector of data IDs, data will be filtered and sorted by this list; of the vector is named the IDs will be replaced by these names
+#' @param dids a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names
 #' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
@@ -250,11 +250,13 @@ prettyData <- function(data, dids, colors) {
     
     ## re-order: mids first and IDs last
     data$dataIDs <- dids
+    ## store colors
+    origcols <- data$colors
     data <- data[c(match(mids,names(data)),
                    match("mids",names(data)),
                    match(dids,names(data)),
                    match("dataIDs",names(data)))]
-
+    data$colors <- origcols
 
     ## rename!
     if ( !is.null(names(dids)) ) {
@@ -270,7 +272,7 @@ prettyData <- function(data, dids, colors) {
     if ( !missing(colors) ) {
         if ( is.null(names(colors)) )
             names(colors) <- data$dataIDs
-        data$colors <- colors
+        data$colors[names(colors)] <- colors
     }
     data
 }
@@ -319,7 +321,11 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
             data$colors <- c(data$colors, col[length(col)])
             names(data$colors) <-
                 c(names(data$colors)[2:length(data$colors)-1],ID)
+        } else if ( !missing(col) ) {
+            data$colors <- getColors(data$dataIDs)
+            data$colors[ID] <- col
         }
+        
         if ( missing(processing) ) # add date as processing note
             processing <- date()
         data <- append(data, list(list(data=dat, processing=processing)))

@@ -28,10 +28,16 @@ mergePlates <- function(data=list(), layouts=list()) {
 #' @param blank.id keyword that indicates blank wells. Blank wells can be
 #'                 combined with other well descriptors for separate blanking
 #' @param fields names for the field descriptors
+#' @param asep a separator for substance:amount pairs, eg. to indicate amount
+#' of an inducer or a nutrient, can only be used together with
+#' argument \code{afield}, eg. use \code{asep=":", afield="inducer"}
+#' @param afield field names which hold substance:amount pair information,
+#' see argument \code{asep}
 #' @param formatted indicates whether the file is already in the required
 #'                  format; all other paramaters but 'sep' will be ignored
 #' @param nrows number of rows to expect, defaults to 8 for rows A to H in
-#' a typical 96 well plate
+#' a typical 96 well plate; TODO: get rid of this and instead check for
+#' rownames?
 #' @param header logical argument indicating the presence/absence of a header
 #' row in the layout file
 #' @return a table of well content descriptors, where the first column 'wells'
@@ -43,16 +49,21 @@ mergePlates <- function(data=list(), layouts=list()) {
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
-                         fields, nrows=8, formatted=FALSE, header=TRUE) {
+                         fields, asep, afield,
+                         nrows=8, formatted=FALSE, header=TRUE) {
 
 
     ## already in well format?
     if ( formatted ) {
         dat <- read.table(file, sep=sep, header=header, stringsAsFactors=FALSE)
+        ## split inducer:amount columns
+        if ( !missing(asep) & !missing(afield) ) 
+            plate <- replaceAmounts(plate, col=afield, sep=asep, replace=TRUE)
         return(dat)
     }
     
     ## plate map by columns and rows
+    ## TODO: get rid of nrows and check fields instead?
     dat <- read.table(file, sep=sep, header=header, row.names=1, nrows=nrows,
                       stringsAsFactors=FALSE)
     if ( !header )
@@ -84,8 +95,47 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     ## and add new blank
     plate <- cbind(data.frame(plate),blank=blanks)
 
+    ## split inducer:amount columns
+    if ( !missing(asep) & !missing(afield) ) 
+        plate <- replaceAmounts(plate, col=afield, sep=asep, replace=TRUE)
+    
     #class(plate) <- "platemap"
     return(plate)
+}
+
+#' replace amount columns of plate maps
+#'
+#' replaces amount strings of the form substance:amount in columns of
+#' plate maps by two columns, separating the substance and the amount;
+#' wrapper for \code{\link{parseAmounts}}
+#' @param map the plate map, see  \code{\link{readPlateMap}}
+#' @param col the column ID or index to be split
+#' @param sep the separator of the substance:amount pair strings
+#' @param replace if TRUE the original columns in \code{col} will be removed
+#' @export
+replaceAmounts <- function(map, col, sep=":", replace=TRUE) {
+    for ( cl in col ) 
+        map <- cbind.data.frame(map, parseAmounts(map[,cl], sep=sep))
+    if ( replace ) {
+        if ( typeof(col)=="character" )
+            col <- match(col,colnames(map))
+        map <- map[,-col]
+    }
+    map
+}
+
+#' parses amount string from a plate map
+#'
+#' splits a vector of strings of substance:amount pairs into
+#' a matrix with 2 columns, of substances and amounts
+#' @param str a vector of strings, providing substance:amount pairs
+#' @param sep the separator of the substance:amount pair strings
+#' @seealso \code{\link{replaceAmounts}}
+#' @export
+parseAmounts <- function(str, sep=":") {
+    amount <- as.numeric(sub(paste0(".*",sep),"",str))
+    inducer <- sub(paste0(sep,".*"),"",str)
+    cbind.data.frame(substance=inducer,amount=amount)
 }
 
 ### PLATE DATA

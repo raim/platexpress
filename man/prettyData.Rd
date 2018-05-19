@@ -2,19 +2,19 @@
 % Please edit documentation in R/platereader.R
 \name{prettyData}
 \alias{prettyData}
-\title{\code{\link{prettyData}} : set colors and order or filter the data set}
+\title{\code{\link{prettyData}} : set colors, rename, order or filter the data set}
 \usage{
 prettyData(data, dids, colors)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
 
-\item{dids}{a vector of data IDs, data will be filtered and sorted by this list; of the vector is named the IDs will be replaced by these names}
+\item{dids}{a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names}
 
 \item{colors}{a vector of plot colors as RGB strings, optionally already named by dataIDs}
 }
 \description{
-\code{\link{prettyData}} : set colors and order or filter the data set
+\code{\link{prettyData}} : set colors, rename, order or filter the data set
 }
 \seealso{
 \code{\link{readPlateData}}

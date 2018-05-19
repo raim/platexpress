@@ -6,7 +6,7 @@
 columns should be named as in the corresponding data files.}
 \usage{
 readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
-  nrows = 8, formatted = FALSE, header = TRUE)
+  asep, afield, nrows = 8, formatted = FALSE, header = TRUE)
 }
 \arguments{
 \item{file}{text file containing the plate layout.}
@@ -20,8 +20,16 @@ combined with other well descriptors for separate blanking}
 
 \item{fields}{names for the field descriptors}
 
+\item{asep}{a separator for substance:amount pairs, eg. to indicate amount
+of an inducer or a nutrient, can only be used together with
+argument \code{afield}, eg. use \code{asep=":", afield="inducer"}}
+
+\item{afield}{field names which hold substance:amount pair information,
+see argument \code{asep}}
+
 \item{nrows}{number of rows to expect, defaults to 8 for rows A to H in
-a typical 96 well plate}
+a typical 96 well plate; TODO: get rid of this and instead check for
+rownames?}
 
 \item{formatted}{indicates whether the file is already in the required
 format; all other paramaters but 'sep' will be ignored}

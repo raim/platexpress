@@ -12,7 +12,7 @@
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
 #' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
 #' \code{\link[grofit:grofit]{grofit}} data format
-#' @param data the current platexpress data set, see \code{\link{readPlateData}}
+#' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param did data ID of the data to be converted, from \code{data$dataIDs}
 #' @param min.time minimal time of the data to be used
 #' @param max.time maximal time of the data to be used
@@ -38,6 +38,7 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
     dat <- data[[did]]$data
     if ( missing(wells) )
         wells <- colnames(dat)
+    else wells <- as.character(wells)
 
     dat <- dat[,wells]
 
@@ -55,12 +56,20 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
     time <- t(matrix(rep(time, ncol(dat)), c(length(time), ncol(dat))))
 
     ## well annotation
+    ## use well as TestId
     if ( !missing(plate) ) {
-        if ( missing(eid) )
-            eid <- colnames(plate)[2:3]
-        idx <- match(wells,as.character(plate[,"well"]))
-        annotation <- data.frame(cbind(as.character(plate[idx,eid[1]]),
-                                       as.character(plate[idx,eid[2]])))
+        if ( missing(eid) ) ## add second column as default
+            eid <- colnames(plate)[2]
+        ## sub-selection
+        idx <- match(wells, as.character(plate[,"well"]))
+        annotation1 <- plate[idx,"well"]
+        ## use both fields if two eids are given ..
+        annotation2 <- plate[idx,eid[1]]
+        if ( length(eid)>1 )
+            for ( k in 2:length(eid) )
+                annotation2 <- paste0(annotation2,"-",plate[idx,eid[k]])
+        annotation <- data.frame(annotation1, annotation2)
+        
     } else
         annotation <- data.frame(cbind(colnames(dat),
                                        rep("",ncol(dat))))
@@ -69,9 +78,9 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
     found.dose <- !missing(dose)
     if ( !found.dose ) 
         if ( !missing(plate) ) ## get dose info from plate layout: TODO
-            if ( "dose" %in% colnames(plate) ) {
-                idx <- match(wells,as.character(plate[,"dose"]))
-                dose <- as.numeric(plate[idx,"dose"])
+            if ( "amount" %in% colnames(plate) ) {
+                idx <- match(wells,as.character(plate[,"well"]))
+                dose <- as.numeric(plate[idx,"amount"])
                 found.dose <- TRUE
             }
     if ( !found.dose )
@@ -84,6 +93,50 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
     list(time=time, data=grdat)
 }
 
+#' parse grofit results
+#'
+#' parses the output of \code{\link{gcFit.2}} into a table
+#' of the main model parameters, for each well
+#' @param fit grofit object, the result of a call to \code{\link{gcFit.2}}
+#' @export
+grofitResults <- function(fit) {
+    ## TODO: addModel, using
+    ## this data to add modelled data to the plate data object
+    params <- fit$gcTable[,c("lambda.model","mu.model","A.model","used.model")]
+    colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
+    rownames(params) <- as.character(odfit$gcTable[,"TestId"])
+    params
+}
+
+#' add grofit models to plate data object
+#' @param data a platexpress data set, see \code{\link{readPlateData}}
+#' @param fit grofit object, the result of a call to \code{\link{gcFit.2}}
+#' @param ID ID for the new data set
+#' @param ... arguments to \code{\link{addData}}
+#' @export
+addModel <- function(data, fit, ID="model", ...) {
+
+    testid <- "TestId" # this requires wells being used as TestId in grofit
+   
+    ## copy first existing data set
+    newdat <- data[[data$dataIDs[[1]]]]$data
+    newdat[] <- NA
+    models <- rep(NA, ncol(newdat))
+    names(models) <- colnames(newdat)
+    ## parse grofit results and use predict to add data
+    for ( i in 1:ncol(newdat) ) {
+        id <- colnames(newdat)[i]
+        idx <- which(as.character(fit$gcTable[,testid])==id)
+        if ( !length(idx) ) next
+        #cat(paste(id, fit$gcTable[idx,testid],fit$gcFittedModels[[idx]]$gcID[1],"\n"))
+        if ( !fit$gcFittedModels[[idx]]$fitFlag ) next
+        newdat[,i] <- predict(fit$gcFittedModels[[idx]]$nls,
+                              newdata=data.frame(time=data$Time))
+        models[i] <- fit$gcFittedModels[[idx]]$model
+    }
+    ## add and return
+    addData(data, ID, newdat, processing="grofit prediction", ...)
+}
 
 #' hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
 #' which adds the new "plot" switch used in \code{\link{gcFit.2}}
