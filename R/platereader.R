@@ -952,6 +952,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param wells a list of wells to plot, overrules \code{rows} and \code{cols}
+#' @param wcols named color vector for wells, used for the well ID
 #' @param rows a list of strings/characters used as row ID in the composite
 #' row:col well description in the plate layout (map) and plate data
 #' @param cols as rows but plate column IDs
@@ -976,7 +977,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' argument \code{dids}) in the last plotted well
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-viewPlate <- function(data, wells, 
+viewPlate <- function(data, wells, wcols,
                       rows=toupper(letters[1:8]),cols=1:12,
                       xid, xscale=FALSE,xlim,
                       dids, dtype="data", pcols, yscale=TRUE,ylims,ylim,log="",
@@ -991,6 +992,10 @@ viewPlate <- function(data, wells,
         rows <- wells
         cols <- ""
     }
+    if ( missing(wcols) ) {
+        wcols <- rep(1,length(wells))
+        names(wcols) <- wells
+    } 
     
     ## filter for present wells
     pwells <- unique(c(sapply(data$dataIDs,
@@ -1112,7 +1117,7 @@ viewPlate <- function(data, wells,
                      type="l",log=log,col=pcols[ptyp])
               if ( k==1 ) {
                   box()
-                  legend(legpos,well,bty="n")
+                  legend(legpos,well,text.col=wcols[well],bty="n")
               }
           }
       }
