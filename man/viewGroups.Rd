@@ -5,7 +5,7 @@
 \title{plot grouped wells as summary plots, incl. confidence intervals and means}
 \usage{
 viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, dids,
-  dtype = "data", pcols, yscale = TRUE, ylims, ylim, log = "",
+  dtype = "data", pcols, group2.col, yscale = TRUE, ylims, ylim, log = "",
   show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
   lty.orig = 1, lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2,
   g2.legpos = "topleft", g2.legend = TRUE, embed = FALSE,
