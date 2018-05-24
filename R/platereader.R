@@ -952,6 +952,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param wells a list of wells to plot, overrules \code{rows} and \code{cols}
+#' @param wcols named color vector for wells, used for the well ID
 #' @param rows a list of strings/characters used as row ID in the composite
 #' row:col well description in the plate layout (map) and plate data
 #' @param cols as rows but plate column IDs
@@ -976,7 +977,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' argument \code{dids}) in the last plotted well
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-viewPlate <- function(data, wells, 
+viewPlate <- function(data, wells, wcols,
                       rows=toupper(letters[1:8]),cols=1:12,
                       xid, xscale=FALSE,xlim,
                       dids, dtype="data", pcols, yscale=TRUE,ylims,ylim,log="",
@@ -991,6 +992,10 @@ viewPlate <- function(data, wells,
         rows <- wells
         cols <- ""
     }
+    if ( missing(wcols) ) {
+        wcols <- rep(1,length(wells))
+        names(wcols) <- wells
+    } 
     
     ## filter for present wells
     pwells <- unique(c(sapply(data$dataIDs,
@@ -1112,7 +1117,7 @@ viewPlate <- function(data, wells,
                      type="l",log=log,col=pcols[ptyp])
               if ( k==1 ) {
                   box()
-                  legend(legpos,well,bty="n")
+                  legend(legpos,well,text.col=wcols[well],bty="n")
               }
           }
       }
@@ -1236,6 +1241,31 @@ groupStats <- function(data, groups, dids) {
     data
 }
 
+#' get colors for all wells in a group
+#'
+#' returns a named vector of colors for a grouping if all
+#' colors in that group are unique
+#' @param plate the plate layout map, see \code{\link{readPlateMap}},
+#' for which a coloring scheme has been specified, eg. by
+#' \code{\link{amountColors}}
+#' @param group a well grouping, see \code{\link{getGroups}}
+#' @param color the name of the column in \code{plate} providing colors
+#' @export
+groupColors <- function(plate, group, color="color") {
+    grcols <- rep(NA,length(group))
+    names(grcols) <- names(group)
+    #wells <- rownames(plate)
+    #if ( is.null(wells) ) wells <- plate[,"well"]
+    for ( i in 1:length(group) ) {
+        grp <- group[[i]]
+        cols <- unique(plate[grp,color])
+        if ( length(cols)!=1 )
+            stop("different colors observed in group", i, names(group)[i])
+        grcols[i] <- cols
+    }
+    grcols
+}
+
 
 #' plot grouped wells as summary plots, incl. confidence intervals and means
 #' @param data the list of measurement data as provided by
@@ -1307,7 +1337,8 @@ groupStats <- function(data, groups, dids) {
 #' @export
 viewGroups <- function(data, groups, groups2,
                        xid, xscale=FALSE, xlim, xlab,
-                       dids, dtype="data",pcols,yscale=TRUE,ylims,ylim, log="",
+                       dids, dtype="data",pcols,group2.col,
+                       yscale=TRUE,ylims,ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
                        g2.legpos="topleft", g2.legend=TRUE,
@@ -1347,7 +1378,10 @@ viewGroups <- function(data, groups, groups2,
     if ( verb )
       cat(paste("x-axis:", xid, "\n"))
 
+    ## COLOR SELECTION default
     ## get plot params - colors
+    ## TODO: also allow individual group2 colors
+    ## (if only one data set is plotted)
     if ( missing(pcols) ) # if not missing: overrides set&default colors
         if ( !is.null(data$colors) )
             pcols <- data$colors # set colors
@@ -1451,11 +1485,16 @@ viewGroups <- function(data, groups, groups2,
         for ( i in 1:length(ptypes) ) {
             ptyp <- ptypes[i]
 
+            ## COLOR SELECTION group 1
             col.orig <- pcols[ptyp]
-            ## override colors if
+            ## TODO: unify !global.x and group2.col, they seem similar
+            ## override colors if 
             orig.cols <- NA
-            if ( !global.x ) 
+            if ( !global.x ) # there is no common x-axis
                 orig.cols <- getColors(names(sgroups))
+            if ( !missing(group2.col) ) # colors were explicitly provided
+                orig.cols <- group2.col[names(sgroups)]
+          
             for ( sg in 1:length(sgroups) ) {
                 wells <- sgroups[[sg]]
                 wells <- wells[wells%in%pwells] # filter for present wells
@@ -1489,6 +1528,13 @@ viewGroups <- function(data, groups, groups2,
                                 ifelse(lty.orig==0,1,lty.orig))
                     #col.orig <- ifelse(g
                 }
+                ## COLOR SELECTION group 2
+                g2.col <- col.orig
+                ## group2 colors
+                if ( !missing(group2.col) ) 
+                    g2.col <- group2.col[sid]
+                ##cat(paste(sg, g2.col, "\n"))
+                
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
 
@@ -1511,10 +1557,10 @@ viewGroups <- function(data, groups, groups2,
                                     "raised to ylim for log. y-axis polygon")
                         }
                         polygon(x=px,y=py,border=NA,
-                                col=paste(pcols[ptyp],"55",sep=""))
+                                col=paste(g2.col,"55",sep=""))
                     }
                     if ( show.mean )
-                        lines(x=x,mn,col=ifelse(emphasize.mean,1,pcols[ptyp]),
+                        lines(x=x,mn,col=ifelse(emphasize.mean,1,g2.col),
                               lwd=lwd.mean,lty=ifelse(g2.legend,sg,lty.mean))
                 }
 
@@ -1529,18 +1575,18 @@ viewGroups <- function(data, groups, groups2,
             }
         }
         if ( length(sgroups)>1 & g2.legend )
-          if ( global.x ) 
-            legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
-                   col=1,bty="n")
-          else
-            legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
-                   col=orig.cols,bg="#FFFFFFAA")
-              else
-                legend(g2.legpos,id, bty="n")
+            if ( global.x & missing(group2.col) ) 
+                legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
+                       col=1,bty="n")
+            else
+                legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
+                       col=orig.cols,bg="#FFFFFFAA") # TODO: use g2cols
+        else
+            legend(g2.legpos,id, bty="n")
         if ( xaxis ) axis(1)
         if ( missing(xlab) ) 
           xlab <- xid
-        mtext(xlab, 1, 2.5)
+        mtext(xlab, 1, par("mgp")[1])
     }
     ## add legend to last plot
     if ( g1.legend )

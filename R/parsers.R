@@ -60,8 +60,10 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     if ( formatted ) {
         dat <- read.table(file, sep=sep, header=header, stringsAsFactors=FALSE)
         ## split inducer:amount columns
-        if ( !missing(asep) & !missing(afield) ) 
-            plate <- replaceAmounts(plate, col=afield, sep=asep, replace=TRUE)
+        if ( !missing(asep) & !missing(afield) ) {
+            dat <- replaceAmounts(dat, col=afield, sep=asep, replace=TRUE)
+            dat <- amountColors(dat)
+        }
         return(dat)
     }
     
@@ -82,7 +84,7 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
 
     values <- matrix("",nrow=length(vals),ncol=nvals)
     for ( i in 1:nvals ) 
-      values[,i] <- as.character(unlist(lapply(vals, function(x) trim(x[i]))))
+      values[,i] <- as.character(unlist(lapply(vals, function(x) trimws(x[i]))))
 
     if ( missing(fields) )
       colnames(values) <- paste("X",1:nvals,sep="")
@@ -99,8 +101,13 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     plate <- cbind(data.frame(plate),blank=blanks)
 
     ## split inducer:amount columns
-    if ( !missing(asep) & !missing(afield) ) 
+    if ( !missing(asep) & !missing(afield) ) {
         plate <- replaceAmounts(plate, col=afield, sep=asep, replace=TRUE)
+        plate <- amountColors(plate)
+    }
+    
+    ## use wells as rownames!
+    rownames(plate) <- plate$well
     
     #class(plate) <- "platemap"
     return(plate)
@@ -139,6 +146,30 @@ parseAmounts <- function(str, sep=":") {
     amount <- as.numeric(sub(paste0(".*",sep),"",str))
     inducer <- sub(paste0(sep,".*"),"",str)
     cbind.data.frame(substance=inducer,amount=amount)
+}
+
+#' add a color vector for substance amounts
+#'
+#' simply add a color palette along the range of added amounts
+#' of a given substance; where substance and amount columns
+#' obtained from from \code{\link{replaceAmounts}}, or options\\code{asep}
+#' and \code{afield} in \code{\link{readPlateMap}}.
+#' @param map the plate map, see  \code{\link{readPlateMap}}
+#' @param substance name of the substance column in \code{map}
+#' @param amount name of the amount column in \code{map}
+#' @param colf color palette function
+#' @seealso \code{\link{readPlateMap}}, \code{\link{replaceAmounts}}
+#' @export
+amountColors <- function(map, substance="substance",amount="amount", colf=colorRamps::matlab.like2) {
+    substances <- unique(map[,substance])
+    colors <- rep(NA, nrow(map))
+    for ( subst in substances ) {
+        idx <- which(map[,substance]==subst)
+        amnt <- map[idx,amount]
+        amnt <- round(100*amnt/max(amnt,na.rm=TRUE))+1
+        colors[idx] <- colf(101)[amnt]
+    }
+    cbind.data.frame(map,color=as.character(colors),stringsAsFactors=FALSE)
 }
 
 ### PLATE DATA
