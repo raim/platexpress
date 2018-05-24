@@ -7,7 +7,10 @@ readPlates <- function(layout, data.path, type, settings) {
     ## merge data from multiple plates?
 }
 ## TODO: merge several plates and layouts
+## just generate lists of plate objects, and make viewGroups/viewPlate
+## etc. take such lists as defaults, and convert singles to lists themselves
 mergePlates <- function(data=list(), layouts=list()) {
+    #just generates lists of plates, and one big layout table
 }
 
 ## Plate Design: parses a plate design file in CSV. Rows and columns
