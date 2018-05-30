@@ -4,16 +4,16 @@
 \alias{groupColors}
 \title{get colors for all wells in a group}
 \usage{
-groupColors(plate, group, color = "color")
+groupColors(map, group, color = "color")
 }
 \arguments{
-\item{plate}{the plate layout map, see \code{\link{readPlateMap}},
+\item{map}{the plate layout map, see \code{\link{readPlateMap}},
 for which a coloring scheme has been specified, eg. by
 \code{\link{amountColors}}}
 
 \item{group}{a well grouping, see \code{\link{getGroups}}}
 
-\item{color}{the name of the column in \code{plate} providing colors}
+\item{color}{the name of the column in \code{map} providing colors}
 }
 \description{
 returns a named vector of colors for a grouping if all

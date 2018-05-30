@@ -1245,20 +1245,20 @@ groupStats <- function(data, groups, dids) {
 #'
 #' returns a named vector of colors for a grouping if all
 #' colors in that group are unique
-#' @param plate the plate layout map, see \code{\link{readPlateMap}},
+#' @param map the plate layout map, see \code{\link{readPlateMap}},
 #' for which a coloring scheme has been specified, eg. by
 #' \code{\link{amountColors}}
 #' @param group a well grouping, see \code{\link{getGroups}}
-#' @param color the name of the column in \code{plate} providing colors
+#' @param color the name of the column in \code{map} providing colors
 #' @export
-groupColors <- function(plate, group, color="color") {
+groupColors <- function(map, group, color="color") {
     grcols <- rep(NA,length(group))
     names(grcols) <- names(group)
-    #wells <- rownames(plate)
-    #if ( is.null(wells) ) wells <- plate[,"well"]
+    #wells <- rownames(map)
+    #if ( is.null(wells) ) wells <- map[,"well"]
     for ( i in 1:length(group) ) {
         grp <- group[[i]]
-        cols <- unique(plate[grp,color])
+        cols <- unique(map[match(grp,map$well),color])
         if ( length(cols)!=1 )
             stop("different colors observed in group", i, names(group)[i])
         grcols[i] <- cols
@@ -1289,6 +1289,8 @@ groupColors <- function(plate, group, color="color") {
 #' @param xlab custom x-axis label
 #' @param pcols a named list of RGB colors to be used the plotted data types;
 #' the color vector must have names according to the data IDs
+#' @param group2.col a named list of RGB colors for group2 (which are shown
+#' in one plot)
 #' @param yscale if TRUE (default) global y-axis limits will be calculated from
 #' all plotted wells; if FALSE each well be locally scaled
 #' @param ylims a named list of y-axis ranges pairs for each data ID
@@ -1580,7 +1582,7 @@ viewGroups <- function(data, groups, groups2,
                        col=1,bty="n")
             else
                 legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
-                       col=orig.cols,bg="#FFFFFFAA") # TODO: use g2cols
+                       col=orig.cols,bg="#FFFFFFAA",box.lwd=NA) # TODO: use g2cols
         else
             legend(g2.legpos,id, bty="n")
         if ( xaxis ) axis(1)
