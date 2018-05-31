@@ -1195,7 +1195,10 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
     groups
 }
 
-
+## TODO
+## wrapper for viewGroups taking list of plates
+## and a merged layout file
+viewGroupl <- function(data, groups, groups2, ...) {}
 
 ## TODO: use this in viewGroups as well?
 #' calculates simple statistics for groups as plotted in
