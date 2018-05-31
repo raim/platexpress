@@ -169,7 +169,11 @@ amountColors <- function(map, substance="substance",amount="amount", colf=colorR
         amnt <- round(100*amnt/max(amnt,na.rm=TRUE))+1
         colors[idx] <- colf(101)[amnt]
     }
-    cbind.data.frame(map,color=as.character(colors),stringsAsFactors=FALSE)
+    if ( "color" %in% colnames(map) )
+      map$color <- as.character(colors)
+    else
+      map <- cbind.data.frame(map,color=as.character(colors),stringsAsFactors=FALSE)
+    map
 }
 
 ### PLATE DATA

@@ -426,6 +426,50 @@ cutData <- function(data, rng, mid) {
     data
 }
 
+#' dose-response box-plots of model parameters
+#'
+#' plots a continuous value for each well as a function
+#' of an \code{amount} of a \code{substance} and make boxplots
+#' for all replicates at a given amount
+#' @param map a plate layout map, to with columns 
+doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
+                         color="color", na.y=0, ylim) {
+
+    wells <- match(wells,map[,"well"])
+  
+    y <- map[wells,val]
+    x <- map[wells,amount]
+    
+    ## get unique colors for unique sorted x, as it will appear in
+    ## boxplots
+    ## UGLY, TODO: less ugly?
+    if ( color %in% colnames(map) ) {
+        cl <- map[wells,color]
+        cl <- cl[order(x)]
+        cl <- cl[which(!duplicated(sort(x)))]
+    } else cl <- 1
+    
+    if ( missing(ylim) )
+        ylim <- range(y,na.rm=TRUE)
+
+    if ( substance %in%  colnames(map) ) 
+        subid <- map[wells,substance][1]
+    else subid <- substance
+    
+    boxplot(y~x, border=cl,
+            xlab=subid,ylab=val,ylim=ylim,
+            na.action="na.pass")
+    stripchart(y~x,add=T, vertical=TRUE,col=cl,
+               method="jitter", pch=1,cex=1,
+               na.action="na.pass")
+    nay <- y
+    nay[is.na(y)] <- na.y
+    nay[!is.na(y)] <- NA
+    stripchart(nay~x,add=T, vertical=TRUE,col="red",
+               method="jitter", pch=4,cex=1/2,
+               na.action="na.pass")
+}
+
 #' returns data for group of wells in a given range of the x-axis
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a grouping of wells, see \code{\link{getGroups}}

@@ -45,6 +45,9 @@ interpolation, blank correction, etc.)}
 \item{pcols}{a named list of RGB colors to be used the plotted data types;
 the color vector must have names according to the data IDs}
 
+\item{group2.col}{a named list of RGB colors for group2 (which are shown
+in one plot)}
+
 \item{yscale}{if TRUE (default) global y-axis limits will be calculated from
 all plotted wells; if FALSE each well be locally scaled}
 
