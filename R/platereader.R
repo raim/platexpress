@@ -344,12 +344,16 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
 #' @seealso \code{\link{addData}}
 #' @export
 rmData <- function(data, ID) {
-    if ( !ID%in%data$dataIDs )
-        warning("\"",ID,"\" not found")
-    data$dataIDs <- data$dataIDs[!data$dataIDs%in%ID] # rm ID
+  
+  for ( id in ID ) {
+    if ( !id%in%data$dataIDs )
+      warning("\"",id,"\" not found")
+    data$dataIDs <- data$dataIDs[!data$dataIDs%in%id] # rm ID
     if ( "colors" %in% names(data) ) # rm color
-        data$colors <- data$colors[!names(data$colors)%in%ID]
-    data[-which(names(data)%in%ID)] # rm data
+        data$colors <- data$colors[!names(data$colors)%in%id]
+    data <- data[-which(names(data)%in%id)] # rm data
+  }
+  data
 }
 
 
@@ -431,9 +435,31 @@ cutData <- function(data, rng, mid) {
 #' plots a continuous value for each well as a function
 #' of an \code{amount} of a \code{substance} and make boxplots
 #' for all replicates at a given amount
-#' @param map a plate layout map, to with columns 
+#' @param map a plate layout map with columns \code{amount} and some 
+#' calculated value in column \code{val}, 
+#' eg. results from \code{\link[grofit:grofit]{grofit}}
+#' @param wells a list of well IDs to be used in the plot
+#' @param val the name of a column in \code{map} containing numeric values
+#' that should be plotted on y-axis
+#' @param amount the name of a column in \code{map} providing numeric values
+#' that should be plotted on x-axis, typically a substance added to wells
+#' in multiple replicates; the default value "amount" is automatically
+#' generated from appropriate plate layout files by \code{link{readPlateMap}} 
+#' @param substance the name of a column in \code{map} providing the names of 
+#' the substance in \code{amount}, used as x-axis label; if it doesn't 
+#' correspond to a column, its value is directly used as label
+#' @param color the name of a column in \code{map} providing colors
+#' for each well; NOTE, that wells with the same \code{amount} should have
+#' the same color, only the first color for a given \code{amount} is used;
+#' Colors are automatically assigned from a color ramp mapped to the
+#' numerical range of \code{amount} by \code{link{readPlateMap}} 
+#' @param na.y value to be used to plot replicates with \code{NA} in 
+#' column \code{val}; set to NA to supress plotting
+#' @param ylim limits of the y-axis
+#' @param xnum use numerical x-axis instead of default categorical
+#' @export
 doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
-                         color="color", na.y=0, ylim) {
+                         color="color", na.y=0, ylim, xnum=FALSE) {
 
     wells <- match(wells,map[,"well"])
   
@@ -447,6 +473,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
         cl <- map[wells,color]
         cl <- cl[order(x)]
         cl <- cl[which(!duplicated(sort(x)))]
+        names(cl) <- sort(x[!duplicated(x)])
     } else cl <- 1
     
     if ( missing(ylim) )
@@ -456,12 +483,36 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
         subid <- map[wells,substance][1]
     else subid <- substance
     
-    boxplot(y~x, border=cl,
-            xlab=subid,ylab=val,ylim=ylim,
-            na.action="na.pass")
-    stripchart(y~x,add=T, vertical=TRUE,col=cl,
+    #xlim <- range(x)
+    #if ( is.na(na.y) ) # if na.y are not plotted limit xaxis
+    #  xlim <- range(x[!is.na(y)])
+    
+    y1 <- y
+    x1 <- x
+    
+    if ( is.na(na.y) ) {
+      y1 <- y1[!is.na(y)]
+      x1 <- x1[!is.na(y)]
+    }
+    
+    xaxt="s"
+    if ( xnum ) {# attempt numerical x-axis
+      x1 <- factor(x1, levels = do.call(seq, as.list(range(x1))))
+      xact <- "n"
+    }
+    cl <- cl[as.character(unique(sort(x1)))]
+    boxplot(y1~x1, border=cl,
+            xlab=subid,ylab=val,ylim=ylim, #xlim=xlim,
+            na.action="na.pass",xaxt=xaxt)
+    stripchart(y1~x1,add=T, vertical=TRUE,col=cl,
                method="jitter", pch=1,cex=1,
                na.action="na.pass")
+    if ( xnum ) # numerical xaxis
+      axis(1)    
+    
+    if ( xnum )
+      x <- factor(x, levels=do.call(seq, as.list(range(x))))
+    
     nay <- y
     nay[is.na(y)] <- na.y
     nay[!is.na(y)] <- NA
