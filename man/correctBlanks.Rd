@@ -4,8 +4,8 @@
 \alias{correctBlanks}
 \title{\code{\link{correctBlanks}} correct for blanks}
 \usage{
-correctBlanks(data, plate, type = "ci95", by, dids, mid, max.mid, mbins = 1,
-  verb = TRUE)
+correctBlanks(data, plate, type = "median", by, dids, mid, max.mid,
+  mbins = 1, verb = TRUE)
 }
 \arguments{
 \item{data}{the \code{\link{platexpress}} data list to be blank-corrected}
