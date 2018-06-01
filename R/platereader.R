@@ -498,7 +498,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
     xaxt="s"
     if ( xnum ) {# attempt numerical x-axis
       x1 <- factor(x1, levels = do.call(seq, as.list(range(x1))))
-      xact <- "n"
+      xaxt <- "n"
     }
     cl <- cl[as.character(unique(sort(x1)))]
     boxplot(y1~x1, border=cl,
