@@ -629,7 +629,7 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbins=1, verb=TRUE) {
+correctBlanks <- function(data, plate, type="median", by, dids, mid, max.mid, mbins=1, verb=TRUE) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
@@ -728,8 +728,8 @@ correctBlanks <- function(data, plate, type="ci95", by, dids, mid, max.mid, mbin
                         blank <- median(c(dat[bbin,bwells]),na.rm=TRUE)
                     else if ( type=="mean" )
                         blank <- mean(c(dat[bbin,bwells]),na.rm=TRUE)
-                    else if ( type=="ci95" )
-                        blank <- mean(c(dat[bbin,bwells]),na.rm=TRUE) -  ci95(c(dat[bin,bwells]),na.rm=TRUE)
+                    else if ( type=="ci95" ) # TODO: why is ci95 subtracted?
+                        blank <- mean(c(dat[bbin,bwells]),na.rm=TRUE) -  ci95(c(dat[bbin,bwells]),na.rm=TRUE)
                 }
                 ## subtract blank
                 corr[[ptyp]]$data[bin,c(dwells,bwells)] <-
