@@ -2,10 +2,11 @@
 % Please edit documentation in R/platereader.R
 \name{doseResponse}
 \alias{doseResponse}
-\title{dose-response box-plots of model parameters}
+\title{dose-response plots with error bars for replicates}
 \usage{
 doseResponse(map, wells, val, amount = "amount", substance = "substance",
-  color = "color", na.y = 0, ylim, xnum = FALSE)
+  col = "color", bartype = "range", barl = 0.05, all = FALSE,
+  line = TRUE, na.y = 0, ylim, xlim, ylab, xlab, ...)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some 
@@ -26,21 +27,45 @@ generated from appropriate plate layout files by \code{link{readPlateMap}}}
 the substance in \code{amount}, used as x-axis label; if it doesn't 
 correspond to a column, its value is directly used as label}
 
-\item{color}{the name of a column in \code{map} providing colors
-for each well; NOTE, that wells with the same \code{amount} should have
-the same color, only the first color for a given \code{amount} is used;
-Colors are automatically assigned from a color ramp mapped to the
-numerical range of \code{amount} by \code{link{readPlateMap}}}
+\item{col}{either a valid color representation or the name of a column in 
+\code{map} providing colors for each well; NOTE, that wells with the same 
+\code{amount} should have the same color, only the first color for a given 
+\code{amount} is used; such colors are automatically assigned from a color ramp 
+mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
+see \code{\link{amountColors}}}
+
+\item{bartype}{type of the error bar range, "range" for the full range
+of the data, "ci95" for the 95% confidence interval, "sd" for the standard
+deviation, "se" for the standard error}
+
+\item{barl}{length of the horizontal lines of error bars (argument \code{length}
+of function \code{\link{arrows}})}
+
+\item{all}{logical indicating whether to plot all data points additionally to 
+error bars}
+
+\item{line}{logical indicating whether to plot a line connecting the mean
+values}
 
 \item{na.y}{value to be used to plot replicates with \code{NA} in 
 column \code{val}; set to NA to supress plotting}
 
 \item{ylim}{limits of the y-axis}
 
-\item{xnum}{use numerical x-axis instead of default categorical}
+\item{xlim}{limits of the x-axis}
+
+\item{ylab}{alternative label for the y-axis, default is to use argument \code{val}}
+
+\item{xlab}{alternative label for the x-axis, default is to use argument 
+\code{substance}, or if this is a column in \code{map}, the substance
+indicated there}
+
+\item{...}{arguments passed on to \code{\link{points}} used to plot the
+mean values}
 }
 \description{
 plots a continuous value for each well as a function
-of an \code{amount} of a \code{substance} and make boxplots
-for all replicates at a given amount
+of an \code{amount} of a \code{substance} and generates error bars
+for all replicates at a given amount; returns the plotted mean values
+and error bar ranges.
 }

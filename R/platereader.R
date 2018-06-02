@@ -430,7 +430,7 @@ cutData <- function(data, rng, mid) {
     data
 }
 
-#' dose-response box-plots of model parameters
+#' dose-response box-plots
 #'
 #' plots a continuous value for each well as a function
 #' of an \code{amount} of a \code{substance} and make boxplots
@@ -458,9 +458,11 @@ cutData <- function(data, rng, mid) {
 #' @param ylim limits of the y-axis
 #' @param xnum use numerical x-axis instead of default categorical
 #' @export
-doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
-                         color="color", na.y=0, ylim, xnum=FALSE) {
+doseResponse.box <- function(map, wells, val, amount="amount", substance="substance", 
+                             color="color", na.y=0, ylim, xnum=FALSE) {
 
+  if( missing(wells) ) wells <- map[,"well"]
+  
     wells <- match(wells,map[,"well"])
   
     y <- map[wells,val]
@@ -519,6 +521,132 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
     stripchart(nay~x,add=T, vertical=TRUE,col="red",
                method="jitter", pch=4,cex=1/2,
                na.action="na.pass")
+}
+
+#' dose-response plots with error bars for replicates
+#'
+#' plots a continuous value for each well as a function
+#' of an \code{amount} of a \code{substance} and generates error bars
+#' for all replicates at a given amount; returns the plotted mean values
+#' and error bar ranges.
+#' @param map a plate layout map with columns \code{amount} and some 
+#' calculated value in column \code{val}, 
+#' eg. results from \code{\link[grofit:grofit]{grofit}}
+#' @param wells a list of well IDs to be used in the plot
+#' @param val the name of a column in \code{map} containing numeric values
+#' that should be plotted on y-axis
+#' @param amount the name of a column in \code{map} providing numeric values
+#' that should be plotted on x-axis, typically a substance added to wells
+#' in multiple replicates; the default value "amount" is automatically
+#' generated from appropriate plate layout files by \code{link{readPlateMap}} 
+#' @param substance the name of a column in \code{map} providing the names of 
+#' the substance in \code{amount}, used as x-axis label; if it doesn't 
+#' correspond to a column, its value is directly used as label
+#' @param col either a valid color representation or the name of a column in 
+#' \code{map} providing colors for each well; NOTE, that wells with the same 
+#' \code{amount} should have the same color, only the first color for a given 
+#' \code{amount} is used; such colors are automatically assigned from a color ramp 
+#' mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
+#' see \code{\link{amountColors}} 
+#' @param bartype type of the error bar range, "range" for the full range
+#' of the data, "ci95" for the 95% confidence interval, "sd" for the standard
+#' deviation, "se" for the standard error
+#' @param barl length of the horizontal lines of error bars (argument \code{length}
+#' of function \code{\link{arrows}})
+#' @param all logical indicating whether to plot all data points additionally to 
+#' error bars
+#' @param line logical indicating whether to plot a line connecting the mean
+#' values
+#' @param na.y value to be used to plot replicates with \code{NA} in 
+#' column \code{val}; set to NA to supress plotting
+#' @param ylim limits of the y-axis
+#' @param xlim limits of the x-axis
+#' @param ylab alternative label for the y-axis, default is to use argument \code{val}
+#' @param xlab alternative label for the x-axis, default is to use argument 
+#' \code{substance}, or if this is a column in \code{map}, the substance
+#' indicated there
+#' @param ... arguments passed on to \code{\link{points}} used to plot the
+#' mean values
+#' @export
+doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
+                         col="color", bartype="range", barl=.05, 
+                         all=FALSE, line=TRUE, na.y=0, ylim, xlim, ylab, xlab, ...) {
+  
+  if( missing(wells) ) wells <- map[,"well"]
+  
+  wells <- match(wells,map[,"well"])
+  
+  y <- map[wells,val]
+  x <- map[wells,amount]
+
+  ## get unique colors for unique sorted x, as it will appear in
+  ## boxplots
+  ## UGLY, TODO: less ugly?
+  if ( col %in% colnames(map) ) {
+    cl <- map[wells,col]
+    cl <- cl[order(x)]
+    cl <- cl[which(!duplicated(sort(x)))]
+    names(cl) <- sort(x[!duplicated(x)])
+    linecol <- 1
+  } else { 
+    cl <- rep(col,length(unique(x)))
+    linecol <- col
+  }
+  
+  if ( substance %in%  colnames(map) ) 
+    subid <- map[wells,substance][1]
+  else subid <- substance
+  if ( missing(xlab) )
+    xlab <- subid
+  if ( missing(ylab) )
+    ylab <- val
+  
+  y1 <- y
+  x1 <- x
+    
+  y1 <- y1[!is.na(y)]
+  x1 <- x1[!is.na(y)]
+  
+
+  ## calculate ranges for duplicates at each x
+  xlevels <- sort(unique(x1))
+  ymat <- matrix(NA,nrow=length(xlevels),ncol=4)
+  for ( i in 1:length(xlevels) ) {
+    xi <- xlevels[i]
+    yi <- y1[x1==xi]
+    ymat[i,2] <- mean(yi,na.rm=TRUE)
+    if ( bartype=="range" )
+      ymat[i,3:4] <- range(yi,na.rm=TRUE)
+    else if ( bartype=="sd" )
+      ymat[i,3:4] <- c(ymat[i,2] + c(-1,1)*sd(yi,na.rm=TRUE))
+    else if ( bartype=="se" )
+      ymat[i,3:4] <- c(ymat[i,2] + c(-1,1)*se(yi,na.rm=TRUE))
+    else if ( bartype=="ci95")
+      ymat[i,3:4] <- c(ymat[i,2] + c(-1,1)*ci95(yi,na.rm=TRUE))
+    else stop("bar type ", bartype, " unknown\n")
+    ymat[i,1] <- xi
+  }
+  if ( missing(ylim) )
+    ylim <- range(c(ymat[,2:4],ifelse(all,y,NA)),na.rm=TRUE)
+  if ( missing(xlim) ) {
+    if ( !is.na(na.y))
+      xlim <- range(x,na.rm=TRUE)
+    else xlim <- range(x1,na.rm=TRUE)
+  }
+  
+  ## plot
+  plot(x1,y1,col=NA, xlab=subid,ylab=val,ylim=ylim,xlim=xlim, ...)
+  if ( line )
+    lines(ymat[,1],ymat[,2],col=linecol)
+  for ( i in 1:nrow(ymat) ) {
+    points(ymat[i,1],ymat[i,2], col=cl[i], ...)
+    arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
+    if ( all )
+      points(x1[x1==ymat[i,1]], y1[x1==ymat[i,1]], pch=20, cex=.5, , col=cl[i])
+  }
+  if ( !is.na(na.y) & sum(is.na(y)) )
+    points(x[is.na(y)], rep(na.y,sum(is.na(y))), col="red", pch=4, cex=.5)
+  invisible(ymat)
 }
 
 #' returns data for group of wells in a given range of the x-axis
