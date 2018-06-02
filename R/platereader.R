@@ -626,6 +626,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
     else stop("bar type ", bartype, " unknown\n")
     ymat[i,1] <- xi
   }
+  colnames(ymat) <- c(amount,val,bartype,"")
   if ( missing(ylim) )
     ylim <- range(c(ymat[,2:4],ifelse(all,y,NA)),na.rm=TRUE)
   if ( missing(xlim) ) {
