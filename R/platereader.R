@@ -548,6 +548,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' \code{amount} is used; such colors are automatically assigned from a color ramp 
 #' mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
 #' see \code{\link{amountColors}} 
+#' @param pch pch of the mean value points
 #' @param bartype type of the error bar range, "range" for the full range
 #' of the data, "ci95" for the 95% confidence interval, "sd" for the standard
 #' deviation, "se" for the standard error
@@ -565,11 +566,10 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @param xlab alternative label for the x-axis, default is to use argument 
 #' \code{substance}, or if this is a column in \code{map}, the substance
 #' indicated there
-#' @param ... arguments passed on to \code{\link{points}} used to plot the
-#' mean values
+#' @param ... arguments passed on to the main setup \code{\link{plot}}
 #' @export
 doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
-                         col="color", bartype="range", barl=.05, 
+                         col="color", pch=1, bartype="range", barl=.05, 
                          all=FALSE, line=TRUE, na.y=0, ylim, xlim, ylab, xlab, ...) {
   
   if( missing(wells) ) wells <- map[,"well"]
@@ -636,11 +636,11 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   }
   
   ## plot
-  plot(x1,y1,col=NA, xlab=subid,ylab=val,ylim=ylim,xlim=xlim, ...)
+  plot(x1, y1, col=NA, xlab=subid, ylab=val, ylim=ylim, xlim=xlim, ...)
   if ( line )
     lines(ymat[,1],ymat[,2],col=linecol)
   for ( i in 1:nrow(ymat) ) {
-    points(ymat[i,1],ymat[i,2], col=cl[i], ...)
+    points(ymat[i,1],ymat[i,2], col=cl[i], pch=pch)
     arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
     if ( all )
       points(x1[x1==ymat[i,1]], y1[x1==ymat[i,1]], pch=20, cex=.5, , col=cl[i])
