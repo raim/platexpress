@@ -5,7 +5,7 @@
 \title{dose-response plots with error bars for replicates}
 \usage{
 doseResponse(map, wells, val, amount = "amount", substance = "substance",
-  col = "color", bartype = "range", barl = 0.05, all = FALSE,
+  col = "color", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
   line = TRUE, na.y = 0, ylim, xlim, ylab, xlab, ...)
 }
 \arguments{
@@ -34,6 +34,8 @@ correspond to a column, its value is directly used as label}
 mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
 see \code{\link{amountColors}}}
 
+\item{pch}{pch of the mean value points}
+
 \item{bartype}{type of the error bar range, "range" for the full range
 of the data, "ci95" for the 95% confidence interval, "sd" for the standard
 deviation, "se" for the standard error}
@@ -60,8 +62,7 @@ column \code{val}; set to NA to supress plotting}
 \code{substance}, or if this is a column in \code{map}, the substance
 indicated there}
 
-\item{...}{arguments passed on to \code{\link{points}} used to plot the
-mean values}
+\item{...}{arguments passed on to the main setup \code{\link{plot}}}
 }
 \description{
 plots a continuous value for each well as a function
