@@ -200,15 +200,18 @@ lambda2RGB <- function(wavelength) {
 }
 
 
-## trim leading and trailing white-space from parsed strings
-trim <- function(str)
-  gsub(" *$", "", gsub("^ *", "", str) )
-
 
 ### STATS
 
 ## moving average
-ma <- function(x,n=5){filter(x,rep(1/n,n), sides=2)}
+#' moving average using \code{\link[stats]{filter}}
+#' @param x data vector along which a moving average will be calculated
+#' @param n moving average window size
+#' @param circular logical see help of function \code{\link[stats]{filter}}
+#' @export
+ma <- function(x, n=5, circular=FALSE) {
+  filter(x,rep(1/n,n), sides=2, circular=circular)
+}
 
 # calculate 95% confidence intervals for the given
 # data vector using a t-distribution
