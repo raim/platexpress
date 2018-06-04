@@ -9,6 +9,79 @@
 ## grdat <- data2grofit(ap12data)
 ## fit <- gcFit.2(grdat$time, grdat$data)
 
+### HIGH-LEVEL WRAPPER FOR GROFIT
+#' high-level wrapper for grofit
+#' 
+#' Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
+#' plate data and layout, using established settings. Please see
+#' the documentation of package \code{\link[grofit:grofit]{grofit}}
+#' for details of the fitting procedure. This high-level wrapper used
+#' \code{platexpress} functions \code{\link{data2grofit}}, 
+#' \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
+#' data, set parameters and call \code{\link[grofit:grofit]{grofit}},
+#' and then maps results (lag phase lambda, growth rate mu and capacity A)
+#' to the \code{plate} layout map, and \code{\link{addModel}} to add modelled
+#' prediction of the fitted data to the plate \code{data} object. 
+#' The function returns a list containing the new \code{data} and \code{plate}
+#' objects, as well as the original \code{grofit} result object.
+#' @param data a platexpress data set, see \code{\link{readPlateData}}
+#' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
+#' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+#' annotation
+#' @param did data ID of the data to be converted, from \code{data$dataIDs}
+#' @param fields column IDs in the plate layout map to be used for
+#' \code{\link[grofit:grofit]{grofit}} data annotation; if \code{plate} is not
+#' missing at least 1 column is required
+#' @param model.type models that \code{grofit} will attempt to fit,
+#' see \code{\link[grofit:grofit.control]{grofit.control}}; will be igonred
+#' if \code{control} is passed directly
+#' @param nboot.gc numbers of bootstrap samples,
+#' see \code{\link[grofit:grofit.control]{grofit.control}}; will be igonred
+#' if \code{control} is passed directly 
+#' @param plot set to TRUE for plots even without \code{interactive} use
+#' @param interactive set to TRUE for interactive growth curve fitting
+#' @param ... further arguments to \code{\link{grofit.2.control}}
+#'@export 
+callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substance"),
+                       control, model.type=c("richards","gompertz.exp","gompertz"), 
+                       nboot.gc=100, plot=TRUE, interactive=FALSE, ...) {
+  
+  ## generate input data, plate annotation
+  if ( missing(plate) )
+    gdat <- data2grofit(data)
+  else
+    gdat <- data2grofit(data, plate=plate, did=did,
+                        wells=plate$well[!plate$blank],
+                        dose=plate$amount[!plate$blank],
+                        eid=fields, ...)
+  
+  ## set grofit paraameters
+  if ( missing(control) )
+    control <- grofit.2.control(plot=plot, interactive=interactive,
+                                suppress.messages=TRUE,
+                                nboot.gc=nboot.gc,
+                                model.type=model.type)
+  
+  ## call grofit; redirect plots to detail pdf
+  odfit <- gcFit.2(gdat$time, gdat$data, control)
+  
+  ## get grofit results
+  params <- grofitResults(odfit)
+  colnames(params) <- paste0(did,"_",colnames(params))
+  
+  ## ... add to layout data
+  if ( !missing(plate) )
+    plate <- cbind.data.frame(plate, params[as.character(plate[,"well"]),])
+  else plate <- params
+  
+  ## add modelled data!
+  data <- addModel(data, odfit, ID=paste0(did,"_model"), col="#0000FF")
+  
+  res <- list(data=data, plate=plate, fit=odfit)
+  
+  res
+}  
+  
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
 #' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
 #' \code{\link[grofit:grofit]{grofit}} data format
@@ -25,7 +98,7 @@
 #' \code{\link[grofit:grofit]{grofit}} data annotation; if missing but
 #' \code{plate} is present, the columns 2 and 3 are used
 #' @param dose vector of doses in each well, used as the third column of
-#'  \code{\link[grofit:grofit]{grofit}}data annotation, where it can be used for
+#'  \code{\link[grofit:grofit]{grofit}} data annotation, where it can be used for
 #' dose-response calculations
 #' @details Returns a simple list with two entries \code{time} and \code{data},
 #' as required for \code{\link[grofit:grofit]{grofit}}.
@@ -104,7 +177,7 @@ grofitResults <- function(fit) {
     ## this data to add modelled data to the plate data object
     params <- fit$gcTable[,c("lambda.model","mu.model","A.model","used.model")]
     colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
-    rownames(params) <- as.character(odfit$gcTable[,"TestId"])
+    rownames(params) <- as.character(fit$gcTable[,"TestId"])
     params
 }
 

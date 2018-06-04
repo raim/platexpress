@@ -28,7 +28,7 @@ annotation}
 \code{plate} is present, the columns 2 and 3 are used}
 
 \item{dose}{vector of doses in each well, used as the third column of
- \code{\link[grofit:grofit]{grofit}}data annotation, where it can be used for
+ \code{\link[grofit:grofit]{grofit}} data annotation, where it can be used for
 dose-response calculations}
 }
 \description{
