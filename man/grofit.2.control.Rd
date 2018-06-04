@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{grofit.2.control}
 \alias{grofit.2.control}
-\title{hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
+\title{wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
 which adds the new "plot" switch used in \code{\link{gcFit.2}}}
 \usage{
 grofit.2.control(interactive = FALSE, plot = TRUE, ...)
@@ -16,7 +16,7 @@ grofit.2.control(interactive = FALSE, plot = TRUE, ...)
 \code{\link[grofit:grofit.control]{grofit.control}}}
 }
 \description{
-hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
+wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
 which adds the new "plot" switch used in \code{\link{gcFit.2}}
 }
 \seealso{

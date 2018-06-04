@@ -138,7 +138,7 @@ addModel <- function(data, fit, ID="model", ...) {
     addData(data, ID, newdat, processing="grofit prediction", ...)
 }
 
-#' hack of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
+#' wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
 #' which adds the new "plot" switch used in \code{\link{gcFit.2}}
 #' @param ... parameters passed on to
 #' \code{\link[grofit:grofit.control]{grofit.control}}
