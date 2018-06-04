@@ -560,6 +560,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' values
 #' @param na.y value to be used to plot replicates with \code{NA} in 
 #' column \code{val}; set to NA to supress plotting
+#' @param add add data to existing plot
 #' @param ylim limits of the y-axis
 #' @param xlim limits of the x-axis
 #' @param ylab alternative label for the y-axis, default is to use argument \code{val}
@@ -570,7 +571,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @export
 doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
                          col="color", pch=1, bartype="range", barl=.05, 
-                         all=FALSE, line=TRUE, na.y=0, ylim, xlim, ylab, xlab, ...) {
+                         all=FALSE, line=TRUE, na.y=0, add=FALSE, ylim, xlim, ylab, xlab, ...) {
   
   if( missing(wells) ) wells <- map[,"well"]
   
@@ -636,11 +637,13 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   }
   
   ## plot
-  plot(x1, y1, col=NA, xlab=subid, ylab=val, ylim=ylim, xlim=xlim, ...)
+  if ( !add )
+    plot(x1, y1, col=NA, xlab=subid, ylab=ylab, ylim=ylim, xlim=xlim, ...)
   if ( line )
     lines(ymat[,1],ymat[,2],col=linecol)
   for ( i in 1:nrow(ymat) ) {
-    points(ymat[i,1],ymat[i,2], col=cl[i], pch=pch)
+    if ( !line ) 
+      points(ymat[i,1],ymat[i,2], col=cl[i], pch=pch)
     arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
     if ( all )
       points(x1[x1==ymat[i,1]], y1[x1==ymat[i,1]], pch=20, cex=.5, , col=cl[i])

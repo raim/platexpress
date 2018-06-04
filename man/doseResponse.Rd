@@ -6,7 +6,7 @@
 \usage{
 doseResponse(map, wells, val, amount = "amount", substance = "substance",
   col = "color", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
-  line = TRUE, na.y = 0, ylim, xlim, ylab, xlab, ...)
+  line = TRUE, na.y = 0, add = FALSE, ylim, xlim, ylab, xlab, ...)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some 
@@ -51,6 +51,8 @@ values}
 
 \item{na.y}{value to be used to plot replicates with \code{NA} in 
 column \code{val}; set to NA to supress plotting}
+
+\item{add}{add data to existing plot}
 
 \item{ylim}{limits of the y-axis}
 
