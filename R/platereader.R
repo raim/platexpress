@@ -645,9 +645,12 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   if ( line )
     lines(ymat[,1],ymat[,2],col=linecol)
   for ( i in 1:nrow(ymat) ) {
+    if ( ymat[i,3]<ymat[i,4])
+      arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
+    else 
+      points(ymat[i,1], ymat[i,3],pch=3, col=cl[i])
     if ( !line ) 
       points(ymat[i,1],ymat[i,2], col=cl[i], pch=pch)
-    arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
     if ( all )
       points(x1[x1==ymat[i,1]], y1[x1==ymat[i,1]], pch=20, cex=.5, , col=cl[i])
   }
