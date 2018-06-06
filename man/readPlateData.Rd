@@ -32,9 +32,9 @@ to convert from hours to seconds}
 a list of distinct measurement time-courses from one plate
 }
 \description{
-Parses data files in CSV, as exported by
+Parses platereader data files in CSV format, as exported by
 the plate reader software. Header IDs in the data file should match with 
-IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
+IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined parsing
 functions exist for a couple of plate-readers. If your format is
 not implement, you can manually create simple data tables and use 
 the function \code{\link{readSimplePlate}}

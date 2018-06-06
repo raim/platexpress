@@ -16,7 +16,10 @@ replaceAmounts(map, col, sep = ":", replace = TRUE)
 \item{replace}{if TRUE the original columns in \code{col} will be removed}
 }
 \description{
-replaces amount strings of the form substance:amount in columns of
-plate layout maps by two columns, separating the substance and the amount;
-wrapper for \code{\link{parseAmounts}}
+replaces amount strings of the form \code{substance:amount} in a column of
+the plate layout map by two columns, separating substance and the amount
+into a string and a numeric column.
+}
+\seealso{
+\code{\link{parseAmounts}}, \code{\link{readPlateMap}}
 }

@@ -355,7 +355,7 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
         }
         
         if ( missing(processing) ) # add date as processing note
-            processing <- date()
+            processing <- paste("added",date())
         data <- append(data, list(list(data=dat, processing=processing)))
         names(data) <- c(names(data)[2:length(data)-1],ID)
     }

@@ -10,9 +10,10 @@ readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
 \arguments{
 \item{file}{text file containing the plate layout.}
 
-\item{sep}{column separator, as in read.table}
+\item{sep}{column separator, as in \code{\link[utils:read.table]{read.table}}}
 
-\item{fsep}{within-field separator, separating the well-specific descriptors}
+\item{fsep}{within-field separator, separating the well-specific descriptors within
+well fields}
 
 \item{blank.id}{keyword that indicates blank wells. Blank wells can be
 combined with other well descriptors for separate blanking}
@@ -41,8 +42,8 @@ a table of well content descriptors, where the first column 'wells'
         maps the plate map to the data files.
 }
 \description{
-Parses a plate design file in CSV. Rows and 
-columns should be named as in the corresponding data files.
+Parses a plate design file in CSV format. Rows and 
+columns should be named as in the corresponding plate reader data files.
 }
 \examples{
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")

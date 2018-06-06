@@ -17,8 +17,7 @@ as a list of strings}
 
 \item{sep}{field separator used in the input tabular file}
 
-\item{time.format}{format of the time, e.g., "%H:%M"%S" (see
-\code{strptime}), or "numeric" if the time is provided in normal numbers}
+\item{time.format}{format of the time, see \code{\link[base:strptime]{strptime}})}
 
 \item{verb}{print messages if true}
 }
