@@ -2,11 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{findWavelength}
 \alias{findWavelength}
-\title{\code{\link{findWavelength}}:
-a color selector for \code{\link{showSpectrum}}; expects the user to
-click on the spectrum, then draws a vertical line at the clicked
-wavelength using \code{\link{plotWavelength}} and records the wavelength
-in nm.}
+\title{Find Wavelength in Spectrum}
 \usage{
 findWavelength(n = 1, ...)
 }
@@ -17,7 +13,6 @@ findWavelength(n = 1, ...)
 selecting plot symbol and text size, and positions}
 }
 \description{
-\code{\link{findWavelength}}:
 a color selector for \code{\link{showSpectrum}}; expects the user to
 click on the spectrum, then draws a vertical line at the clicked
 wavelength using \code{\link{plotWavelength}} and records the wavelength

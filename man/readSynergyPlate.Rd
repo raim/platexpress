@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{readSynergyPlate}
 \alias{readSynergyPlate}
-\title{Read Synergy Mx-exported files}
+\title{Read Synergy Mx Plate Data}
 \usage{
 readSynergyPlate(files, data.ids, skip, sep = ";", dec = ".",
   skiplastcol = FALSE, time.format = "\%H:\%M:\%S", verb = TRUE)
@@ -29,7 +29,11 @@ this is the case for the current data set}
 \item{verb}{print messages if true}
 }
 \description{
-Read Synergy Mx-exported files
+Parses date exported from the Excel file that can be exported
+from the Synergy Mx platereader. A parameter that often changes
+is \code{skip}, the number of lines before the data starts,
+here before the ID of a measurement in the first column, eg.
+"600" for OD measurement at 600 nm.
 }
 \seealso{
 \code{\link{readPlateData}}

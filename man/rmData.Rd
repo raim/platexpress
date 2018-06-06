@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{rmData}
 \alias{rmData}
-\title{\code{\link{rmData}} : remove a data set}
+\title{Remove Data}
 \usage{
 rmData(data, ID)
 }
@@ -16,7 +16,7 @@ Returns the new \\code{\link{platexpress}} data, with
 data set <\code{ID}> removed
 }
 \description{
-\code{\link{rmData}} : remove a data set
+removes a data set from plate data
 }
 \seealso{
 \code{\link{addData}}

@@ -2,8 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{groupStats}
 \alias{groupStats}
-\title{calculates simple statistics for groups as plotted in
-\code{\link{viewGroups}}}
+\title{Group Statistics}
 \usage{
 groupStats(data, groups, dids)
 }
@@ -22,7 +21,8 @@ where actual data is replaced  by statistics over grouped wells.
 }
 \description{
 calculates simple statistics for groups as plotted in
-\code{\link{viewGroups}}
+\code{\link{viewGroups}}. TODO: actually use these stats
+in viewGroups, optionally add group stats to original data structure
 }
 \details{
 Calculates the simple statistics over grouped wells

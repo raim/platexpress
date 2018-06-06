@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{getData}
 \alias{getData}
-\title{\code{\link{getData}} : get a specific data set, returns a data matrix}
+\title{Get Data}
 \usage{
 getData(data, ID, type = "data")
 }
@@ -16,5 +16,5 @@ the data list also contains original values for some of the processing
 steps}
 }
 \description{
-\code{\link{getData}} : get a specific data set, returns a data matrix
+Returns a specific data set as data matrix
 }

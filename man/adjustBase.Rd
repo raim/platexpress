@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{adjustBase}
 \alias{adjustBase}
-\title{adjusts data to a minimal base after blank correction}
+\title{Adjusts to Minimal Base}
 \usage{
 adjustBase(data, base = 0, dids, add.fraction, xlim, each = FALSE,
   verb = TRUE)
@@ -30,7 +30,9 @@ option \code{dids}) where raised to a minimum level in
 }
 \description{
 The function raises all data to a "base" level, default 0, to avoid
-negative values that sometimes occur after blank correction.
+negative values that sometimes occur after blank correction
+in \code{\link{correctBlanks}}. The function can be optionally
+called directly in \code{\link{correctBlanks}} by option \code{base}.
 }
 \details{
 Adjusts data to a new mininum, this is useful for adjustment

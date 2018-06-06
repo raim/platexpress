@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{prettyData}
 \alias{prettyData}
-\title{\code{\link{prettyData}} : set colors, rename, order or filter the data set}
+\title{Set Data IDs and colors}
 \usage{
 prettyData(data, dids, colors)
 }
@@ -14,7 +14,7 @@ prettyData(data, dids, colors)
 \item{colors}{a vector of plot colors as RGB strings, optionally already named by dataIDs}
 }
 \description{
-\code{\link{prettyData}} : set colors, rename, order or filter the data set
+Sets colors, rename, order or filter the data set
 }
 \seealso{
 \code{\link{readPlateData}}

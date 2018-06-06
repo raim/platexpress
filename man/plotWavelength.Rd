@@ -2,9 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{plotWavelength}
 \alias{plotWavelength}
-\title{\code{\link{plotWavelength}}:
-a color selector for \code{\link{showSpectrum}}; draws a vertical line,
-the wavelength, and a filled circle at a given wavelength in nm.}
+\title{Plot Wavelength in Spectrum}
 \usage{
 plotWavelength(x = 534, y = 1.09, ych = 0.95, cex = 5, pch = 19, ...)
 }
@@ -22,7 +20,6 @@ plotWavelength(x = 534, y = 1.09, ych = 0.95, cex = 5, pch = 19, ...)
 \item{...}{further arguments to ?text}
 }
 \description{
-\code{\link{plotWavelength}}:
 a color selector for \code{\link{showSpectrum}}; draws a vertical line,
 the wavelength, and a filled circle at a given wavelength in nm.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{addData}
 \alias{addData}
-\title{\code{\link{addData}} : add a data set, e.g., calculated ratios}
+\title{Add Data}
 \usage{
 addData(data, ID, dat, col, processing, replace = FALSE)
 }
@@ -20,7 +20,7 @@ addData(data, ID, dat, col, processing, replace = FALSE)
 \item{replace}{replace existing data, default: FALSE}
 }
 \description{
-\code{\link{addData}} : add a data set, e.g., calculated ratios
+Adds a data set, e.g., calculated ratios, smoothed data, etc.
 }
 \seealso{
 \code{\link{readPlateData}}

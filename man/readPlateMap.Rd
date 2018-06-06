@@ -2,8 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{readPlateMap}
 \alias{readPlateMap}
-\title{Parses a plate design file in CSV. Rows and 
-columns should be named as in the corresponding data files.}
+\title{Read Plate Layout Map}
 \usage{
 readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
   asep, afield, nrows = 8, formatted = FALSE, header = TRUE)

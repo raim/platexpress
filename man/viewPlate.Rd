@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{viewPlate}
 \alias{viewPlate}
-\title{\code{\link{viewPlate}} plots all data in plate format}
+\title{View Plate}
 \usage{
 viewPlate(data, wells, wcols, rows = toupper(letters[1:8]), cols = 1:12,
   xid, xscale = FALSE, xlim, dids, dtype = "data", pcols, yscale = TRUE,
@@ -53,7 +53,10 @@ log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 argument \code{dids}) in the last plotted well}
 }
 \description{
-\code{\link{viewPlate}} plots all data in plate format
+plots all data in plate format for a quick inspection of
+the current data set. This function should be called immediately
+after loading a new platereader dataset to inspect the data
+and decide on further processing steps.
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

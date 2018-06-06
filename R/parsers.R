@@ -13,7 +13,8 @@ mergePlates <- function(data=list(), layouts=list()) {
     #just generates lists of plates, and one big layout table
 }
 
-## Plate Design: parses a plate design file in CSV. Rows and columns
+## Read Plate Layout Map
+## parses a plate design file in CSV. Rows and columns
 ## should be named as in the datafile. Each field can
 ## have multiple descriptors, separated by a specified separator (e.g.
 ## "newline"); blanks are specified by a keyword (default: "blank"),
@@ -23,6 +24,8 @@ mergePlates <- function(data=list(), layouts=list()) {
 ## in the fields can be passed via argument "fields" as a vector of
 ## strings.
 ## TODO: repair this in example:
+#' Read Plate Layout Map
+#' 
 #' Parses a plate design file in CSV. Rows and 
 #' columns should be named as in the corresponding data files.
 #' @param file text file containing the plate layout.
@@ -113,10 +116,10 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     return(plate)
 }
 
-#' replace amount columns of plate maps
-#'
+#' Numeric Amounts
+#' 
 #' replaces amount strings of the form substance:amount in columns of
-#' plate maps by two columns, separating the substance and the amount;
+#' plate layout maps by two columns, separating the substance and the amount;
 #' wrapper for \code{\link{parseAmounts}}
 #' @param map the plate map, see  \code{\link{readPlateMap}}
 #' @param col the column ID or index to be split
@@ -134,7 +137,7 @@ replaceAmounts <- function(map, col, sep=":", replace=TRUE) {
     map
 }
 
-#' parses amount string from a plate map
+#' Parse Amount Strings
 #'
 #' splits a vector of strings of substance:amount pairs into
 #' a matrix with 2 columns, of substances and amounts
@@ -148,7 +151,7 @@ parseAmounts <- function(str, sep=":") {
     cbind.data.frame(substance=inducer,amount=amount)
 }
 
-#' add a color vector for substance amounts
+#' Add Amount Colors
 #'
 #' simply add a color palette along the range of added amounts
 #' of a given substance; where substance and amount columns
@@ -179,17 +182,21 @@ amountColors <- function(map, substance="substance",amount="amount", colf=colorR
 ### PLATE DATA
 
 ## TODO: repair this in example
-#
+#' Read Plate Data
+#' 
 #' Parses data files in CSV, as exported by
 #' the plate reader software. Header IDs in the data file should match with 
 #' IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
-#' functions exist for a couple of plate-readers.
+#' functions exist for a couple of plate-readers. If your format is
+#' not implement, you can manually create simple data tables and use 
+#' the function \code{\link{readSimplePlate}}
 #' @param files list of one or more data files
 #' @param type pre-defined formats, as exported from platereaders; currently
 #' for BMG Optima/Mars, ('BMG') and Synergy Mx ('Synergy').
 #' @param interpolate if true a master time, the average time between distinct
 #' measurements of one timepoint, is calculated and all values are interpolated
 #' to this mastertime. This is currently obligatory for further processing.
+#' See function \code{\link{interpolatePlateTimes}} for details.
 #' @param data.ids an optional sub-selection of data types in the input file,
 #' as a list of strings
 #' @param verb print messages if true
@@ -234,8 +241,12 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
     data
 }
 
-#' Read in simple platereader data with only one data type, and time
-#' in the first column
+#' Read Simple Plate Data Tables
+#' 
+#' Read in simple platereader data with only one data type, time
+#' in the first column and data for all wells in the following columns, 
+#' where the column header must correspond to wells
+#' in \code{\link{readPlateMap}}.
 #' @param skip lines to skip before parsing data
 #' @param time.format format of the time, e.g., "%H:%M"%S" (see
 #' \code{strptime}), or "numeric" if the time is provided in normal numbers
@@ -278,7 +289,13 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
     data
 }
 
-#' Read Synergy Mx-exported files
+#' Read Synergy Mx Plate Data
+#' 
+#' Parses date exported from the Excel file that can be exported
+#' from the Synergy Mx platereader. A parameter that often changes
+#' is \code{skip}, the number of lines before the data starts,
+#' here before the ID of a measurement in the first column, eg.
+#' "600" for OD measurement at 600 nm.
 #' @param skip lines to skip before parsing data
 #' @param time.format format of the time, e.g., "%H:%M"%S" (see
 #' \code{strptime}), or "numeric" if the time is provided in normal numbers
@@ -387,8 +404,14 @@ readSynergyPlate <- function(files, data.ids,
 ## and reduced redundant temperature information
 ## TODO: correct times for reading delay in platereader
 ##       - perhaps newer versions can give exact time for each
-#' Read BMG Optima/MARS-exported files
-#' @param skip lines to skip before parsing data
+#' Read BMG Optima/MARS Plate Data
+#' 
+#' Parses date from a CSV file that can be exported
+#' from the MARS analysis software of BMG plate readers. Different
+#' measurements (eg. OD and fluorescence) are exported separately
+#' and should all be liste in parameter \code{files}.
+#' @param skip lines to skip before parsing data; if missing it will
+#' be set to 5
 #' @param sep field separator used in the input tabular file
 #' @param dec decimal number symbol (e.g., ',' if data export was with
 #' german language settings)

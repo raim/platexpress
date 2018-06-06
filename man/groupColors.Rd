@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{groupColors}
 \alias{groupColors}
-\title{get colors for all wells in a group}
+\title{Group Colors}
 \usage{
 groupColors(map, group, color = "color")
 }

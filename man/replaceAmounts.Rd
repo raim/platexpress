@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{replaceAmounts}
 \alias{replaceAmounts}
-\title{replace amount columns of plate maps}
+\title{Numeric Amounts}
 \usage{
 replaceAmounts(map, col, sep = ":", replace = TRUE)
 }
@@ -17,6 +17,6 @@ replaceAmounts(map, col, sep = ":", replace = TRUE)
 }
 \description{
 replaces amount strings of the form substance:amount in columns of
-plate maps by two columns, separating the substance and the amount;
+plate layout maps by two columns, separating the substance and the amount;
 wrapper for \code{\link{parseAmounts}}
 }

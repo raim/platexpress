@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{parseAmounts}
 \alias{parseAmounts}
-\title{parses amount string from a plate map}
+\title{Parse Amount Strings}
 \usage{
 parseAmounts(str, sep = ":")
 }

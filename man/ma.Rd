@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{ma}
 \alias{ma}
-\title{moving average using \code{\link[stats]{filter}}}
+\title{Moving Average}
 \usage{
 ma(x, n = 5, circular = FALSE)
 }
@@ -14,5 +14,5 @@ ma(x, n = 5, circular = FALSE)
 \item{circular}{logical see help of function \code{\link[stats]{filter}}}
 }
 \description{
-moving average using \code{\link[stats]{filter}}
+calculate a moving average using \code{\link[stats]{filter}}
 }

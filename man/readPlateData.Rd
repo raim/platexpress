@@ -2,10 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{readPlateData}
 \alias{readPlateData}
-\title{Parses data files in CSV, as exported by
-the plate reader software. Header IDs in the data file should match with 
-IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
-functions exist for a couple of plate-readers.}
+\title{Read Plate Data}
 \usage{
 readPlateData(files, type, data.ids, verb = TRUE, interpolate = TRUE,
   time.conversion, ...)
@@ -23,7 +20,8 @@ as a list of strings}
 
 \item{interpolate}{if true a master time, the average time between distinct
 measurements of one timepoint, is calculated and all values are interpolated
-to this mastertime. This is currently obligatory for further processing.}
+to this mastertime. This is currently obligatory for further processing.
+See function \code{\link{interpolatePlateTimes}} for details.}
 
 \item{time.conversion}{conversion factor for the plate time, e.g., 1/3600
 to convert from hours to seconds}
@@ -37,7 +35,9 @@ a list of distinct measurement time-courses from one plate
 Parses data files in CSV, as exported by
 the plate reader software. Header IDs in the data file should match with 
 IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined read-in
-functions exist for a couple of plate-readers.
+functions exist for a couple of plate-readers. If your format is
+not implement, you can manually create simple data tables and use 
+the function \code{\link{readSimplePlate}}
 }
 \note{
 The original data is all interpolated to a common/average 'master' time

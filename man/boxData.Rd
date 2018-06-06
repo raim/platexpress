@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{boxData}
 \alias{boxData}
-\title{returns data for group of wells in a given range of the x-axis}
+\title{Box-Plots of Data Ranges}
 \usage{
 boxData(data, rng, groups, mid, did = "OD", plot = TRUE, type = "box",
   etype = "ci")
@@ -34,7 +34,9 @@ raw values (if argument \code{rng} was a single point
 on the x-axis) or mean values (if argument\code{rng} was a range).
 }
 \description{
-returns data for group of wells in a given range of the x-axis
+returns data for group of wells in a given range of the x-axis;
+if only one value is given, the values closest to this x-axis points
+are returned; see "Value" for details.
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

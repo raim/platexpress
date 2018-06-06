@@ -2,19 +2,19 @@
 % Please edit documentation in R/platereader.R
 \name{shiftData}
 \alias{shiftData}
-\title{\code{\link{shiftData}} : shift x-axis by a lag-phase to align growth curves}
+\title{Shift Data}
 \usage{
 shiftData(data, lag, mid)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data set}
 
-\item{lag}{a named vector given the lag-phase to be removed; the names
+\item{lag}{a named vector providing the lag-phase to be removed; the names
 correspond to the wells in data}
 
 \item{mid}{the x-axis to be used, defaults to the first available
 (usually "Time")}
 }
 \description{
-\code{\link{shiftData}} : shift x-axis by a lag-phase to align growth curves
+Shifts the x-axis, eg. by calculated lag-phases, to align growth curves
 }

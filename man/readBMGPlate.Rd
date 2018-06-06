@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{readBMGPlate}
 \alias{readBMGPlate}
-\title{Read BMG Optima/MARS-exported files}
+\title{Read BMG Optima/MARS Plate Data}
 \usage{
 readBMGPlate(files, data.ids, skip, sep = ";", dec = ".", verb = TRUE)
 }
@@ -12,7 +12,8 @@ readBMGPlate(files, data.ids, skip, sep = ";", dec = ".", verb = TRUE)
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
 
-\item{skip}{lines to skip before parsing data}
+\item{skip}{lines to skip before parsing data; if missing it will
+be set to 5}
 
 \item{sep}{field separator used in the input tabular file}
 
@@ -22,7 +23,10 @@ german language settings)}
 \item{verb}{print messages if true}
 }
 \description{
-Read BMG Optima/MARS-exported files
+Parses date from a CSV file that can be exported
+from the MARS analysis software of BMG plate readers. Different
+measurements (eg. OD and fluorescence) are exported separately
+and should all be liste in parameter \code{files}.
 }
 \seealso{
 \code{\link{readPlateData}}

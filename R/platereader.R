@@ -1,9 +1,11 @@
-### ANALYZING PLATE-READER GROWTH & EXPRESSION CURVES
-#' platexpress: A package for analysing microbial growth & expression.
+#' platexpress: quick inspection and analysis of microbial growth & expression.
 #'
-#' The platexpress package provides a quick&easy interface to 
-#' microbial growth & gene expression data as measured in typical
-#' microplate-readers or other parallel growth systems.
+#' The platexpress package provides a quick & easy interface to 
+#' inspect microbial growth & gene expression data as measured in typical
+#' platereaders ("96-well plates") or other parallel growth systems.
+#' Interfaces to existing packages allow growth model fitting 
+#' (currently only \code{\link[grofit:grofit]{grofit}}, and
+#' partially/untested \code{\link[cellGrowth]{cellGrowth}}.)
 #' 
 #'@author Rainer Machne
 #'@docType package
@@ -14,14 +16,17 @@
 #'@importFrom stats median sd qt approx spline filter predict
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
 #' abline lines points polygon box axis par text title mtext stripchart
-#'@importFrom grDevices rainbow rgb col2rgb png pdf postscript graphics.off
+#'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off
 #'@importFrom utils read.csv read.table
 NULL
 
 
 ### UTILS
 
-#' plots to png, eps or pdf, taking the same arguments
+#' Select Plot Device
+#' 
+#' plots to png, eps, pdf, tiff, svg or jpeg devices taking the same 
+#' width, height and resolution arguments for all
 #' @param file the name of the file without the extension (.pdf)
 #' @param type type of the figure, either png, pdf or eps
 #' @param width the figure width in inches
@@ -33,11 +38,18 @@ NULL
 plotdev <- function(file="test", type="png", width=5, height=5, res=100) {
   file <- paste(file, type, sep=".")
   if ( type == "png" )
-    png(file, width=width, height=height, units="in", res=res)
+    grDevices::png(file, width=width, height=height, units="in", res=res)
   if ( type == "eps" )
-    postscript(file, width=width, height=height, paper="special")
+    grDevices::postscript(file, width=height, height=width,paper="special",
+                          horizontal = FALSE, onefile = FALSE)
   if ( type == "pdf" )
-    pdf(file, width=width, height=height)
+    grDevices::pdf(file, width=width, height=height)
+  if ( type == "tiff" )
+    grDevices::tiff(file, width=width, height=height, units="in", res=res)
+  if ( type == "svg" )
+    grDevices::svg(file, width=width, height=height)
+  if ( type == "jpeg" )
+    grDevices::jpeg(file, width=width, height=height, units="in", res=res)
 }
 
 
@@ -48,9 +60,11 @@ getRGB <- function(n) {
 }
 
 
-#' \code{\link{showSpectrum}}:
+#' Show Visual Ligh Spectrum
+#' 
 #' shows the color spectrum of visible light along wavelengths in nm.
-#' See \code{\link{wavelength2RGB}} for details.
+#' NOTE that this is not a fully correct spectrum,
+#' see \code{\link{wavelength2RGB}} for details.
 #' @param wavelengths vector of wavelengths to be plotted
 #' @param alpha the alpha factor (opacity) for plot symbols, min=1, max=255
 #' @param pch the plot symbol type, see ?par("pch")
@@ -78,7 +92,9 @@ showSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
          col=paste(cols,alpha,sep=""),ylim=c(.9,1.1),pch=pch,cex=cex,...)
     axis(1,at=pretty(wavelengths))
 }
-#' \code{\link{plotWavelength}}:
+
+#' Plot Wavelength in Spectrum
+#' 
 #' a color selector for \code{\link{showSpectrum}}; draws a vertical line,
 #' the wavelength, and a filled circle at a given wavelength in nm.
 #' @param x wavelength in nm
@@ -99,7 +115,8 @@ plotWavelength <- function(x=534, y=1.09, ych=0.95, cex=5, pch=19, ...) {
     axis(4)
 }
 
-#' \code{\link{findWavelength}}:
+#' Find Wavelength in Spectrum
+#' 
 #' a color selector for \code{\link{showSpectrum}}; expects the user to
 #' click on the spectrum, then draws a vertical line at the clicked
 #' wavelength using \code{\link{plotWavelength}} and records the wavelength
@@ -125,8 +142,10 @@ findWavelength <- function(n=1, ...) {
     rgb
 }
 
-#' \code{\link{wavelength2RGB}}:
-#' converts wavelength in nm (visible light: 380:780 nm) to RGB.
+#' Convert Wavelength to RGB Colors
+#' 
+#' Converts wavelength in nm (visible light: 380:780 nm) to RGB.
+#' NOTE that this is not a fully correct spectrum, see Details.
 #' @details implemented following the java code posted at
 #' http://stackoverflow.com/questions/1472514/convert-light-frequency-to-rgb .
 #' Also see http://www.fourmilab.ch/documents/specrend/ for original code and
@@ -204,7 +223,9 @@ lambda2RGB <- function(wavelength) {
 ### STATS
 
 ## moving average
-#' moving average using \code{\link[stats]{filter}}
+#' Moving Average 
+#' 
+#' calculate a moving average using \code{\link[stats]{filter}}
 #' @param x data vector along which a moving average will be calculated
 #' @param n moving average window size
 #' @param circular logical see help of function \code{\link[stats]{filter}}
@@ -235,7 +256,9 @@ se <- function(data,na.rm=TRUE) {
 
 
 
-#' \code{\link{prettyData}} : set colors, rename, order or filter the data set
+#' Set Data IDs and colors 
+#' 
+#' Sets colors, rename, order or filter the data set
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param dids a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names
 #' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
@@ -292,7 +315,9 @@ getColors <- function(ptypes,type="R") {
 }
 
 ## add data
-#' \code{\link{addData}} : add a data set, e.g., calculated ratios
+#' Add Data
+#' 
+#' Adds a data set, e.g., calculated ratios, smoothed data, etc.
 #' @param data the current platexpress data set
 #' @param ID the ID of the new data 
 #' @param dat the new data, must be a matrix akin to other data in the set
@@ -338,7 +363,9 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
 }
 
 
-#' \code{\link{rmData}} : remove a data set
+#' Remove Data
+#' 
+#' removes a data set from plate data 
 #' @param data a \code{\link{platexpress}} data set
 #' @param ID a vector of IDs of the data to be removed
 #' @return Returns the new \\code{\link{platexpress}} data, with 
@@ -360,7 +387,9 @@ rmData <- function(data, ID) {
 }
 
 
-#' \code{\link{getData}} : get a specific data set, returns a data matrix
+#' Get Data
+#' 
+#' Returns a specific data set as data matrix
 #' @param data the current platexpress data set
 #' @param ID the ID of the data to be obtained
 #' @param type the type of the data to be returned (default "data"),
@@ -372,9 +401,11 @@ getData <- function(data, ID, type="data") {
 }
 
 
-#' \code{\link{shiftData}} : shift x-axis by a lag-phase to align growth curves
+#' Shift Data 
+#' 
+#' Shifts the x-axis, eg. by calculated lag-phases, to align growth curves
 #' @param data \code{\link{platexpress}} data set
-#' @param lag a named vector given the lag-phase to be removed; the names
+#' @param lag a named vector providing the lag-phase to be removed; the names
 #' correspond to the wells in data
 #' @param mid the x-axis to be used, defaults to the first available
 #' (usually "Time")
@@ -405,7 +436,9 @@ shiftData <- function(data, lag, mid) {
 }
 
 ## TODO: cut data either by time, or by a chosen data set
-#' \code{\link{cutData}} : cut data in a range of the x-axis
+#' Cut Data Range 
+#' 
+#' Cuts data to a range of the x-axis
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
 #' @param rng a single value or a data range
 #' @param mid ID of the x-axis data to be used for cutting
@@ -433,11 +466,13 @@ cutData <- function(data, rng, mid) {
     data
 }
 
-#' dose-response box-plots
+#' Dose-Response Box-Plots
 #'
-#' plots a continuous value for each well as a function
+#' Plots a continuous value for each well as a function
 #' of an \code{amount} of a \code{substance} and make boxplots
-#' for all replicates at a given amount
+#' for all replicates at a given amount. Note that this is deprecated,
+#' and plots with error bars can be generated instead by
+#' function \code{\link{doseResponse}}.
 #' @param map a plate layout map with columns \code{amount} and some 
 #' calculated value in column \code{val}, 
 #' eg. results from \code{\link[grofit:grofit]{grofit}}
@@ -526,7 +561,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
                          na.action="na.pass")
 }
 
-#' dose-response plots with error bars for replicates
+#' Dose-Response Plots with Error Bars
 #'
 #' plots a continuous value for each well as a function
 #' of an \code{amount} of a \code{substance} and generates error bars
@@ -641,7 +676,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   
   ## plot
   if ( !add )
-    plot(x1, y1, col=NA, xlab=subid, ylab=ylab, ylim=ylim, xlim=xlim, ...)
+    plot(x1, y1, col=NA, xlab=xlab, ylab=ylab, ylim=ylim, xlim=xlim, ...)
   if ( line )
     lines(ymat[,1],ymat[,2],col=linecol)
   for ( i in 1:nrow(ymat) ) {
@@ -659,7 +694,11 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   invisible(ymat)
 }
 
-#' returns data for group of wells in a given range of the x-axis
+#' Box-Plots of Data Ranges
+#' 
+#' returns data for group of wells in a given range of the x-axis;
+#' if only one value is given, the values closest to this x-axis points
+#' are returned; see "Value" for details.
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a grouping of wells, see \code{\link{getGroups}}
 #' @param rng x-axis range or a single point, for the latter the closest
@@ -739,7 +778,9 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
 
 
 
-#' \code{\link{skipWells}} rm wells from both data, plate maps and groupings
+#' Skip Wells
+#' 
+#' Removes wells from plate data, plate layout maps and well groupings
 #' @param data data structures from \code{\link{platexpress}}; either data
 #' (\code{\link{readPlateData}}), a plate layout map
 #' (\code{\link{readPlateMap}}) or a well grouping (\code{\link{getGroups}})
@@ -772,7 +813,9 @@ skipWells <- function(data, skip) {
     data
 }
 
-#' get a filtered list of wells
+#' Get List of Wells
+#' 
+#' get a filtered list of wells that match argument \code{values}
 #' @param plate the plate layout map, see \code{\link{readPlateMap}}
 #' @param blanks if set to \code{TRUE} (default) the argument \code{values}
 #' is optional, and only blank values will be returned.
@@ -796,7 +839,7 @@ getWells <- function(plate, blanks=FALSE, values) {
     return(as.character(res[!is.na(res)]))
 }
 
-#' subtracts blank values
+#' Subtract Blank Values
 #' 
 #' The function subtracts values from "blank" wells. Optionally this can
 #' be done in bins over time (or the current x-axis value) to account
@@ -950,10 +993,12 @@ correctBlanks <- function(data, plate, type="median", by, dids,
     corr
 }
 
-#' adjusts data to a minimal base after blank correction
+#' Adjusts to Minimal Base 
 #' 
 #' The function raises all data to a "base" level, default 0, to avoid
-#' negative values that sometimes occur after blank correction.
+#' negative values that sometimes occur after blank correction
+#' in \code{\link{correctBlanks}}. The function can be optionally
+#' called directly in \code{\link{correctBlanks}} by option \code{base}.
 #' @details Adjusts data to a new mininum, this is useful for adjustment
 #' of negative values after blank corrections.
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
@@ -1055,18 +1100,21 @@ listAverage <- function(lst, id) {
     avg
 }
 
-#' \code{\link{interpolatePlateTimes}} interpolate all data to an average
-#' master time: calculates average time for each measurement point
-#' and interpolates all values to this time; this is also used for
-#' well temperatures
-#' @param data TODO
-#' @param verb TODO
-#' @param xid TODO
+#' Interpolate to Common Timepoints
+#' 
+#' interpolates all time-series of a plate to an average
+#' master time, using the R base function \code{\link[stats:spline]{spline}}.
+#' An average time is calculated for each measurement point and all values 
+#' are interpolated to these new time points. This is automatically done when
+#' parsing the raw data with \code{\link{readPlateData}}, unless
+#' explicitly suppressed. The same is also done for well temperatures.
+#' @param data  \code{\link{platexpress}} data, see \code{\link{readPlateData}}
+#' @param verb  print messages if true
 #' @return returns a copy of the full data list with a master time and
 #' temperature added at the top level
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-interpolatePlateTimes <- function(data, verb=TRUE, xid) {
+interpolatePlateTimes <- function(data, verb=TRUE) {
 
 
     ## catch single data case
@@ -1100,7 +1148,7 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
             ## interpolate data, NOTE that rule=2 will fill the end points
             #mdat[,j] <- approx(x=x,y=y,xout=mtime,rule=2)$y
             ## TODO: is this OK/betterer then simple approx?
-            mdat[,j] <- spline(x=x,y=y,xout=mtime,method="fmm")$y
+            mdat[,j] <- stats::spline(x=x,y=y,xout=mtime,method="fmm")$y
                 
         }
         ## replace data
@@ -1120,8 +1168,14 @@ interpolatePlateTimes <- function(data, verb=TRUE, xid) {
     data
 }
 
+#' Interpolate Plate Data
+#' 
 #' interpolate one dataset to common points of another
-#' data set, e.g., fluorescence to OD
+#' data set. This is used to change the x-axis of a data set, e.g., 
+#' the measured OD values can become the new x-axis and all fluorescence 
+#' values will be interpolated to common OD vlues, using the 
+#' R base function \code{\link[stats:spline]{spline}}, the same way
+#' as in \code{\link{interpolatePlateTimes}}.
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param xid ID of the data set which should serve as the new x-axis
@@ -1200,7 +1254,12 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 }
 
 
-#' \code{\link{viewPlate}} plots all data in plate format
+#' View Plate
+#' 
+#' plots all data in plate format for a quick inspection of
+#' the current data set. This function should be called immediately
+#' after loading a new platereader dataset to inspect the data
+#' and decide on further processing steps.
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param wells a list of wells to plot, overrules \code{rows} and \code{cols}
@@ -1389,7 +1448,11 @@ viewPlate <- function(data, wells, wcols,
 ## groups <- getGroups(plate=ap12plate, by=c("strain"))
 
 
-#' group wells by experiment annotations (in plate map file)
+#' Get Groups of Replicates
+#' 
+#' groups wells by experiment annotations in the plate layout map
+#' (selected by option \code{by}), and returns a list of well IDs 
+#' that are all replicates for these groups.
 #' @param plate the plate layout map, see \code{\link{readPlateMap}}
 #' @param by a list of column IDs of the plate layout
 #' @param order if TRUE groups will be alphabetically ordered
@@ -1453,8 +1516,11 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 viewGroupl <- function(data, groups, groups2, ...) {}
 
 ## TODO: use this in viewGroups as well?
+#' Group Statistics
+#' 
 #' calculates simple statistics for groups as plotted in
-#' \code{\link{viewGroups}}
+#' \code{\link{viewGroups}}. TODO: actually use these stats
+#' in viewGroups, optionally add group stats to original data structure
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a list of well grouped wells, as produced by
 #' \code{\link{getGroups}}
@@ -1469,8 +1535,6 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 groupStats <- function(data, groups, dids) {
-
-
     
     if ( missing(dids) )
         dids <- data$dataIDs
@@ -1496,7 +1560,7 @@ groupStats <- function(data, groups, dids) {
     data
 }
 
-#' get colors for all wells in a group
+#' Group Colors
 #'
 #' returns a named vector of colors for a grouping if all
 #' colors in that group are unique
@@ -1521,8 +1585,11 @@ groupColors <- function(map, group, color="color") {
     grcols
 }
 
-
-#' plot grouped wells as summary plots, incl. confidence intervals and means
+#' View Group Averages
+#' 
+#' plot grouped wells as summary plots, incl. means and confidence intervals.
+#' This function gives a first overview of the reproducability between
+#' replicates.
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param groups a list of well grouped wells, as produced by

@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{doseResponse.box}
 \alias{doseResponse.box}
-\title{dose-response box-plots}
+\title{Dose-Response Box-Plots}
 \usage{
 doseResponse.box(map, wells, val, amount = "amount",
   substance = "substance", color = "color", na.y = 0, ylim,
@@ -41,7 +41,9 @@ column \code{val}; set to NA to supress plotting}
 \item{xnum}{use numerical x-axis instead of default categorical}
 }
 \description{
-plots a continuous value for each well as a function
+Plots a continuous value for each well as a function
 of an \code{amount} of a \code{substance} and make boxplots
-for all replicates at a given amount
+for all replicates at a given amount. Note that this is deprecated,
+and plots with error bars can be generated instead by
+function \code{\link{doseResponse}}.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{amountColors}
 \alias{amountColors}
-\title{add a color vector for substance amounts}
+\title{Add Amount Colors}
 \usage{
 amountColors(map, substance = "substance", amount = "amount",
   colf = colorRamps::matlab.like2)

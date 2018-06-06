@@ -2,29 +2,26 @@
 % Please edit documentation in R/platereader.R
 \name{interpolatePlateTimes}
 \alias{interpolatePlateTimes}
-\title{\code{\link{interpolatePlateTimes}} interpolate all data to an average
-master time: calculates average time for each measurement point
-and interpolates all values to this time; this is also used for
-well temperatures}
+\title{Interpolate to Common Timepoints}
 \usage{
-interpolatePlateTimes(data, verb = TRUE, xid)
+interpolatePlateTimes(data, verb = TRUE)
 }
 \arguments{
-\item{data}{TODO}
+\item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
 
-\item{verb}{TODO}
-
-\item{xid}{TODO}
+\item{verb}{print messages if true}
 }
 \value{
 returns a copy of the full data list with a master time and
 temperature added at the top level
 }
 \description{
-\code{\link{interpolatePlateTimes}} interpolate all data to an average
-master time: calculates average time for each measurement point
-and interpolates all values to this time; this is also used for
-well temperatures
+interpolates all time-series of a plate to an average
+master time, using the R base function \code{\link[stats:spline]{spline}}.
+An average time is calculated for each measurement point and all values 
+are interpolated to these new time points. This is automatically done when
+parsing the raw data with \code{\link{readPlateData}}, unless
+explicitly suppressed. The same is also done for well temperatures.
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

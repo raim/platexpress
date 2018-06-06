@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{plotdev}
 \alias{plotdev}
-\title{plots to png, eps or pdf, taking the same arguments}
+\title{Select Plot Device}
 \usage{
 plotdev(file = "test", type = "png", width = 5, height = 5, res = 100)
 }
@@ -18,7 +18,8 @@ plotdev(file = "test", type = "png", width = 5, height = 5, res = 100)
 \item{res}{the figure resolution in ppi (pixels per inch), only used}
 }
 \description{
-plots to png, eps or pdf, taking the same arguments
+plots to png, eps, pdf, tiff, svg or jpeg devices taking the same 
+width, height and resolution arguments for all
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

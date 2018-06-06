@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{correctBlanks}
 \alias{correctBlanks}
-\title{subtracts blank values}
+\title{Subtract Blank Values}
 \usage{
 correctBlanks(data, plate, type = "median", by, dids, mid, max.mid,
   mbins = 1, base, verb = TRUE, ...)

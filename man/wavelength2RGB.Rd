@@ -2,8 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{wavelength2RGB}
 \alias{wavelength2RGB}
-\title{\code{\link{wavelength2RGB}}:
-converts wavelength in nm (visible light: 380:780 nm) to RGB.}
+\title{Convert Wavelength to RGB Colors}
 \usage{
 wavelength2RGB(wavelength)
 }
@@ -11,8 +10,8 @@ wavelength2RGB(wavelength)
 \item{wavelength}{the wavelength in nm to convert to RGB}
 }
 \description{
-\code{\link{wavelength2RGB}}:
-converts wavelength in nm (visible light: 380:780 nm) to RGB.
+Converts wavelength in nm (visible light: 380:780 nm) to RGB.
+NOTE that this is not a fully correct spectrum, see Details.
 }
 \details{
 implemented following the java code posted at

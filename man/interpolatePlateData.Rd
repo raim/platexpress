@@ -2,8 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{interpolatePlateData}
 \alias{interpolatePlateData}
-\title{interpolate one dataset to common points of another
-data set, e.g., fluorescence to OD}
+\title{Interpolate Plate Data}
 \usage{
 interpolatePlateData(data, xid, dids, n, xout)
 }
@@ -24,7 +23,11 @@ original number of rows will be used}
 }
 \description{
 interpolate one dataset to common points of another
-data set, e.g., fluorescence to OD
+data set. This is used to change the x-axis of a data set, e.g., 
+the measured OD values can become the new x-axis and all fluorescence 
+values will be interpolated to common OD vlues, using the 
+R base function \code{\link[stats:spline]{spline}}, the same way
+as in \code{\link{interpolatePlateTimes}}.
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

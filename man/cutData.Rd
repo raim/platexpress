@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{cutData}
 \alias{cutData}
-\title{\code{\link{cutData}} : cut data in a range of the x-axis}
+\title{Cut Data Range}
 \usage{
 cutData(data, rng, mid)
 }
@@ -14,7 +14,7 @@ cutData(data, rng, mid)
 \item{mid}{ID of the x-axis data to be used for cutting}
 }
 \description{
-\code{\link{cutData}} : cut data in a range of the x-axis
+Cuts data to a range of the x-axis
 }
 \details{
 Cuts the passed \code{\link{platexpress}} data to ranges of

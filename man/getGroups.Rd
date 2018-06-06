@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{getGroups}
 \alias{getGroups}
-\title{group wells by experiment annotations (in plate map file)}
+\title{Get Groups of Replicates}
 \usage{
 getGroups(plate, by = "medium", order = FALSE, verb = TRUE)
 }
@@ -21,7 +21,9 @@ can be used, e.g., in viewGroups(data,groups) or \code{link{groupStats}}
 to summarize data for these groups.
 }
 \description{
-group wells by experiment annotations (in plate map file)
+groups wells by experiment annotations in the plate layout map
+(selected by option \code{by}), and returns a list of well IDs 
+that are all replicates for these groups.
 }
 \details{
 Calculates the distinct groups from the plate layout by the selected

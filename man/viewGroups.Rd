@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{viewGroups}
 \alias{viewGroups}
-\title{plot grouped wells as summary plots, incl. confidence intervals and means}
+\title{View Group Averages}
 \usage{
 viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, dids,
   dtype = "data", pcols, group2.col, yscale = TRUE, ylims, ylim, log = "",
@@ -108,7 +108,9 @@ to the order in argument \code{dids} and as plotted in the legend
 \item{verb}{print messages if true}
 }
 \description{
-plot grouped wells as summary plots, incl. confidence intervals and means
+plot grouped wells as summary plots, incl. means and confidence intervals.
+This function gives a first overview of the reproducability between
+replicates.
 }
 \examples{
 data(ap12)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{skipWells}
 \alias{skipWells}
-\title{\code{\link{skipWells}} rm wells from both data, plate maps and groupings}
+\title{Skip Wells}
 \usage{
 skipWells(data, skip)
 }
@@ -15,7 +15,7 @@ skipWells(data, skip)
 e.g. "B3" to skip the well in row B/column 3}
 }
 \description{
-\code{\link{skipWells}} rm wells from both data, plate maps and groupings
+Removes wells from plate data, plate layout maps and well groupings
 }
 \details{
 Removes specific wells from \code{\link{platexpress}} data,

@@ -2,8 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{readSimplePlate}
 \alias{readSimplePlate}
-\title{Read in simple platereader data with only one data type, and time
-in the first column}
+\title{Read Simple Plate Data Tables}
 \usage{
 readSimplePlate(files, data.ids, skip, sep = "\\t", time.format = "\%M:\%S",
   verb = TRUE)
@@ -24,6 +23,8 @@ as a list of strings}
 \item{verb}{print messages if true}
 }
 \description{
-Read in simple platereader data with only one data type, and time
-in the first column
+Read in simple platereader data with only one data type, time
+in the first column and data for all wells in the following columns, 
+where the column header must correspond to wells
+in \code{\link{readPlateMap}}.
 }

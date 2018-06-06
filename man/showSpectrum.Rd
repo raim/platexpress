@@ -2,9 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{showSpectrum}
 \alias{showSpectrum}
-\title{\code{\link{showSpectrum}}:
-shows the color spectrum of visible light along wavelengths in nm.
-See \code{\link{wavelength2RGB}} for details.}
+\title{Show Visual Ligh Spectrum}
 \usage{
 showSpectrum(wavelengths = 380:780, alpha = 99, pch = 19, cex = 3,
   ylab = "approximate color", main = "use findWavelength(3)",
@@ -28,9 +26,9 @@ showSpectrum(wavelengths = 380:780, alpha = 99, pch = 19, cex = 3,
 \item{...}{further arguments to plot}
 }
 \description{
-\code{\link{showSpectrum}}:
 shows the color spectrum of visible light along wavelengths in nm.
-See \code{\link{wavelength2RGB}} for details.
+NOTE that this is not a fully correct spectrum,
+see \code{\link{wavelength2RGB}} for details.
 }
 \details{
 Plots the color spectrum over the selected wavelengths in nm.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/platereader.R
 \name{getWells}
 \alias{getWells}
-\title{get a filtered list of wells}
+\title{Get List of Wells}
 \usage{
 getWells(plate, blanks = FALSE, values)
 }
@@ -21,5 +21,5 @@ Returns the list of wells according to argument \code{values},
 or a list of blanks if \code{blanks==TRUE}
 }
 \description{
-get a filtered list of wells
+get a filtered list of wells that match argument \code{values}
 }
