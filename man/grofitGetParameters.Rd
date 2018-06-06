@@ -10,7 +10,7 @@ grofitGetParameters(fits, p = c("TestId", "AddId", "lambda.model", "mu.model",
 }
 \arguments{
 \item{fits}{the list of results returned by \code{\link[grofit:gcFit]{gcFit}}
-or the platexpress interface \code{\link{gcFit.2}}}
+or the \code{platexpress} version \code{\link{gcFit.2}}}
 
 \item{p}{list of parameters to obtain from the table \code{fits$gcTable}}
 }

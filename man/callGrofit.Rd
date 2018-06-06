@@ -21,6 +21,12 @@ annotation}
 \code{\link[grofit:grofit]{grofit}} data annotation; if \code{plate} is not
 missing at least 1 column is required}
 
+\item{control}{an object of class \code{grofit.control} with an additional
+parameter \code{plot}, as provided by the \code{platexpress} function
+\code{\link{grofit.2.control}}; if present arguments \code{model.type},
+\code{nboot.gc} and \code{plot} will be ignored (unless the latter
+is not present)}
+
 \item{model.type}{models that \code{grofit} will attempt to fit,
 see \code{\link[grofit:grofit.control]{grofit.control}}; will be igonred
 if \code{control} is passed directly}

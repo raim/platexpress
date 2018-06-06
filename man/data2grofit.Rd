@@ -10,14 +10,14 @@ data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
-\item{did}{data ID of the data to be converted, from \code{data$dataIDs}}
+\item{did}{data ID of the data to be converted for grofit, from \code{data$dataIDs}}
 
 \item{min.time}{minimal time of the data to be used}
 
 \item{max.time}{maximal time of the data to be used}
 
 \item{wells}{column IDs of the data set to use, if missing all wells
-are taken}
+are used}
 
 \item{plate}{plate layout map, see \code{\link{readPlateMap}}, columns
 of this map can be converted to \code{\link[grofit:grofit]{grofit}} data

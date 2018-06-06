@@ -202,7 +202,9 @@ amountColors <- function(map, substance="substance",amount="amount", colf=colorR
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @examples
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-#' raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="%H:%M:%S")
+#' raw <- readPlateData(files=data.file, type="Synergy", 
+#'                      data.ids=c("600","YFP_50:500,535"), 
+#'                      dec=",", time.format="%H:%M:%S")
 #' @export
 readPlateData <- function(files, type, data.ids, verb=TRUE,
                           interpolate=TRUE, time.conversion, ...) {

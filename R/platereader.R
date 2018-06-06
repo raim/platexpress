@@ -11,9 +11,9 @@
 #'@section Dependencies: The package uses mostly functionality from R base,
 #' (graphics, grDevices, stats) but more functionality is available when
 #' \code{\link[grofit:grofit]{grofit}} is installed.
-#'@importFrom stats median sd qt approx spline filter
+#'@importFrom stats median sd qt approx spline filter predict
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
-#' abline lines points polygon box axis par text title mtext
+#' abline lines points polygon box axis par text title mtext stripchart
 #'@importFrom grDevices rainbow rgb col2rgb png pdf postscript graphics.off
 #'@importFrom utils read.csv read.table
 NULL
@@ -506,12 +506,12 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
       xaxt <- "n"
     }
     cl <- cl[as.character(unique(sort(x1)))]
-    boxplot(y1~x1, border=cl,
-            xlab=subid,ylab=val,ylim=ylim, #xlim=xlim,
-            na.action="na.pass",xaxt=xaxt)
-    stripchart(y1~x1,add=T, vertical=TRUE,col=cl,
-               method="jitter", pch=1,cex=1,
-               na.action="na.pass")
+    graphics::boxplot(y1~x1, border=cl,
+                      xlab=subid,ylab=val,ylim=ylim, #xlim=xlim,
+                      na.action="na.pass",xaxt=xaxt)
+    graphics::stripchart(y1~x1,add=T, vertical=TRUE,col=cl,
+                         method="jitter", pch=1,cex=1,
+                         na.action="na.pass")
     if ( xnum ) # numerical xaxis
       axis(1)    
     
@@ -521,9 +521,9 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
     nay <- y
     nay[is.na(y)] <- na.y
     nay[!is.na(y)] <- NA
-    stripchart(nay~x,add=T, vertical=TRUE,col="red",
-               method="jitter", pch=4,cex=1/2,
-               na.action="na.pass")
+    graphics::stripchart(nay~x,add=T, vertical=TRUE,col="red",
+                         method="jitter", pch=4,cex=1/2,
+                         na.action="na.pass")
 }
 
 #' dose-response plots with error bars for replicates
@@ -796,8 +796,16 @@ getWells <- function(plate, blanks=FALSE, values) {
     return(as.character(res[!is.na(res)]))
 }
 
-#' \code{\link{correctBlanks}} correct for blanks
-#' @param data the \code{\link{platexpress}} data list to be blank-corrected
+#' subtracts blank values
+#' 
+#' The function subtracts values from "blank" wells. Optionally this can
+#' be done in bins over time (or the current x-axis value) to account
+#' for time-dependent blanks. E.g. fluorescence blanks from LB medium
+#' sometimes show time-dependence, perhaps due to light-dependent
+#' degradation of LB fluorescence. Separate blanks for each condition can
+#' be used via the \code{by} option, to be used the same way as
+#' in \code{\link{getGroups}}.
+#' @param data the plate data list to be blank-corrected
 #' @param plate the plate layout where column "blanks" indicates which wells
 #' are to be treated as blanks
 #' @param dids IDs of the data which should be blank-corrected, all will be
@@ -805,20 +813,26 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' @param by a list of column IDs of the plate layout; separate blank
 #' correction will be attempted for groups in these columns; each group
 #' must have at least one specified blank associated
-#' @param type TODO
+#' @param type calculation of blank values from multiple time-points and
+#' wells; "median", "mean" or "ci95", where the latter subtracts the mean
+#' minus  the 95\% confidence interval to avoid blanked values below 0
 #' @param mid ID of the x-axis data to be used, if blanked along x-axis, set
 #' by \code{mbins}>1
+#' @param max.mid the maximal x-axis value where blanks should be used
 #' @param mbins the number of bins the x-axis is to be divided, if blanked
 #' along the x-axis, see \code{mid}
-#' @param max.mid the maximal x-axis value where blanks should be used
+#' @param base optional minimal value; all values will be raised by 
+#' the same amount using the function \code{\link{adjustBase}}
 #' @param verb issued progress messages and info
+#' @param ... further arguments to \code{\link{adjustBase}}
 #' @seealso \code{\link{adjustBase}}
 #' @examples
 #' data(ap12)
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-correctBlanks <- function(data, plate, type="median", by, dids, mid, max.mid, mbins=1, verb=TRUE) {
+correctBlanks <- function(data, plate, type="median", by, dids, 
+                          mid, max.mid, mbins=1, base, verb=TRUE, ...) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
@@ -931,12 +945,17 @@ correctBlanks <- function(data, plate, type="median", by, dids, mid, max.mid, mb
                                          paste("blank-corrected by",btyp))
         }
     }
+    if ( !missing(base) ) 
+      corr <- adjustBase(corr, base=base, dids=dids, verb=verb, ...)
     corr
 }
 
-#' \code{\link{adjustBase}} adjust data to a minimal base
+#' adjusts data to a minimal base after blank correction
+#' 
+#' The function raises all data to a "base" level, default 0, to avoid
+#' negative values that sometimes occur after blank correction.
 #' @details Adjusts data to a new mininum, this is useful for adjustment
-#' of negative values after blank corrections
+#' of negative values after blank corrections.
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param dids vector of ID strings for which base correction should be
 #' executed
@@ -946,8 +965,8 @@ correctBlanks <- function(data, plate, type="median", by, dids, mid, max.mid, mb
 #' @param add.fraction a fraction of the whole data range, added to base
 #' @param each add base for each well separately!
 #' @param verb print messages if true
-#' @return Returns `data' where all data sets or only those selected by option
-#' dids where raised to a minimum level in 
+#' @return Returns `data' where all data sets (or only those specified in 
+#' option \code{dids}) where raised to a minimum level in 
 #' @seealso \code{\link{correctBlanks}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export

@@ -3,7 +3,7 @@
 \name{grofit.2.control}
 \alias{grofit.2.control}
 \title{wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
-which adds the new "plot" switch used in \code{\link{gcFit.2}}}
+which adds the new \code{plot} switch used in \code{\link{gcFit.2}}}
 \usage{
 grofit.2.control(interactive = FALSE, plot = TRUE, ...)
 }
@@ -17,7 +17,7 @@ grofit.2.control(interactive = FALSE, plot = TRUE, ...)
 }
 \description{
 wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
-which adds the new "plot" switch used in \code{\link{gcFit.2}}
+which adds the new \code{plot} switch used in \code{\link{gcFit.2}}
 }
 \seealso{
 \code{\link{gcFit.2}}

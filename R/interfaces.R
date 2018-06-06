@@ -32,6 +32,11 @@
 #' @param fields column IDs in the plate layout map to be used for
 #' \code{\link[grofit:grofit]{grofit}} data annotation; if \code{plate} is not
 #' missing at least 1 column is required
+#' @param control an object of class \code{grofit.control} with an additional
+#' parameter \code{plot}, as provided by the \code{platexpress} function
+#' \code{\link{grofit.2.control}}; if present arguments \code{model.type},
+#' \code{nboot.gc} and \code{plot} will be ignored (unless the latter
+#' is not present)
 #' @param model.type models that \code{grofit} will attempt to fit,
 #' see \code{\link[grofit:grofit.control]{grofit.control}}; will be igonred
 #' if \code{control} is passed directly
@@ -61,6 +66,8 @@ callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substa
                                 suppress.messages=TRUE,
                                 nboot.gc=nboot.gc,
                                 model.type=model.type)
+  if ( !"plot" %in% names(control) )
+    control$plot <- plot
   
   ## call grofit; redirect plots to detail pdf
   odfit <- gcFit.2(gdat$time, gdat$data, control)
@@ -86,11 +93,11 @@ callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substa
 #' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
 #' \code{\link[grofit:grofit]{grofit}} data format
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
-#' @param did data ID of the data to be converted, from \code{data$dataIDs}
+#' @param did data ID of the data to be converted for grofit, from \code{data$dataIDs}
 #' @param min.time minimal time of the data to be used
 #' @param max.time maximal time of the data to be used
 #' @param wells column IDs of the data set to use, if missing all wells
-#' are taken
+#' are used
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
 #' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
 #' annotation
@@ -203,8 +210,8 @@ addModel <- function(data, fit, ID="model", ...) {
         if ( !length(idx) ) next
         #cat(paste(id, fit$gcTable[idx,testid],fit$gcFittedModels[[idx]]$gcID[1],"\n"))
         if ( !fit$gcFittedModels[[idx]]$fitFlag ) next
-        newdat[,i] <- predict(fit$gcFittedModels[[idx]]$nls,
-                              newdata=data.frame(time=data$Time))
+        newdat[,i] <- stats::predict(fit$gcFittedModels[[idx]]$nls,
+                                     newdata=data.frame(time=data$Time))
         models[i] <- fit$gcFittedModels[[idx]]$model
     }
     ## add and return
@@ -212,7 +219,7 @@ addModel <- function(data, fit, ID="model", ...) {
 }
 
 #' wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
-#' which adds the new "plot" switch used in \code{\link{gcFit.2}}
+#' which adds the new \code{plot} switch used in \code{\link{gcFit.2}}
 #' @param ... parameters passed on to
 #' \code{\link[grofit:grofit.control]{grofit.control}}
 #' @param interactive set to TRUE for interactive growth curve fitting
@@ -227,7 +234,7 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 }
 
 #' hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
-#' without interaction
+#' even when option \code{interative==FALSE}
 #' @param time a matrix of measurment times for each well as required by
 #' \code{\link[grofit:grofit]{grofit}}, provided by \code{\link{data2grofit}}
 #' @param data the data as produced by \code{\link{data2grofit}}
@@ -382,7 +389,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
 #' Convenience function to quickly extract growth parameters
 #' from a \code{\link[grofit:grofit]{grofit}} results list.
 #' @param fits the list of results returned by \code{\link[grofit:gcFit]{gcFit}}
-#' or the platexpress interface \code{\link{gcFit.2}}
+#' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @param p list of parameters to obtain from the table \code{fits$gcTable}
 #' @export
 grofitGetParameters <- function(fits, p=c("TestId","AddId","lambda.model","mu.model","A.model","used.model")) {
@@ -392,17 +399,35 @@ grofitGetParameters <- function(fits, p=c("TestId","AddId","lambda.model","mu.mo
 
 ### cellGrowth INTERFACE
 
-#' hack of cellGrowth bandwidthCV to work with platexpress data format
+#' hack of the cellGrowth package function 
+#' \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+#' to work with the \code{platexpress} data format, using adjusted default
+#' values
 #' TODO: select bandwidths from data$Time
+#'
+#' @param data platexpress data set, see \code{\link{readPlateData}} 
+#' @param did data ID of the data to be converted for grofit, from 
+#' \code{data$dataIDs}
+#' @param mid the x-axis to be used, defaults to the first available
+#' (usually "Time")
+#' @param wells column IDs of the data set to use, if missing all wells
+#' are used
+#' @param bandwidths see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
+#' @param nFold see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+#' @param nWell see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+#' @param cutoff see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+#' @param scaleY see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
+#' @seealso \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
+#'
 #' @export
 bandwidthCV.2 = function(data, did, mid, wells,
-  bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
-  nFold=10,
-  nWell=50,
-  cutoff=0.95,
-  ##calibration=identity,
-  scaleY=identity # log2
-  ) {
+                         bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
+                         nFold=10,
+                         nWell=50,
+                         cutoff=0.95,
+                         ##calibration=identity,
+                         scaleY=identity # log2
+) {
 
     if ( missing(mid) )
       mid <- data$mids[1]
@@ -502,6 +527,18 @@ bandwidthCV.2 = function(data, did, mid, wells,
 
 #' batch wrapper for fitCellGrowth
 #' TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
+#'
+#' @param data platexpress data set, see \code{\link{readPlateData}}
+#' @param did data ID of the data to be converted for grofit, from 
+#' \code{data$dataIDs}
+#' @param mid the x-axis to be used, defaults to the first available
+#' (usually "Time")
+#' @param wells column IDs of the data set to use, if missing all wells
+#' are used
+#' @param ... further parameters to the \code{cellGrowth} package function
+#' \code{\link[cellGrowth:fitCellGrowth]{fitCellGrowth}}
+#' @seealso \code{\link[cellGrowth:fitCellGrowth]{fitCellGrowth}}
+#'
 #' @export
 fitCellGrowths.2 = function(data, did, mid, wells, ...) {
 

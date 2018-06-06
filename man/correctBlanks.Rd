@@ -2,18 +2,20 @@
 % Please edit documentation in R/platereader.R
 \name{correctBlanks}
 \alias{correctBlanks}
-\title{\code{\link{correctBlanks}} correct for blanks}
+\title{subtracts blank values}
 \usage{
 correctBlanks(data, plate, type = "median", by, dids, mid, max.mid,
-  mbins = 1, verb = TRUE)
+  mbins = 1, base, verb = TRUE, ...)
 }
 \arguments{
-\item{data}{the \code{\link{platexpress}} data list to be blank-corrected}
+\item{data}{the plate data list to be blank-corrected}
 
 \item{plate}{the plate layout where column "blanks" indicates which wells
 are to be treated as blanks}
 
-\item{type}{TODO}
+\item{type}{calculation of blank values from multiple time-points and
+wells; "median", "mean" or "ci95", where the latter subtracts the mean
+minus  the 95\% confidence interval to avoid blanked values below 0}
 
 \item{by}{a list of column IDs of the plate layout; separate blank
 correction will be attempted for groups in these columns; each group
@@ -30,10 +32,21 @@ by \code{mbins}>1}
 \item{mbins}{the number of bins the x-axis is to be divided, if blanked
 along the x-axis, see \code{mid}}
 
+\item{base}{optional minimal value; all values will be raised by 
+the same amount using the function \code{\link{adjustBase}}}
+
 \item{verb}{issued progress messages and info}
+
+\item{...}{further arguments to \code{\link{adjustBase}}}
 }
 \description{
-\code{\link{correctBlanks}} correct for blanks
+The function subtracts values from "blank" wells. Optionally this can
+be done in bins over time (or the current x-axis value) to account
+for time-dependent blanks. E.g. fluorescence blanks from LB medium
+sometimes show time-dependence, perhaps due to light-dependent
+degradation of LB fluorescence. Separate blanks for each condition can
+be used via the \code{by} option, to be used the same way as
+in \code{\link{getGroups}}.
 }
 \examples{
 data(ap12)

@@ -2,13 +2,44 @@
 % Please edit documentation in R/interfaces.R
 \name{bandwidthCV.2}
 \alias{bandwidthCV.2}
-\title{hack of cellGrowth bandwidthCV to work with platexpress data format
+\title{hack of the cellGrowth package function 
+\code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+to work with the \code{platexpress} data format, using adjusted default
+values
 TODO: select bandwidths from data$Time}
 \usage{
 bandwidthCV.2(data, did, mid, wells, bandwidths = seq(0.5, 10, length.out =
   30), nFold = 10, nWell = 50, cutoff = 0.95, scaleY = identity)
 }
+\arguments{
+\item{data}{platexpress data set, see \code{\link{readPlateData}}}
+
+\item{did}{data ID of the data to be converted for grofit, from 
+\code{data$dataIDs}}
+
+\item{mid}{the x-axis to be used, defaults to the first available
+(usually "Time")}
+
+\item{wells}{column IDs of the data set to use, if missing all wells
+are used}
+
+\item{bandwidths}{see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}}
+
+\item{nFold}{see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}}
+
+\item{nWell}{see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}}
+
+\item{cutoff}{see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}}
+
+\item{scaleY}{see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}}
+}
 \description{
-hack of cellGrowth bandwidthCV to work with platexpress data format
+hack of the cellGrowth package function 
+\code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+to work with the \code{platexpress} data format, using adjusted default
+values
 TODO: select bandwidths from data$Time
+}
+\seealso{
+\code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
 }

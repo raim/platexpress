@@ -44,7 +44,9 @@ The original data is all interpolated to a common/average 'master' time
 }
 \examples{
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(files=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), dec=",",time.format="\%H:\%M:\%S")
+raw <- readPlateData(files=data.file, type="Synergy", 
+                     data.ids=c("600","YFP_50:500,535"), 
+                     dec=",", time.format="\%H:\%M:\%S")
 }
 \seealso{
 \code{\link{readSimplePlate}}, \code{\link{readBMGPlate}}, \code{\link{readSynergyPlate}}, \code{\link{readPlateMap}}, \code{\link{viewPlate}}

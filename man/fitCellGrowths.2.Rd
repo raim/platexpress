@@ -7,7 +7,25 @@ TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths}
 \usage{
 fitCellGrowths.2(data, did, mid, wells, ...)
 }
+\arguments{
+\item{data}{platexpress data set, see \code{\link{readPlateData}}}
+
+\item{did}{data ID of the data to be converted for grofit, from 
+\code{data$dataIDs}}
+
+\item{mid}{the x-axis to be used, defaults to the first available
+(usually "Time")}
+
+\item{wells}{column IDs of the data set to use, if missing all wells
+are used}
+
+\item{...}{further parameters to the \code{cellGrowth} package function
+\code{\link[cellGrowth:fitCellGrowth]{fitCellGrowth}}}
+}
 \description{
 batch wrapper for fitCellGrowth
 TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
+}
+\seealso{
+\code{\link[cellGrowth:fitCellGrowth]{fitCellGrowth}}
 }

@@ -3,7 +3,7 @@
 \name{gcFit.2}
 \alias{gcFit.2}
 \title{hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
-without interaction}
+even when option \code{interative==FALSE}}
 \usage{
 gcFit.2(time, data, control = grofit.2.control())
 }
@@ -20,7 +20,7 @@ even if interactive is set to FALSE.}
 }
 \description{
 hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
-without interaction
+even when option \code{interative==FALSE}
 }
 \details{
 Adding the field "plot" allows to de-activate
