@@ -274,6 +274,9 @@ prettyData <- function(data, dids, colors) {
     ## get mids (global x-axis data)
     mids <- data$mids
     
+    if ( any(is.na(match(dids,names(data))))) 
+      stop("IDs (dids) not found in data", paste(dids,sep=";"))
+    
     ## re-order: mids first and IDs last
     data$dataIDs <- dids
     ## store colors
