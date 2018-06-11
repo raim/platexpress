@@ -590,11 +590,12 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
 #' see \code{\link{amountColors}} 
 #' @param pch pch of the mean value points
-#' @param avgf function to calculate average, 
-#' \code{\link[stats:median]{median}} or \code{\link[base:mean]{mean}}
-#' @param bartype type of the error bar range, "range" for the full range
-#' of the data, "ci95" for the 95% confidence interval, "sd" for the standard
-#' deviation, "se" for the standard error
+#' @param bartype type of the error bars, "range" for the full range
+#' of the data, where the average value will be the 
+#' \code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval, 
+#' "sd" for the standard deviation, or "se" for the standard error where
+#' the average value will be the \code{\link[base:mean]{mean}};
+#' TODO: implement boxplot-like quantiles
 #' @param barl length of the horizontal lines of error bars (argument \code{length}
 #' of function \code{\link{arrows}})
 #' @param all logical indicating whether to plot all data points additionally to 
@@ -614,7 +615,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @export
 doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
                          col="color", pch=1, 
-                         avgf=stats::median, bartype="range", barl=.05, 
+                         bartype="range", barl=.05, 
                          all=FALSE, line=TRUE, na.y=0, add=FALSE, ylim, xlim, ylab, xlab, ...) {
   
   if( missing(wells) ) wells <- map[,"well"]
@@ -651,7 +652,10 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
     
   y1 <- y1[!is.na(y)]
   x1 <- x1[!is.na(y)]
-  
+
+  ## AVERAGE FUNCTION
+  avgf <- base::mean # for ci95%, SD, SE
+  if ( bartype=="range" ) avgf <- stats::median
 
   ## calculate ranges for duplicates at each x
   xlevels <- sort(unique(x1))
@@ -659,7 +663,8 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   for ( i in 1:length(xlevels) ) {
     xi <- xlevels[i]
     yi <- y1[x1==xi]
-    ymat[i,2] <- avgf(yi,na.rm=TRUE) # average function (mean/median)
+    ymat[i,2] <- avgf(yi,na.rm=TRUE) # average function (mean or median)
+    ## TODO: allow "quantiles" for boxplot-like plot
     if ( bartype=="range" )
       ymat[i,3:4] <- range(yi,na.rm=TRUE)
     else if ( bartype=="sd" )
