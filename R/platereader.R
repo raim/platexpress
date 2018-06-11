@@ -590,6 +590,8 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
 #' see \code{\link{amountColors}} 
 #' @param pch pch of the mean value points
+#' @param avgf function to calculate average, 
+#' \code{\link[stats:median]{median}} or \code{\link[base:mean]{mean}}
 #' @param bartype type of the error bar range, "range" for the full range
 #' of the data, "ci95" for the 95% confidence interval, "sd" for the standard
 #' deviation, "se" for the standard error
@@ -611,7 +613,8 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @param ... arguments passed on to the main setup \code{\link{plot}}
 #' @export
 doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
-                         col="color", pch=1, bartype="range", barl=.05, 
+                         col="color", pch=1, 
+                         avgf=stats::median, bartype="range", barl=.05, 
                          all=FALSE, line=TRUE, na.y=0, add=FALSE, ylim, xlim, ylab, xlab, ...) {
   
   if( missing(wells) ) wells <- map[,"well"]
@@ -656,7 +659,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   for ( i in 1:length(xlevels) ) {
     xi <- xlevels[i]
     yi <- y1[x1==xi]
-    ymat[i,2] <- mean(yi,na.rm=TRUE)
+    ymat[i,2] <- avgf(yi,na.rm=TRUE) # average function (mean/median)
     if ( bartype=="range" )
       ymat[i,3:4] <- range(yi,na.rm=TRUE)
     else if ( bartype=="sd" )
