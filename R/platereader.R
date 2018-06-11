@@ -614,11 +614,39 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @param ... arguments passed on to the main setup \code{\link{plot}}
 #' @export
 doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
-                         col="color", pch=1, 
-                         bartype="range", barl=.05, 
+                         col="color", pch=1, bartype="range", barl=.05, 
                          all=FALSE, line=TRUE, na.y=0, add=FALSE, ylim, xlim, ylab, xlab, ...) {
   
   if( missing(wells) ) wells <- map[,"well"]
+  
+  ## call recursively with add option if wells is a grouping list!
+  ## NOTE: interpreting col as a group color list!
+  ## TODO: use classes
+  if ( typeof(wells)=="list" ) {
+    
+    ## record call
+    mc <- match.call(expand.dots = FALSE)
+    
+    ## set common xlims/ylims
+    if ( missing(xlim) ) 
+      mc[["xlim"]] <- range(map[map$well%in%unlist(wells),amount],na.rm=TRUE)
+    if ( missing(ylim) )
+      mc[["ylim"]] <- range(map[map$well%in%unlist(wells),val],na.rm=TRUE)
+        
+    ymats <- list()
+    for ( i in 1:length(wells) ) {
+      mc[["wells"]] <- wells[[i]]
+      mc[["add"]] <- i>1
+      #mc[["col"]] <- i
+      cat(paste("plotting group",i, names(wells)[i],"in color", i,"\n"))
+      #scan()
+      ymat <- eval(mc)
+      if ( !is.null(ymat) )
+        ymats <- append(ymats,list(ymat))
+    }    
+    names(ymats) <- names(wells)
+    return(invisible(ymats))
+  }
   
   wells <- match(wells,map[,"well"])
   
@@ -660,6 +688,12 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   ## calculate ranges for duplicates at each x
   xlevels <- sort(unique(x1))
   ymat <- matrix(NA,nrow=length(xlevels),ncol=4)
+  
+  ## TODO: why does this appear in recursive call at end?
+  if ( length(xlevels)==0 ) {
+    warning("NO XLEVELS FOUND")
+    return(NULL)
+  }
   for ( i in 1:length(xlevels) ) {
     xi <- xlevels[i]
     yi <- y1[x1==xi]
