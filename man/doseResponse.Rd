@@ -5,9 +5,8 @@
 \title{Dose-Response Plots with Error Bars}
 \usage{
 doseResponse(map, wells, val, amount = "amount", substance = "substance",
-  col = "color", pch = 1, avgf = stats::median, bartype = "range",
-  barl = 0.05, all = FALSE, line = TRUE, na.y = 0, add = FALSE, ylim,
-  xlim, ylab, xlab, ...)
+  col = "color", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
+  line = TRUE, na.y = 0, add = FALSE, ylim, xlim, ylab, xlab, ...)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some 
@@ -37,12 +36,12 @@ see \code{\link{amountColors}}}
 
 \item{pch}{pch of the mean value points}
 
-\item{avgf}{function to calculate average, 
-\code{\link[stats:median]{median}} or \code{\link[base:mean]{mean}}}
-
-\item{bartype}{type of the error bar range, "range" for the full range
-of the data, "ci95" for the 95% confidence interval, "sd" for the standard
-deviation, "se" for the standard error}
+\item{bartype}{type of the error bars, "range" for the full range
+of the data, where the average value will be the 
+\code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval, 
+"sd" for the standard deviation, or "se" for the standard error where
+the average value will be the \code{\link[base:mean]{mean}};
+TODO: implement boxplot-like quantiles}
 
 \item{barl}{length of the horizontal lines of error bars (argument \code{length}
 of function \code{\link{arrows}})}
