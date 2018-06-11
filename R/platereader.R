@@ -653,6 +653,10 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   y <- map[wells,val]
   x <- map[wells,amount]
 
+  ## COLOR SELECTION
+  ## TODO: organize coloring schemes
+  ## defult, first color from plotted xlevel
+  ## or direct coloring
   ## get unique colors for unique sorted x, as it will appear in
   ## boxplots
   ## UGLY, TODO: less ugly?
