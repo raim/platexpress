@@ -584,11 +584,12 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' the substance in \code{amount}, used as x-axis label; if it doesn't 
 #' correspond to a column, its value is directly used as label
 #' @param col either a valid color representation or the name of a column in 
-#' \code{map} providing colors for each well; NOTE, that wells with the same 
-#' \code{amount} should have the same color, only the first color for a given 
-#' \code{amount} is used; such colors are automatically assigned from a color ramp 
-#' mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
-#' see \code{\link{amountColors}} 
+#' \code{map} providing colors for each well or a, if \code{wells} is a named
+#' list of wells, a named vector of colors with matching names. NOTE for the
+#' second case, that wells with the same \code{amount} should have the same color, only 
+#' the first color for a given \code{amount} is used; such colors are automatically 
+#' assigned from a color ramp mapped to the numerical range of \code{amount} by 
+#' \code{\link{readPlateMap}}, see \code{\link{amountColors}};
 #' @param pch pch of the mean value points
 #' @param bartype type of the error bars, "range" for the full range
 #' of the data, where the average value will be the 
@@ -611,11 +612,14 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @param xlab alternative label for the x-axis, default is to use argument 
 #' \code{substance}, or if this is a column in \code{map}, the substance
 #' indicated there
+#' @param verb print progress messages
 #' @param ... arguments passed on to the main setup \code{\link{plot}}
 #' @export
-doseResponse <- function(map, wells, val, amount="amount", substance="substance", 
+doseResponse <- function(map, wells, val, 
+                         amount="amount", substance="substance", 
                          col="color", pch=1, bartype="range", barl=.05, 
-                         all=FALSE, line=TRUE, na.y=0, add=FALSE, ylim, xlim, ylab, xlab, ...) {
+                         all=FALSE, line=TRUE, na.y=0, add=FALSE, 
+                         ylim, xlim, ylab, xlab, verb=TRUE, ...) {
   
   if( missing(wells) ) wells <- map[,"well"]
   
@@ -637,14 +641,17 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
     for ( i in 1:length(wells) ) {
       mc[["wells"]] <- wells[[i]]
       mc[["add"]] <- i>1
-      #mc[["col"]] <- i
-      cat(paste("plotting group",i, names(wells)[i],"in color", i,"\n"))
+      if ( names(wells)[i]%in%names(col) )
+        mc[["col"]] <- col[[names(wells)[i]]]
+      if ( verb )
+        cat(paste("plotting group",i, names(wells)[i],"in color", 
+                  mc[["col"]],"\n"))
       #scan()
       ymat <- eval(mc)
-      if ( !is.null(ymat) )
-        ymats <- append(ymats,list(ymat))
+      ymats <- append(ymats,list(ymat))
     }    
     names(ymats) <- names(wells)
+    ## TODO: legend?
     return(invisible(ymats))
   }
   
@@ -653,24 +660,6 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   y <- map[wells,val]
   x <- map[wells,amount]
 
-  ## COLOR SELECTION
-  ## TODO: organize coloring schemes
-  ## defult, first color from plotted xlevel
-  ## or direct coloring
-  ## get unique colors for unique sorted x, as it will appear in
-  ## boxplots
-  ## UGLY, TODO: less ugly?
-  if ( col %in% colnames(map) ) {
-    cl <- map[wells,col]
-    cl <- cl[order(x)]
-    cl <- cl[which(!duplicated(sort(x)))]
-    names(cl) <- sort(x[!duplicated(x)])
-    linecol <- 1
-  } else { 
-    cl <- rep(col,length(unique(x)))
-    linecol <- col
-  }
-  
   if ( substance %in%  colnames(map) ) 
     subid <- map[wells,substance][1]
   else subid <- substance
@@ -693,6 +682,22 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   xlevels <- sort(unique(x1))
   ymat <- matrix(NA,nrow=length(xlevels),ncol=4)
   
+  ## COLOR SELECTION
+  ## TODO: organize coloring schemes
+  ## default, first color from plotted xlevel or direct coloring
+  ## get unique colors for unique sorted x, as it will appear in
+  ## boxplots
+  ## UGLY, TODO: less ugly?
+  if ( col %in% colnames(map) ) {
+    cl <- map[wells,col]
+    cl <- cl[order(x)]
+    cl <- cl[which(!duplicated(sort(x)))]
+    names(cl) <- sort(x[!duplicated(x)])
+    linecol <- 1
+  } else { 
+    cl <- rep(col,length(unique(x)))
+    linecol <- col
+  }
   ## TODO: why does this appear in recursive call at end?
   if ( length(xlevels)==0 ) {
     warning("NO XLEVELS FOUND")
@@ -714,7 +719,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
     else stop("bar type ", bartype, " unknown\n")
     ymat[i,1] <- xi
   }
-  colnames(ymat) <- c(amount,val,bartype,"")
+  colnames(ymat) <- c(amount,val,paste0(bartype,c(".min",".max")))
   if ( missing(ylim) )
     ylim <- range(c(ymat[,2:4],ifelse(all,y,NA)),na.rm=TRUE)
   if ( missing(xlim) ) {
@@ -722,7 +727,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
       xlim <- range(x,na.rm=TRUE)
     else xlim <- range(x1,na.rm=TRUE)
   }
-  
+  cat(paste(nrow(ymat),length(cl),"\n"))
   ## plot
   if ( !add )
     plot(x1, y1, col=NA, xlab=xlab, ylab=ylab, ylim=ylim, xlim=xlim, ...)
@@ -740,7 +745,7 @@ doseResponse <- function(map, wells, val, amount="amount", substance="substance"
   }
   if ( !is.na(na.y) & sum(is.na(y)) )
     points(x[is.na(y)], rep(na.y,sum(is.na(y))), col="red", pch=4, cex=.5)
-  invisible(ymat)
+  invisible(cbind.data.frame(ymat,color=cl))
 }
 
 #' Box-Plots of Data Ranges
