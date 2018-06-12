@@ -6,7 +6,8 @@
 \usage{
 doseResponse(map, wells, val, amount = "amount", substance = "substance",
   col = "color", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
-  line = TRUE, na.y = 0, add = FALSE, ylim, xlim, ylab, xlab, ...)
+  line = TRUE, na.y = 0, add = FALSE, ylim, xlim, ylab, xlab,
+  verb = TRUE, ...)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some 
@@ -28,11 +29,12 @@ the substance in \code{amount}, used as x-axis label; if it doesn't
 correspond to a column, its value is directly used as label}
 
 \item{col}{either a valid color representation or the name of a column in 
-\code{map} providing colors for each well; NOTE, that wells with the same 
-\code{amount} should have the same color, only the first color for a given 
-\code{amount} is used; such colors are automatically assigned from a color ramp 
-mapped to the numerical range of \code{amount} by \code{\link{readPlateMap}},
-see \code{\link{amountColors}}}
+\code{map} providing colors for each well or a, if \code{wells} is a named
+list of wells, a named vector of colors with matching names. NOTE for the
+second case, that wells with the same \code{amount} should have the same color, only 
+the first color for a given \code{amount} is used; such colors are automatically 
+assigned from a color ramp mapped to the numerical range of \code{amount} by 
+\code{\link{readPlateMap}}, see \code{\link{amountColors}};}
 
 \item{pch}{pch of the mean value points}
 
@@ -66,6 +68,8 @@ column \code{val}; set to NA to supress plotting}
 \item{xlab}{alternative label for the x-axis, default is to use argument 
 \code{substance}, or if this is a column in \code{map}, the substance
 indicated there}
+
+\item{verb}{print progress messages}
 
 \item{...}{arguments passed on to the main setup \code{\link{plot}}}
 }
