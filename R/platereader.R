@@ -5,7 +5,7 @@
 #' platereaders ("96-well plates") or other parallel growth systems.
 #' Interfaces to existing packages allow growth model fitting 
 #' (currently only \code{\link[grofit:grofit]{grofit}}, and
-#' partially/untested \code{\link[cellGrowth]{cellGrowth}}.)
+#' partially/untested \code{\link[cellGrowth:fitCellGrowth]{cellGrowth}}.)
 #' 
 #'@author Rainer Machne
 #'@docType package

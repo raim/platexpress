@@ -11,7 +11,7 @@ inspect microbial growth & gene expression data as measured in typical
 platereaders ("96-well plates") or other parallel growth systems.
 Interfaces to existing packages allow growth model fitting 
 (currently only \code{\link[grofit:grofit]{grofit}}, and
-partially/untested \code{\link[cellGrowth]{cellGrowth}}.)
+partially/untested \code{\link[cellGrowth:fitCellGrowth]{cellGrowth}}.)
 }
 \section{Dependencies}{
  The package uses mostly functionality from R base,
