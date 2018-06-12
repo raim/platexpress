@@ -689,13 +689,11 @@ doseResponse <- function(map, wells, val,
   ## boxplots
   ## UGLY, TODO: less ugly?
   if ( col %in% colnames(map) ) {
-    cl <- map[wells,col]
-    cl <- cl[order(x)]
-    cl <- cl[which(!duplicated(sort(x)))]
-    names(cl) <- sort(x[!duplicated(x)])
+    cl <- sapply(xlevels,function(x) map[map[,amount]==x,col][1])
+    names(cl) <- xlevels
     linecol <- 1
   } else { 
-    cl <- rep(col,length(unique(x)))
+    cl <- rep(col,length(xlevels))
     linecol <- col
   }
   ## TODO: why does this appear in recursive call at end?
@@ -727,7 +725,7 @@ doseResponse <- function(map, wells, val,
       xlim <- range(x,na.rm=TRUE)
     else xlim <- range(x1,na.rm=TRUE)
   }
-  cat(paste(nrow(ymat),length(cl),"\n"))
+
   ## plot
   if ( !add )
     plot(x1, y1, col=NA, xlab=xlab, ylab=ylab, ylim=ylim, xlim=xlim, ...)
@@ -745,7 +743,7 @@ doseResponse <- function(map, wells, val,
   }
   if ( !is.na(na.y) & sum(is.na(y)) )
     points(x[is.na(y)], rep(na.y,sum(is.na(y))), col="red", pch=4, cex=.5)
-  invisible(cbind.data.frame(ymat,color=cl))
+  invisible(cbind.data.frame(ymat,color=cl,stringsAsFactors=FALSE))
 }
 
 #' Box-Plots of Data Ranges
