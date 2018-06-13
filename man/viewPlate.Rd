@@ -58,6 +58,13 @@ the current data set. This function should be called immediately
 after loading a new platereader dataset to inspect the data
 and decide on further processing steps.
 }
+\examples{
+data(ap12)
+# view all data on the plate
+viewPlate(ap12data) 
+# inspect natural logarithm of OD_600 values, ie. log(X(t))
+viewPlate(ap12data, dids="600", log="y") 
+}
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}
 }
