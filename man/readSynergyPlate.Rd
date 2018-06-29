@@ -30,7 +30,7 @@ this is the case for the current data set}
 }
 \description{
 Parses date exported from the Excel file that can be exported
-from the Synergy Mx platereader. A parameter that often changes
+from the Biotek Synergy Mx platereader. A parameter that often changes
 is \code{skip}, the number of lines before the data starts,
 here before the ID of a measurement in the first column, eg.
 "600" for OD measurement at 600 nm.

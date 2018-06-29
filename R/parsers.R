@@ -194,7 +194,9 @@ amountColors <- function(map, substance="substance",amount="amount", colf=colorR
 #' the function \code{\link{readSimplePlate}}
 #' @param files list of one or more data files
 #' @param type pre-defined formats, as exported from platereaders; currently
-#' for BMG Optima/Mars, ('BMG') and Synergy Mx ('Synergy').
+#' for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars 
+#' vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export 
+#' protocols!
 #' @param interpolate if true a master time, the average time between distinct
 #' measurements of one timepoint, is calculated and all values are interpolated
 #' to this mastertime. This is currently obligatory for further processing.
@@ -221,6 +223,9 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
     if ( type=="BMG" )
       data <- readBMGPlate(files=files, data.ids=data.ids,
                            verb=verb, ...)
+    else if ( type=="BMG2" )
+      data <- readBMG2Plate(files=files, data.ids=data.ids,
+                            verb=verb, ...)
     else if ( type=="Synergy" )
       data <- readSynergyPlate(files=files, data.ids=data.ids, 
                                verb=verb, ...)
@@ -293,7 +298,7 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
 #' Read Synergy Mx Plate Data
 #' 
 #' Parses date exported from the Excel file that can be exported
-#' from the Synergy Mx platereader. A parameter that often changes
+#' from the Biotek Synergy Mx platereader. A parameter that often changes
 #' is \code{skip}, the number of lines before the data starts,
 #' here before the ID of a measurement in the first column, eg.
 #' "600" for OD measurement at 600 nm.
@@ -405,12 +410,14 @@ readSynergyPlate <- function(files, data.ids,
 ## and reduced redundant temperature information
 ## TODO: correct times for reading delay in platereader
 ##       - perhaps newer versions can give exact time for each
-#' Read BMG Optima/MARS Plate Data
+#' Read BMG Optima/MARS vR3.01 R2 Plate Data
 #' 
 #' Parses date from a CSV file that can be exported
-#' from the MARS analysis software of BMG plate readers. Different
+#' from the MARS (vR3.01 R2) analysis software of BMG plate readers. Different
 #' measurements (eg. OD and fluorescence) are exported separately
-#' and should all be liste in parameter \code{files}.
+#' and should all be liste in parameter \code{files}. Later
+#' versions of MARS (vXXX) have a simpler file format, and can be
+#' parsed with \code{\link{readBMG2Plate}}
 #' @param skip lines to skip before parsing data; if missing it will
 #' be set to 5
 #' @param sep field separator used in the input tabular file
@@ -418,7 +425,7 @@ readSynergyPlate <- function(files, data.ids,
 #' german language settings)
 #' @inheritParams readPlateData
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
-#' @seealso \code{\link{readPlateData}}
+#' @seealso \code{\link{readPlateData}}, \code{\link{readBMG2Plate}}
 #' @export
 readBMGPlate <- function(files, data.ids, 
                          skip, sep=";", dec=".", verb=TRUE) {
@@ -514,4 +521,91 @@ readBMGPlate <- function(files, data.ids,
     data$dataIDs <- names(data)
 
     data
+}
+
+#' Read BMG Optima/MARS vXXX Plate Data
+#' 
+#' Parses date from a CSV file that can be exported
+#' from the MARS (vXXX) analysis software of BMG plate readers. Different
+#' measurements (eg. OD and fluorescence). Data exported from an earlier
+#' version of MARS (vR3.01 R2) can be parsed with \code{\link{readBMGPlate}}
+#' @param skip lines to skip before parsing data
+#' @param sep field separator used in the input tabular file
+#' @param dec decimal number symbol (e.g., ',' if data export was with
+#' german language settings)
+#' @inheritParams readPlateData
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
+#' @seealso \code{\link{readPlateData}}, \code{\link{readBMGPlate}}
+#' @export
+readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
+                          skip=6, sep=";", dec=",", verb=TRUE) {
+  
+
+  
+  data <- list()
+  ## 1) PARSE ALL DATA FILES and collect the individual measurements
+  for ( i in 1:length(files) ) {
+    file <- files[i]
+    #id <- names(files)[i]
+    if ( verb )
+      cat(paste("Parsing file", file , "\n"))
+    
+    ## parse header and data separately, to obtain
+    ## clean numeric data
+    hdat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
+                    skip=skip,sep=sep, dec=dec)
+    hdat <- hdat[1:2,]
+    dat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
+                    skip=skip+2,sep=sep,dec=dec)
+    
+    ## last column in BMG2 files is usually empty, remove
+    if ( sum(is.na(dat[,ncol(dat)]))==nrow(dat) ) {
+      dat <- dat[,2:ncol(dat)-1,]
+      hdat <- hdat[,2:ncol(hdat)-1,]
+    }
+      
+    
+    ## convert well info from column 1 to column names
+    rownames(dat) <- sub("([A-Z])0","\\1",(dat[,1]))
+    ## rm column 1 (well ID) and column 2 (sample ID, not used here)
+    dat <- dat[,-(1:2)]
+    hdat <- hdat[,-(1:2)]
+    
+    ## GET ALL DATA
+    
+    ## split data into  merged measurements, using header in row 1
+    dtype <- trimws(sub("\\)","",sub("Raw Data \\(", "", hdat[1,])))
+    types <- unique(dtype)
+    
+    ## collect all data
+    types <- unique(dtype)
+    dlst <- rep(list(NA),length(types))
+    names(dlst) <- types
+    for ( dtyp in types ) {
+      if ( verb )
+        cat(paste("\tloading data", dtyp, "\n"))
+      tdat <- dat[,dtype==dtyp]
+      htdat <- hdat[,dtype==dtyp]
+      
+      ## parse times in row 2
+      hours <- as.numeric(sub(" h.*","",htdat[2,]))
+      minutes <- as.numeric(sub(" min","",sub(".*h","",htdat[2,])))
+      minutes[is.na(minutes)] <- 0
+      times <- hours*3600 + minutes*60 # time in seconds
+      
+      dlst[[dtyp]] <- list(time=times,
+                           data=t(as.matrix(tdat)))            
+    }
+    ## append data
+    data <- append(data,dlst)
+  }
+  
+  ## NOTE: at this stage, data between different plate-readers
+  ## should already look similar; each entry containing separate
+  ## time and temperature vectors
+  
+  ## SET DATA ID 
+  data$dataIDs <- names(data)
+  
+  data
 }

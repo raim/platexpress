@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{readBMGPlate}
 \alias{readBMGPlate}
-\title{Read BMG Optima/MARS Plate Data}
+\title{Read BMG Optima/MARS vR3.01 R2 Plate Data}
 \usage{
 readBMGPlate(files, data.ids, skip, sep = ";", dec = ".", verb = TRUE)
 }
@@ -24,12 +24,14 @@ german language settings)}
 }
 \description{
 Parses date from a CSV file that can be exported
-from the MARS analysis software of BMG plate readers. Different
+from the MARS (vR3.01 R2) analysis software of BMG plate readers. Different
 measurements (eg. OD and fluorescence) are exported separately
-and should all be liste in parameter \code{files}.
+and should all be liste in parameter \code{files}. Later
+versions of MARS (vXXX) have a simpler file format, and can be
+parsed with \code{\link{readBMG2Plate}}
 }
 \seealso{
-\code{\link{readPlateData}}
+\code{\link{readPlateData}}, \code{\link{readBMG2Plate}}
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

@@ -11,7 +11,9 @@ readPlateData(files, type, data.ids, verb = TRUE, interpolate = TRUE,
 \item{files}{list of one or more data files}
 
 \item{type}{pre-defined formats, as exported from platereaders; currently
-for BMG Optima/Mars, ('BMG') and Synergy Mx ('Synergy').}
+for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars 
+vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export 
+protocols!}
 
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
