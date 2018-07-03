@@ -190,7 +190,7 @@ grofitResults <- function(fit) {
     params <- fit$gcTable[,c("lambda.model","mu.model","A.model","used.model")]
     colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
     rownames(params) <- as.character(fit$gcTable[,"TestId"])
-    params
+    data.frame(params)
 }
 
 #' Convenience function to quickly extract growth parameters
@@ -609,12 +609,12 @@ data2growthrates <- function(data, did) {
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well
 #' @param fit growthrates object, the result of a call to 
-#' \code{\link[growthrates:gcFit]{gcFit}}
+#' \code{\link[grofit:gcFit]{gcFit}}
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
 #' @export
 growthratesResults <- function(fit) {
-  res <- as.matrix(coef(fit))
+  res <- as.matrix(growthrates::coef(fit))
   ## replace names to match names in other packages
   ## lambda, mu and A
   nms <- colnames(res)
