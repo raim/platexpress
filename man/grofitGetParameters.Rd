@@ -5,11 +5,12 @@
 \title{Convenience function to quickly extract growth parameters
 from a \code{\link[grofit:grofit]{grofit}} results list.}
 \usage{
-grofitGetParameters(fits, p = c("TestId", "AddId", "lambda.model", "mu.model",
+grofitGetParameters(fit, p = c("TestId", "AddId", "lambda.model", "mu.model",
   "A.model", "used.model"))
 }
 \arguments{
-\item{fits}{the list of results returned by \code{\link[grofit:gcFit]{gcFit}}
+\item{fit}{grofit object, the result of a call to 
+\code{\link[grofit:gcFit]{gcFit}}
 or the \code{platexpress} version \code{\link{gcFit.2}}}
 
 \item{p}{list of parameters to obtain from the table \code{fits$gcTable}}

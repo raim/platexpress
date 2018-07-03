@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{callGrofit}
 \alias{callGrofit}
-\title{high-level wrapper for grofit}
+\title{high-level wrapper for \code{\link[grofit:grofit]{grofit}}}
 \usage{
 callGrofit(data, plate, did = "OD", fields = c("strain", "medium",
   "substance"), control, model.type = c("richards", "gompertz.exp",

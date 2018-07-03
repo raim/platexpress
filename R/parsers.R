@@ -533,6 +533,8 @@ readBMGPlate <- function(files, data.ids,
 #' @param sep field separator used in the input tabular file
 #' @param dec decimal number symbol (e.g., ',' if data export was with
 #' german language settings)
+#' @param time.format format of the time, e.g., "%H:%M"%S" (see
+#' \code{strptime}),
 #' @inheritParams readPlateData
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}, \code{\link{readBMGPlate}}

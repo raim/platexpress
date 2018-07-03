@@ -13,7 +13,7 @@
 #'@section Dependencies: The package uses mostly functionality from R base,
 #' (graphics, grDevices, stats) but more functionality is available when
 #' \code{\link[grofit:grofit]{grofit}} is installed.
-#'@importFrom stats median sd qt approx spline filter predict
+#'@importFrom stats median sd qt approx spline filter predict coef
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
 #' abline lines points polygon box axis par text title mtext stripchart
 #'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off

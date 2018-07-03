@@ -2,14 +2,19 @@
 % Please edit documentation in R/interfaces.R
 \name{grofitResults}
 \alias{grofitResults}
-\title{parse grofit results}
+\title{parse \code{\link[grofit:grofit]{grofit}} results}
 \usage{
 grofitResults(fit)
 }
 \arguments{
-\item{fit}{grofit object, the result of a call to \code{\link{gcFit.2}}}
+\item{fit}{grofit object, the result of a call to 
+\code{\link[grofit:gcFit]{gcFit}}
+or the \code{platexpress} version \code{\link{gcFit.2}}}
 }
 \description{
 parses the output of \code{\link{gcFit.2}} into a table
 of the main model parameters, for each well
+}
+\seealso{
+\code{\link{data2grofit}}, \code{\link{growthratesResults}}
 }

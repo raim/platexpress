@@ -13,6 +13,9 @@ readBMG2Plate(files, data.ids, time.format = " \%H h \%M min", skip = 6,
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
 
+\item{time.format}{format of the time, e.g., "%H:%M"%S" (see
+\code{strptime}),}
+
 \item{skip}{lines to skip before parsing data}
 
 \item{sep}{field separator used in the input tabular file}

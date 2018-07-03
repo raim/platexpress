@@ -10,7 +10,7 @@
 ## fit <- gcFit.2(grdat$time, grdat$data)
 
 ### HIGH-LEVEL WRAPPER FOR GROFIT
-#' high-level wrapper for grofit
+#' high-level wrapper for \code{\link[grofit:grofit]{grofit}}
 #' 
 #' Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
 #' plate data and layout, using established settings. Please see
@@ -90,6 +90,8 @@ callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substa
 }  
   
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
+#' interface to package \code{\link[grofit:grofit]{grofit}}
+#' 
 #' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
 #' \code{\link[grofit:grofit]{grofit}} data format
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
@@ -173,11 +175,14 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
     list(time=time, data=grdat)
 }
 
-#' parse grofit results
+#' parse \code{\link[grofit:grofit]{grofit}} results
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well
-#' @param fit grofit object, the result of a call to \code{\link{gcFit.2}}
+#' @param fit grofit object, the result of a call to 
+#' \code{\link[grofit:gcFit]{gcFit}}
+#' or the \code{platexpress} version \code{\link{gcFit.2}}
+#' @seealso \code{\link{data2grofit}}, \code{\link{growthratesResults}}
 #' @export
 grofitResults <- function(fit) {
     ## TODO: addModel, using
@@ -186,6 +191,17 @@ grofitResults <- function(fit) {
     colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
     rownames(params) <- as.character(fit$gcTable[,"TestId"])
     params
+}
+
+#' Convenience function to quickly extract growth parameters
+#' from a \code{\link[grofit:grofit]{grofit}} results list.
+#' @param fit grofit object, the result of a call to 
+#' \code{\link[grofit:gcFit]{gcFit}}
+#' or the \code{platexpress} version \code{\link{gcFit.2}}
+#' @param p list of parameters to obtain from the table \code{fits$gcTable}
+#' @export
+grofitGetParameters <- function(fit, p=c("TestId","AddId","lambda.model","mu.model","A.model","used.model")) {
+  fit$gcTable[,p]
 }
 
 #' add grofit models to plate data object
@@ -250,7 +266,7 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 #' @seealso \code{\link{gcFit.2}}
 #' @export
 gcFit.2 <- function (time, data, control = grofit.2.control())  {
-    
+  
     if (methods::is(control) != "grofit.control") 
         stop("control must be of class grofit.control!")
     if ((dim(time)[1]) != (dim(data)[1])) 
@@ -386,15 +402,6 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
     gcFit
 }
 
-#' Convenience function to quickly extract growth parameters
-#' from a \code{\link[grofit:grofit]{grofit}} results list.
-#' @param fits the list of results returned by \code{\link[grofit:gcFit]{gcFit}}
-#' or the \code{platexpress} version \code{\link{gcFit.2}}
-#' @param p list of parameters to obtain from the table \code{fits$gcTable}
-#' @export
-grofitGetParameters <- function(fits, p=c("TestId","AddId","lambda.model","mu.model","A.model","used.model")) {
-    fits$gcTable[,p]
-}
 
 
 ### cellGrowth INTERFACE
@@ -571,4 +578,47 @@ fitCellGrowths.2 = function(data, did, mid, wells, ...) {
     names(fits) <- wells
     fits
 }
- 
+
+### growthrates interface
+
+## TODO: wrapper to call all_easylinearfits etc?
+
+#' interface to package \code{\link[growthrates:growthrates]{growthrates}}
+#' 
+#' converts \code{platexpress} data for 
+#' use with \code{\link[growthrates:growthrates]{growthrates}}
+#' @param data platexpress data set, see \code{\link{readPlateData}}
+#' @param did data ID of the data to be converted for growthrates, from 
+#' \code{data$dataIDs}
+#' @seealso \code{\link{growthratesResults}}, \code{\link{data2grofit}}
+#' @export
+data2growthrates <- function(data, did) {
+  
+  ## TODO: use blank and amount columns in plate layout to filter
+  
+  value <- c(data[[did]]$data)
+  time <- rep(data$Time, ncol(data[[did]]$data))
+  well <- rep(colnames(data[[did]]$data), each=nrow(data[[did]]$data))
+  df <- data.frame(time=time, value=value, 
+                   well=factor(well, levels=colnames(data[[did]]$data)))
+  df
+}
+
+#' parse results \code{\link[growthrates:growthrates]{growthrates}} 
+#'
+#' parses the output of \code{\link{gcFit.2}} into a table
+#' of the main model parameters, for each well
+#' @param fit growthrates object, the result of a call to 
+#' \code{\link[growthrates:gcFit]{gcFit}}
+#' or the \code{platexpress} version \code{\link{gcFit.2}}
+#' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
+#' @export
+growthratesResults <- function(fit) {
+  res <- as.matrix(coef(fit))
+  ## replace names to match names in other packages
+  ## lambda, mu and A
+  nms <- colnames(res)
+  nms <- sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms)))
+  colnames(res) <- nms
+  data.frame(res)
+}

@@ -2,8 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{data2grofit}
 \alias{data2grofit}
-\title{\code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
-\code{\link[grofit:grofit]{grofit}} data format}
+\title{interface to package \code{\link[grofit:grofit]{grofit}}}
 \usage{
 data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
 }
