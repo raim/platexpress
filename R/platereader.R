@@ -17,6 +17,8 @@
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
 #' abline lines points polygon box axis par text title mtext stripchart
 #'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off
+#'@importFrom tidyr separate
+#'@importFrom readxl read_excel
 #'@importFrom utils read.csv read.table
 NULL
 

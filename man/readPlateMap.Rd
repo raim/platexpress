@@ -4,8 +4,8 @@
 \alias{readPlateMap}
 \title{Read Plate Layout Map}
 \usage{
-readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
-  asep, afield, nrows = 8, formatted = FALSE, header = TRUE)
+readPlateMap(file, sep = "\\t", fsep = "\\n", fields, asep, afields,
+  blank.id = "blank", nrows = 8, formatted = FALSE, header = TRUE)
 }
 \arguments{
 \item{file}{text file containing the plate layout.}
@@ -15,17 +15,17 @@ readPlateMap(file, sep = "\\t", fsep = "\\n", blank.id = "blank", fields,
 \item{fsep}{within-field separator, separating the well-specific descriptors within
 well fields}
 
-\item{blank.id}{keyword that indicates blank wells. Blank wells can be
-combined with other well descriptors for separate blanking}
-
 \item{fields}{names for the field descriptors}
 
 \item{asep}{a separator for substance:amount pairs, eg. to indicate amount
 of an inducer or a nutrient, can only be used together with
-argument \code{afield}, eg. use \code{asep=":", afield="inducer"}}
+argument \code{afields}, eg. use \code{asep=":", afields="inducer"}}
 
-\item{afield}{field names which hold substance:amount pair information,
+\item{afields}{field names which hold substance:amount pair information,
 see argument \code{asep}}
+
+\item{blank.id}{keyword that indicates blank wells. Blank wells can be
+combined with other well descriptors for separate blanking}
 
 \item{nrows}{number of rows to expect, defaults to 8 for rows A to H in
 a typical 96 well plate; TODO: get rid of this and instead check for

@@ -37,8 +37,8 @@ mergePlates <- function(data=list(), layouts=list()) {
 #' @param fields names for the field descriptors
 #' @param asep a separator for substance:amount pairs, eg. to indicate amount
 #' of an inducer or a nutrient, can only be used together with
-#' argument \code{afield}, eg. use \code{asep=":", afield="inducer"}
-#' @param afield field names which hold substance:amount pair information,
+#' argument \code{afields}, eg. use \code{asep=":", afields="inducer"}
+#' @param afields field names which hold substance:amount pair information,
 #' see argument \code{asep}
 #' @param formatted indicates whether the file is already in the required
 #'                  format; all other paramaters but 'sep' will be ignored
@@ -55,17 +55,24 @@ mergePlates <- function(data=list(), layouts=list()) {
 #' plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
-                         fields, asep, afield,
+readPlateMap <- function(file, sep="\t", 
+                         fsep="\n", fields, asep, afields,
+                         blank.id="blank",
                          nrows=8, formatted=FALSE, header=TRUE) {
 
 
     ## already in well format?
     if ( formatted ) {
-        dat <- read.table(file, sep=sep, header=header, stringsAsFactors=FALSE)
+        if ( length(grep("\\.xlsx?$", file)) ) {
+            tmp <- data.frame(readxl::read_excel(file, col_names=header),
+                              stringsAsFactors=FALSE)
+        } else {
+            dat <- read.table(file, sep=sep, header=header,
+                              stringsAsFactors=FALSE)
+        }
         ## split inducer:amount columns
-        if ( !missing(asep) & !missing(afield) ) {
-            dat <- replaceAmounts(dat, col=afield, sep=asep, replace=TRUE)
+        if ( !missing(asep) & !missing(afields) ) {
+            dat <- replaceAmounts(dat, col=afields, sep=asep, replace=TRUE)
             dat <- amountColors(dat)
         }
         return(dat)
@@ -73,8 +80,16 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     
     ## plate map by columns and rows
     ## TODO: get rid of nrows and check fields instead?
-    dat <- read.table(file, sep=sep, header=header, row.names=1, nrows=nrows,
-                      stringsAsFactors=FALSE)
+    if ( length(grep("\\.xlsx?$", file)) ) {
+        tmp <- data.frame(readxl::read_excel(file, col_names=header),
+                          stringsAsFactors=FALSE)
+        rownames(tmp) <- tmp[,1]
+        dat <- tmp[1:nrows,-1]
+    } else {
+        dat <- read.table(file, sep=sep,
+                          header=header, row.names=1, nrows=nrows,
+                          stringsAsFactors=FALSE)
+    }
     if ( !header )
       colnames(dat) <- 1:ncol(dat)
 
@@ -105,8 +120,8 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     plate <- cbind(data.frame(plate),blank=blanks)
 
     ## split inducer:amount columns
-    if ( !missing(asep) & !missing(afield) ) {
-        plate <- replaceAmounts(plate, col=afield, sep=asep, replace=TRUE)
+    if ( !missing(asep) & !missing(afields) ) {
+        plate <- replaceAmounts(plate, col=afields, sep=asep, replace=TRUE)
         plate <- amountColors(plate)
     }
     
@@ -115,6 +130,79 @@ readPlateMap <- function(file, sep="\t", fsep="\n", blank.id="blank",
     
     #class(plate) <- "platemap"
     return(plate)
+}
+
+## version 2 of readplatemap
+## 1) parse xls/odt files
+## 2) use tidyr/dplyr to parse fields - DONE
+readPlateMap2 <- function(file, sep="\t", 
+                          fsep="\n", fields, asep, afields,
+                          blank.id="blank",
+                          nrows=8, formatted=FALSE, header=TRUE) {
+    
+    ## already in well format?
+    if ( formatted ) {
+        if ( length(grep("\\.xlsx?$", file)) ) {
+            tmp <- data.frame(readxl::read_excel(file, col_names=header),
+                              stringsAsFactors=FALSE)
+        } else {
+            dat <- read.table(file, sep=sep, header=header,
+                              stringsAsFactors=FALSE)
+        }
+        ## split inducer:amount columns
+        if ( !missing(asep) & !missing(afields) ) {
+            for ( afield in afields ) {
+                dat <- tidyr::separate(vdat, col = afield,
+                                       into = c(afield,
+                                                paste0(afield,".amount")),
+                                       sep = asep)
+                dat$amount <- as.numeric(vdat[[paste0(afield,".amount")]])
+            }
+        }
+        return(dat)
+    }
+    
+    ## plate map by columns and rows
+    ## TODO: get rid of nrows and check fields instead?
+    if ( length(grep("\\.xlsx?$", file)) ) {
+        tmp <- data.frame(readxl::read_excel(file, col_names=header),
+                          stringsAsFactors=FALSE)
+        rownames(tmp) <- tmp[,1]
+        dat <- tmp[1:nrows,-1]
+    } else {
+        dat <- read.table(file, sep=sep, header=header,
+                          row.names=1, nrows=nrows,
+                          stringsAsFactors=FALSE)
+    }
+    if ( !header )
+        colnames(dat) <- 1:ncol(dat)
+    
+    ## generate well names from row and column names
+    wells <- paste(rep(rownames(dat),ncol(dat)),
+                   rep(sub("X","",colnames(dat)),each=nrow(dat)),sep="")
+
+    ## convert to 1D 
+    vdat <- data.frame(well=wells,field=unlist(dat))
+    ## add blank
+    vdat$blank <- FALSE
+    vdat$blank[grep(blank.id, vdat$field)] <- TRUE
+    ## split fields - using tidyr separate
+    vdat <- tidyr::separate(vdat, col = "field", into = fields, sep = fsep)
+    if ( !missing(asep) & !missing(afields) ) {
+        for ( afield in afields ) {
+            vdat <- tidyr::separate(vdat, col = afield,
+                                    into = c(afield, paste0(afield,".amount")),
+                                    sep = asep)
+            vdat$amount <- as.numeric(vdat[[paste0(afield,".amount")]])
+        }
+        ## TODO: split different substances in one afield
+        ## into different columns!
+        ## and replace column name
+     }
+    ## don't - use well column throughout!
+    ##rownames(vdat) <- wells
+    class(plate) <- "platemap"
+    vdat
 }
 
 #' Numeric Amounts
@@ -158,26 +246,31 @@ parseAmounts <- function(str, sep=":") {
 #' add a color palette to the plate layout map, with colors along the range 
 #' of added amounts of a given substance. Substance and amount columns are eg.
 #' auto-generated by \code{\link{readPlateMap}} with options \code{asep}
-#' and \code{afield}.
+#' and \code{afields}.
 #' @param map the plate map, see  \code{\link{readPlateMap}}
 #' @param substance name of the substance column in \code{map}
 #' @param amount name of the amount column in \code{map}
+#' @param color name of the color column to be added to \code{map}
 #' @param colf color palette function
 #' @seealso \code{\link{readPlateMap}}, \code{\link{replaceAmounts}}
 #' @export
-amountColors <- function(map, substance="substance",amount="amount", colf=colorRamps::matlab.like2) {
+amountColors <- function(map, substance="substance",amount="amount", color="color", colf=colorRamps::matlab.like2) {
     substances <- unique(map[,substance])
     colors <- rep(NA, nrow(map))
     for ( subst in substances ) {
         idx <- which(map[,substance]==subst)
-        amnt <- map[idx,amount]
+        amnt <- as.numeric(map[idx,amount])
         amnt <- round(100*amnt/max(amnt,na.rm=TRUE))+1
         colors[idx] <- colf(101)[amnt]
     }
-    if ( "color" %in% colnames(map) )
-      map$color <- as.character(colors)
-    else
-      map <- cbind.data.frame(map,color=as.character(colors),stringsAsFactors=FALSE)
+    if ( color %in% colnames(map) )
+      map[,color] <- as.character(colors)
+    else {
+        map <- cbind.data.frame(map,
+                                as.character(colors),
+                                stringsAsFactors=FALSE)
+        colnames(map)[ncol(map)] <- color
+    }
     map
 }
 
