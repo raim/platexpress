@@ -441,31 +441,68 @@ shiftData <- function(data, lag, mid) {
 ## TODO: cut data either by time, or by a chosen data set
 #' Cut Data Range 
 #' 
-#' Cuts data to a range of the x-axis
+#' Cuts data to a range or single point of the x-axis, and/or cuts
+#' all y-axis values within a range
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
-#' @param rng a single value or a data range
-#' @param mid ID of the x-axis data to be used for cutting
+#' @param mid ID of the x-axis data to cut, default is the main x-axis ('Time')
+#' @param xrng a single or two value(s) for x-axis cuts, only within the range
+#' of two values will be retained; if only one value is passed only the
+#' data closest to this point will be retained!
+#' @param did ID of the y-axis data to cut
+#' @param yrng a single or two value(s) for x-axis cuts, only data smaller
+#' then single value, or within the range of two values will be retained
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @details Cuts the passed \code{\link{platexpress}} data to ranges of
-#' of the x-axis (time or other, see \code{data$mids}). If paramter \code{rng}
-#' is a single value, data for the closest x value will be returned
-#' if rng is a single value
+#' of the x-axis (time or other, see \code{data$mids}) and/or y-axis.
+#' Note that the behaviour is different for passing single values to
+#' \code{xrng} or \code{yrng}:
+#' If \code{xrng} is a single value, data for the closest x value will be
+#' returned. If \code{yrng} is a single value, all data smaller than this
+#' value will be returned. Note that data outside \code{yrng} are simply
+#' set to NA, which may cause problems downstream.
 #' @export
-cutData <- function(data, rng, mid) {
+cutData <- function(data, yrng, mid, did, xrng) {
 
-    if ( missing(mid) )
+    ## default x-axis cut
+    if ( missing(mid) & missing(did) ) 
         mid <- data$mids[1]
-    xdat <- data[[mid]]
-    if ( length(rng)==2 )
-        filter <- xdat >= rng[1] & xdat <= rng[2]
-    else if ( length(rng)==1 )
-        filter <- abs(rng-xdat) == min(abs(rng-xdat))
-    for ( did in data$dataIDs ) {
-        data[[did]]$data <- data[[did]]$data[filter,,drop=FALSE]
-        data[[did]]$processing <- c(data[[did]]$processing,
-                                    paste("cut at", paste(rng,collapse="-")))
+
+    ## TODO: allow cutting both x and y data
+    ## default no mid and did: cut mid
+    ## only mid: cut mid
+    ## only did: cut did
+    ## both did and mid: cut both, first mid
+
+    ## first, cut x-axis
+    if ( !missing(mid) ) {
+        xdat <- data[[mid]]
+        if ( length(xrng)==2 )
+            filter <- xdat >= xrng[1] & xdat <= xrng[2]
+        else if ( length(xrng)==1 )
+            filter <- abs(xrng-xdat) == min(abs(xrng-xdat))
+        for ( did in data$dataIDs ) {
+            data[[did]]$data <- data[[did]]$data[filter,,drop=FALSE]
+            data[[did]]$processing <- c(data[[did]]$processing,
+                                        paste("cut at", paste(xrng,collapse="-")))
+        }
+        data[[mid]] <- xdat[filter]
     }
-    data[[mid]] <- xdat[filter]
+    ## second, cut y-axis
+    ## TODO: cut ALL Y-DATA at these points?
+    ## TODO: cut time at points where all are NA!!
+    if ( !missing(did) & !missing(yrng) ) {
+        ## get indices where to cut
+        ydat <- data[[did]]$data
+
+        ## expand x range to minimum - maximum
+        if ( length(yrng)==1 ) ## max value
+            yrng <- c(min(apply(ydat, 2, min, na.rm=T),na.rm=T),
+                      yrng)
+        ## just set to NA
+        ydat <- apply(ydat, 2, function(y) {
+            y[y < yrng[1] | y > yrng[2]]<-NA;y})
+        data[[did]]$data <- ydat 
+    }
     data
 }
 
@@ -773,7 +810,7 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
     if ( missing(mid) )
         mid <- data$mids[1]
     ## cut data to selected range (closest point if length(rng)==1)
-    cdat <- cutData(data, rng, mid)
+    cdat <- cutData(data, mid=mid, xrng=rng)
 
     ## get the actual point if only one points was chosen
     if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)

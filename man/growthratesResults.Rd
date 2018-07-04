@@ -8,7 +8,7 @@ growthratesResults(fit)
 }
 \arguments{
 \item{fit}{growthrates object, the result of a call to 
-\code{\link[growthrates:gcFit]{gcFit}}
+\code{\link[grofit:gcFit]{gcFit}}
 or the \code{platexpress} version \code{\link{gcFit.2}}}
 }
 \description{

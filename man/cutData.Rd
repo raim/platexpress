@@ -4,23 +4,35 @@
 \alias{cutData}
 \title{Cut Data Range}
 \usage{
-cutData(data, rng, mid)
+cutData(data, yrng, mid, did, xrng)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{link{readPlateData}}}
 
-\item{rng}{a single value or a data range}
+\item{yrng}{a single or two value(s) for x-axis cuts, only data smaller
+then single value, or within the range of two values will be retained}
 
-\item{mid}{ID of the x-axis data to be used for cutting}
+\item{mid}{ID of the x-axis data to cut, default is the main x-axis ('Time')}
+
+\item{did}{ID of the y-axis data to cut}
+
+\item{xrng}{a single or two value(s) for x-axis cuts, only within the range
+of two values will be retained; if only one value is passed only the
+data closest to this point will be retained!}
 }
 \description{
-Cuts data to a range of the x-axis
+Cuts data to a range or single point of the x-axis, and/or cuts
+all y-axis values within a range
 }
 \details{
 Cuts the passed \code{\link{platexpress}} data to ranges of
-of the x-axis (time or other, see \code{data$mids}). If paramter \code{rng}
-is a single value, data for the closest x value will be returned
-if rng is a single value
+of the x-axis (time or other, see \code{data$mids}) and/or y-axis.
+Note that the behaviour is different for passing single values to
+\code{xrng} or \code{yrng}:
+If \code{xrng} is a single value, data for the closest x value will be
+returned. If \code{yrng} is a single value, all data smaller than this
+value will be returned. Note that data outside \code{yrng} are simply
+set to NA, which may cause problems downstream.
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

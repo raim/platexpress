@@ -1,5 +1,11 @@
 # TODO - platexpress
 
+## 201807
+* use platexpress only for pre-processing, then convert
+to modern R formats (tidyr, etc.) and use with growthrates
+*  
+
+
 ## LIBRARY
 ### fix example data to reflect current use
 
