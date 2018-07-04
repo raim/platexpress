@@ -55,10 +55,10 @@ mergePlates <- function(data=list(), layouts=list()) {
 #' plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-readPlateMap <- function(file, sep="\t", 
-                         fsep="\n", fields, asep, afields,
-                         blank.id="blank",
-                         nrows=8, formatted=FALSE, header=TRUE) {
+readPlateMap.old <- function(file, sep="\t", 
+                             fsep="\n", fields, asep, afields,
+                             blank.id="blank",
+                             nrows=8, formatted=FALSE, header=TRUE) {
 
 
     ## already in well format?
@@ -135,7 +135,51 @@ readPlateMap <- function(file, sep="\t",
 ## version 2 of readplatemap
 ## 1) parse xls/odt files
 ## 2) use tidyr/dplyr to parse fields - DONE
-readPlateMap2 <- function(file, sep="\t", 
+## Read Plate Layout Map
+## parses a plate design file in CSV. Rows and columns
+## should be named as in the datafile. Each field can
+## have multiple descriptors, separated by a specified separator (e.g.
+## "newline"); blanks are specified by a keyword (default: "blank"),
+## and if separate blanks are used for different conditions, the
+## blank field must have the same format as measurement fields, except
+## one parameter replaced by the keyword. Names for the values
+## in the fields can be passed via argument "fields" as a vector of
+## strings.
+## TODO: repair this in example:
+#' Read Plate Layout Map
+#' 
+#' Parses a plate design file in CSV format. Rows and 
+#' columns should be named as in the corresponding plate reader data files.
+#' TODO: causes empty groups in getGroups; because separate causes empty
+#' strings in first field instead of NA
+#' @param file text file containing the plate layout.
+#' @param sep column separator, as in \code{\link[utils:read.table]{read.table}}
+#' @param fsep within-field separator, separating the well-specific descriptors within
+#' well fields
+#' @param blank.id keyword that indicates blank wells. Blank wells can be
+#'                 combined with other well descriptors for separate blanking
+#' @param fields names for the field descriptors
+#' @param asep a separator for substance:amount pairs, eg. to indicate amount
+#' of an inducer or a nutrient, can only be used together with
+#' argument \code{afields}, eg. use \code{asep=":", afields="inducer"}
+#' @param afields field names which hold substance:amount pair information,
+#' see argument \code{asep}
+#' @param formatted indicates whether the file is already in the required
+#'                  format; all other paramaters but 'sep' will be ignored
+#' @param nrows number of rows to expect, defaults to 8 for rows A to H in
+#' a typical 96 well plate; TODO: get rid of this and instead check for
+#' rownames?
+#' @param header logical argument indicating the presence/absence of a header
+#' row in the layout file
+#' @return a table of well content descriptors, where the first column 'wells'
+#'         maps the plate map to the data files.
+#' @seealso \code{\link{readPlateData}}
+#' @examples
+#' plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
+#' plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
+#' @export
+readPlateMap <- function(file, sep="\t", 
                           fsep="\n", fields, asep, afields,
                           blank.id="blank",
                           nrows=8, formatted=FALSE, header=TRUE) {
@@ -156,7 +200,8 @@ readPlateMap2 <- function(file, sep="\t",
                                        into = c(afield,
                                                 paste0(afield,".amount")),
                                        sep = asep)
-                dat$amount <- as.numeric(vdat[[paste0(afield,".amount")]])
+                dat[[paste0(afield,".amount")]] <- 
+                  as.numeric(vdat[[paste0(afield,".amount")]])
             }
         }
         return(dat)
@@ -183,9 +228,8 @@ readPlateMap2 <- function(file, sep="\t",
 
     ## convert to 1D 
     vdat <- data.frame(well=wells,field=unlist(dat))
-    ## add blank
-    vdat$blank <- FALSE
-    vdat$blank[grep(blank.id, vdat$field)] <- TRUE
+    ## get blanks, to add later
+    blank.idx <- grep(blank.id, vdat$field)
     ## split fields - using tidyr separate
     vdat <- tidyr::separate(vdat, col = "field", into = fields, sep = fsep)
     if ( !missing(asep) & !missing(afields) ) {
@@ -193,15 +237,22 @@ readPlateMap2 <- function(file, sep="\t",
             vdat <- tidyr::separate(vdat, col = afield,
                                     into = c(afield, paste0(afield,".amount")),
                                     sep = asep)
-            vdat$amount <- as.numeric(vdat[[paste0(afield,".amount")]])
+              vdat[[paste0(afield,".amount")]] <- 
+                as.numeric(vdat[[paste0(afield,".amount")]])
         }
         ## TODO: split different substances in one afield
         ## into different columns!
         ## and replace column name
-     }
+    }
+    ## replace all empty strings by NA
+    vdat[vdat==""] <- NA
+    ## add blanks
+    vdat$blank <- FALSE
+    vdat$blank[blank.idx] <- TRUE
+    
     ## don't - use well column throughout!
     ##rownames(vdat) <- wells
-    class(plate) <- "platemap"
+    #class(vdat) <- "platemap"
     vdat
 }
 

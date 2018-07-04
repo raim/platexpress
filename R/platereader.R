@@ -656,7 +656,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @export
 doseResponse <- function(map, wells, val, 
                          amount="amount", substance="substance", 
-                         col="color", pch=1, bartype="range", barl=.05, 
+                         col="black", pch=1, bartype="range", barl=.05, 
                          all=FALSE, line=TRUE, na.y=0, add=FALSE, 
                          ylim, xlim, ylab, xlab, verb=TRUE, ...) {
   

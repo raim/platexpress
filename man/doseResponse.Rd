@@ -5,7 +5,7 @@
 \title{Dose-Response Plots with Error Bars}
 \usage{
 doseResponse(map, wells, val, amount = "amount", substance = "substance",
-  col = "color", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
+  col = "black", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
   line = TRUE, na.y = 0, add = FALSE, ylim, xlim, ylab, xlab,
   verb = TRUE, ...)
 }
