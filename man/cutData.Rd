@@ -4,21 +4,21 @@
 \alias{cutData}
 \title{Cut Data Range}
 \usage{
-cutData(data, yrng, xid, yid, xrng)
+cutData(data, xrng, xid, yid, yrng)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{link{readPlateData}}}
 
-\item{yrng}{a single or two value(s) for x-axis cuts, only data smaller
-then single value, or within the range of two values will be retained}
+\item{xrng}{a single or two value(s) for x-axis cuts, only within the range
+of two values will be retained; if only one value is passed only the
+data closest to this point will be retained!}
 
 \item{xid}{ID of the x-axis data to cut, default is the main x-axis ('Time')}
 
 \item{yid}{ID of the y-axis data to cut}
 
-\item{xrng}{a single or two value(s) for x-axis cuts, only within the range
-of two values will be retained; if only one value is passed only the
-data closest to this point will be retained!}
+\item{yrng}{a single or two value(s) for x-axis cuts, only data smaller
+then single value, or within the range of two values will be retained}
 }
 \description{
 Cuts data to a range or single point of the x-axis, and/or cuts
