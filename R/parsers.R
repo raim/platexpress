@@ -195,16 +195,22 @@ readPlateMap <- function(file, sep="\t",
         }
         ## split inducer:amount columns
         if ( !missing(asep) & !missing(afields) ) {
-            for ( afield in afields ) {
-                dat <- tidyr::separate(vdat, col = afield,
-                                       into = c(afield,
-                                                paste0(afield,".amount")),
-                                       sep = asep)
-                dat[[paste0(afield,".amount")]] <- 
-                  as.numeric(vdat[[paste0(afield,".amount")]])
-            }
+          #if ( length(afields)>1 )
+          #  warning("multiple substance:amount pairs not fully implemented;",
+          #          "please add colors manually")
+          for ( i in 1:length(afields) ) {
+            afield <- afields[i]
+            amnt.name <- ifelse(i>1,paste0(afield,"amount"),"amount")
+            vdat <- tidyr::separate(vdat, col = afield,
+                                    into = c(afield, amnt.name),
+                                    sep = asep)
+            vdat[[amnt.name]] <- as.numeric(vdat[[amnt.name]])
+            vdat <- amountColors(vdat, 
+                                 substance=afield,
+                                 amount=amnt.name,
+                                 color=sub("amount","color",amnt.name))
+          }
         }
-        return(dat)
     }
     
     ## plate map by columns and rows
@@ -233,16 +239,24 @@ readPlateMap <- function(file, sep="\t",
     ## split fields - using tidyr separate
     vdat <- tidyr::separate(vdat, col = "field", into = fields, sep = fsep)
     if ( !missing(asep) & !missing(afields) ) {
-        for ( afield in afields ) {
-            vdat <- tidyr::separate(vdat, col = afield,
-                                    into = c(afield, paste0(afield,".amount")),
-                                    sep = asep)
-              vdat[[paste0(afield,".amount")]] <- 
-                as.numeric(vdat[[paste0(afield,".amount")]])
-        }
+      #if ( length(afields)>1 )
+      #  warning("multiple substance:amount pairs not fully implemented;",
+      #          "please add colors manually")
+      for ( i in 1:length(afields) ) {
+        afield <- afields[i]
+        amnt.name <- ifelse(i>1,paste0(afield,"amount"),"amount")
+        vdat <- tidyr::separate(vdat, col = afield,
+                                into = c(afield, amnt.name),
+                                sep = asep)
+        vdat[[amnt.name]] <- as.numeric(vdat[[amnt.name]])
+        vdat <- amountColors(vdat, 
+                             substance=afield,
+                             amount=amnt.name,
+                             color=sub("amount","color",amnt.name))
         ## TODO: split different substances in one afield
         ## into different columns!
         ## and replace column name
+      }
     }
     ## replace all empty strings by NA
     vdat[vdat==""] <- NA
