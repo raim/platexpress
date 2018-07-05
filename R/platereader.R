@@ -446,10 +446,10 @@ shiftData <- function(data, lag, xid) {
 #' Cuts data to a range or single point of the x-axis, and/or cuts
 #' all y-axis values within a range
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
-#' @param xid ID of the x-axis data to cut, default is the main x-axis ('Time')
 #' @param xrng a single or two value(s) for x-axis cuts, only within the range
 #' of two values will be retained; if only one value is passed only the
 #' data closest to this point will be retained!
+#' @param xid ID of the x-axis data to cut, default is the main x-axis ('Time')
 #' @param yid ID of the y-axis data to cut
 #' @param yrng a single or two value(s) for x-axis cuts, only data smaller
 #' then single value, or within the range of two values will be retained
@@ -463,7 +463,7 @@ shiftData <- function(data, lag, xid) {
 #' value will be returned. Note that data outside \code{yrng} are simply
 #' set to NA, which may cause problems downstream.
 #' @export
-cutData <- function(data, yrng, xid, yid, xrng) {
+cutData <- function(data, xrng, xid, yid, yrng) {
 
     ## default x-axis cut
     if ( missing(xid) & missing(yid) )
