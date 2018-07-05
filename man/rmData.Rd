@@ -12,7 +12,7 @@ rmData(data, ID)
 \item{ID}{a vector of IDs of the data to be removed}
 }
 \value{
-Returns the new \\code{\link{platexpress}} data, with 
+Returns the new \\code{\link{platexpress}} data, with
 data set <\code{ID}> removed
 }
 \description{

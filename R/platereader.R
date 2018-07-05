@@ -1,12 +1,12 @@
 #' platexpress: quick inspection and analysis of microbial growth & expression.
 #'
-#' The platexpress package provides a quick & easy interface to 
+#' The platexpress package provides a quick & easy interface to
 #' inspect microbial growth & gene expression data as measured in typical
 #' platereaders ("96-well plates") or other parallel growth systems.
-#' Interfaces to existing packages allow growth model fitting 
+#' Interfaces to existing packages allow growth model fitting
 #' (currently only \code{\link[grofit:grofit]{grofit}}, and
 #' partially/untested \code{\link[cellGrowth:fitCellGrowth]{cellGrowth}}.)
-#' 
+#'
 #'@author Rainer Machne
 #'@docType package
 #'@name platexpress
@@ -26,8 +26,8 @@ NULL
 ### UTILS
 
 #' Select Plot Device
-#' 
-#' plots to png, eps, pdf, tiff, svg or jpeg devices taking the same 
+#'
+#' plots to png, eps, pdf, tiff, svg or jpeg devices taking the same
 #' width, height and resolution arguments for all
 #' @param file the name of the file without the extension (.pdf)
 #' @param type type of the figure, either png, pdf or eps
@@ -63,7 +63,7 @@ getRGB <- function(n) {
 
 
 #' Show Visual Ligh Spectrum
-#' 
+#'
 #' shows the color spectrum of visible light along wavelengths in nm.
 #' NOTE that this is not a fully correct spectrum,
 #' see \code{\link{wavelength2RGB}} for details.
@@ -96,7 +96,7 @@ showSpectrum <- function(wavelengths=380:780, alpha=99, pch=19, cex=3,
 }
 
 #' Plot Wavelength in Spectrum
-#' 
+#'
 #' a color selector for \code{\link{showSpectrum}}; draws a vertical line,
 #' the wavelength, and a filled circle at a given wavelength in nm.
 #' @param x wavelength in nm
@@ -118,7 +118,7 @@ plotWavelength <- function(x=534, y=1.09, ych=0.95, cex=5, pch=19, ...) {
 }
 
 #' Find Wavelength in Spectrum
-#' 
+#'
 #' a color selector for \code{\link{showSpectrum}}; expects the user to
 #' click on the spectrum, then draws a vertical line at the clicked
 #' wavelength using \code{\link{plotWavelength}} and records the wavelength
@@ -145,7 +145,7 @@ findWavelength <- function(n=1, ...) {
 }
 
 #' Convert Wavelength to RGB Colors
-#' 
+#'
 #' Converts wavelength in nm (visible light: 380:780 nm) to RGB.
 #' NOTE that this is not a fully correct spectrum, see Details.
 #' @details implemented following the java code posted at
@@ -168,7 +168,7 @@ wavelength2RGB <- function(wavelength)
 lambda2RGB <- function(wavelength) {
 
     ## intensity scaling near visibility
-    gamma <- 0.80 
+    gamma <- 0.80
     intensityMax <- 255
 
     Red <- 0.0
@@ -205,18 +205,18 @@ lambda2RGB <- function(wavelength) {
     factor <- 0.0
     if ( (wavelength >= 380) & (wavelength<420) ) {
         factor <- 0.3 + 0.7*(wavelength - 380) / (420 - 380)
-    } else if ( (wavelength >= 420) & (wavelength<701) ) { 
+    } else if ( (wavelength >= 420) & (wavelength<701) ) {
         factor <- 1.0
     } else if ( (wavelength >= 701) & (wavelength<781) ) {
         factor <- 0.3 + 0.7*(780 - wavelength) / (780 - 700)
     }
-    
+
     rgb <- rep(NA,3)
     ## Don't want 0^x = 1 for x <> 0
     rgb[1] <- ifelse(Red==0,  0, round(intensityMax * (Red   * factor)^gamma))
     rgb[2] <- ifelse(Green==0,0, round(intensityMax * (Green * factor)^gamma))
     rgb[3] <- ifelse(Blue==0, 0, round(intensityMax * (Blue  * factor)^gamma))
-    
+
     rgb(rgb[1],rgb[2],rgb[3],maxColorValue=intensityMax)
 }
 
@@ -225,8 +225,8 @@ lambda2RGB <- function(wavelength) {
 ### STATS
 
 ## moving average
-#' Moving Average 
-#' 
+#' Moving Average
+#'
 #' calculate a moving average using \code{\link[stats]{filter}}
 #' @param x data vector along which a moving average will be calculated
 #' @param n moving average window size
@@ -258,12 +258,12 @@ se <- function(data,na.rm=TRUE) {
 
 
 
-#' Set Data IDs and colors 
-#' 
+#' Set Data IDs and colors
+#'
 #' Sets colors, rename, order or filter the data set
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param yids a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names
-#' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
+#' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
 #' @export
@@ -275,10 +275,10 @@ prettyData <- function(data, yids, colors) {
 
     ## get xids (global x-axis data)
     xids <- data$xids
-    
-    if ( any(is.na(match(yids,names(data))))) 
+
+    if ( any(is.na(match(yids,names(data)))))
       stop("IDs (yids) not found in data", paste(yids,sep=";"))
-    
+
     ## re-order: xids first and IDs last
     data$dataIDs <- yids
     ## store colors
@@ -294,12 +294,12 @@ prettyData <- function(data, yids, colors) {
         names(data)[match(yids,names(data))] <- names(yids)
         data$dataIDs[match(yids,data$dataIDs)] <- names(yids)
     }
-    
+
     ## generate colors, if none are present
     if ( missing(colors) & !"colors"%in%names(data) ) {
         data$colors <- getColors(data$dataIDs)
     }
-    ## set new or replace existing 
+    ## set new or replace existing
     if ( !missing(colors) ) {
         if ( is.null(names(colors)) )
             names(colors) <- data$dataIDs
@@ -308,7 +308,7 @@ prettyData <- function(data, yids, colors) {
     data
 }
 
-## TODO: implement other types? 
+## TODO: implement other types?
 getColors <- function(ptypes,type="R") {
     ## colors
     if ( type=="R" )
@@ -321,10 +321,10 @@ getColors <- function(ptypes,type="R") {
 
 ## add data
 #' Add Data
-#' 
+#'
 #' Adds a data set, e.g., calculated ratios, smoothed data, etc.
 #' @param data the current platexpress data set
-#' @param ID the ID of the new data 
+#' @param ID the ID of the new data
 #' @param dat the new data, must be a matrix akin to other data in the set
 #' @param col plot color for the new data, an RGB string w/o alpha suffix
 #' @param processing optional processing note
@@ -349,7 +349,7 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
         ## add new data
         data$dataIDs <- c(data$dataIDs, ID) # add to ID list
         if ( "colors" %in% names(data) ) { # add color
-            if ( missing(col) ) 
+            if ( missing(col) )
                 col <- getRGB(length(data$colors)+1)
             data$colors <- c(data$colors, col[length(col)])
             names(data$colors) <-
@@ -358,7 +358,7 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
             data$colors <- getColors(data$dataIDs)
             data$colors[ID] <- col
         }
-        
+
         if ( missing(processing) ) # add date as processing note
             processing <- paste("added",date())
         data <- append(data, list(list(data=dat, processing=processing)))
@@ -369,17 +369,17 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
 
 
 #' Remove Data
-#' 
-#' removes a data set from plate data 
+#'
+#' removes a data set from plate data
 #' @param data a \code{\link{platexpress}} data set
 #' @param ID a vector of IDs of the data to be removed
-#' @return Returns the new \\code{\link{platexpress}} data, with 
+#' @return Returns the new \\code{\link{platexpress}} data, with
 #' data set <\code{ID}> removed
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{addData}}
 #' @export
 rmData <- function(data, ID) {
-  
+
   for ( id in ID ) {
     if ( !id%in%data$dataIDs )
       warning("\"",id,"\" not found")
@@ -393,7 +393,7 @@ rmData <- function(data, ID) {
 
 
 #' Get Data
-#' 
+#'
 #' Returns a specific data set as data matrix
 #' @param data the current platexpress data set
 #' @param ID the ID of the data to be obtained
@@ -406,8 +406,8 @@ getData <- function(data, ID, type="data") {
 }
 
 
-#' Shift Data 
-#' 
+#' Shift Data
+#'
 #' Shifts the x-axis, eg. by calculated lag-phases, to align growth curves
 #' @param data \code{\link{platexpress}} data set
 #' @param lag a named vector providing the lag-phase to be removed; the names
@@ -424,7 +424,7 @@ shiftData <- function(data, lag, xid) {
     if ( missing(xid) )
         xid <- data$xids[1]
     xdat <- data[[xid]]
-    
+
     for ( i in 1:length(lag) ) {
         well <- names(lag)[i]
         idx <- which(xdat >= lag[i])[1]
@@ -441,8 +441,8 @@ shiftData <- function(data, lag, xid) {
 }
 
 ## TODO: cut data either by time, or by a chosen data set
-#' Cut Data Range 
-#' 
+#' Cut Data Range
+#'
 #' Cuts data to a range or single point of the x-axis, and/or cuts
 #' all y-axis values within a range
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
@@ -466,7 +466,7 @@ shiftData <- function(data, lag, xid) {
 cutData <- function(data, yrng, xid, yid, xrng) {
 
     ## default x-axis cut
-    if ( missing(xid) & missing(yid) ) 
+    if ( missing(xid) & missing(yid) )
         xid <- data$xids[1]
 
     ## TODO: allow cutting both x and y data
@@ -503,7 +503,7 @@ cutData <- function(data, yrng, xid, yid, xrng) {
         ## just set to NA
         ydat <- apply(ydat, 2, function(y) {
             y[y < yrng[1] | y > yrng[2]]<-NA;y})
-        data[[yid]]$data <- ydat 
+        data[[yid]]$data <- ydat
     }
     data
 }
@@ -515,8 +515,8 @@ cutData <- function(data, yrng, xid, yid, xrng) {
 #' for all replicates at a given amount. Note that this is deprecated,
 #' and plots with error bars can be generated instead by
 #' function \code{\link{doseResponse}}.
-#' @param map a plate layout map with columns \code{amount} and some 
-#' calculated value in column \code{val}, 
+#' @param map a plate layout map with columns \code{amount} and some
+#' calculated value in column \code{val},
 #' eg. results from \code{\link[grofit:grofit]{grofit}}
 #' @param wells a list of well IDs to be used in the plot
 #' @param val the name of a column in \code{map} containing numeric values
@@ -524,30 +524,30 @@ cutData <- function(data, yrng, xid, yid, xrng) {
 #' @param amount the name of a column in \code{map} providing numeric values
 #' that should be plotted on x-axis, typically a substance added to wells
 #' in multiple replicates; the default value "amount" is automatically
-#' generated from appropriate plate layout files by \code{link{readPlateMap}} 
-#' @param substance the name of a column in \code{map} providing the names of 
-#' the substance in \code{amount}, used as x-axis label; if it doesn't 
+#' generated from appropriate plate layout files by \code{link{readPlateMap}}
+#' @param substance the name of a column in \code{map} providing the names of
+#' the substance in \code{amount}, used as x-axis label; if it doesn't
 #' correspond to a column, its value is directly used as label
 #' @param color the name of a column in \code{map} providing colors
 #' for each well; NOTE, that wells with the same \code{amount} should have
 #' the same color, only the first color for a given \code{amount} is used;
 #' Colors are automatically assigned from a color ramp mapped to the
-#' numerical range of \code{amount} by \code{link{readPlateMap}} 
-#' @param na.y value to be used to plot replicates with \code{NA} in 
+#' numerical range of \code{amount} by \code{link{readPlateMap}}
+#' @param na.y value to be used to plot replicates with \code{NA} in
 #' column \code{val}; set to NA to supress plotting
 #' @param ylim limits of the y-axis
 #' @param xnum use numerical x-axis instead of default categorical
 #' @export
-doseResponse.box <- function(map, wells, val, amount="amount", substance="substance", 
+doseResponse.box <- function(map, wells, val, amount="amount", substance="substance",
                              color="color", na.y=0, ylim, xnum=FALSE) {
 
   if( missing(wells) ) wells <- map[,"well"]
-  
+
     wells <- match(wells,map[,"well"])
-  
+
     y <- map[wells,val]
     x <- map[wells,amount]
-    
+
     ## get unique colors for unique sorted x, as it will appear in
     ## boxplots
     ## UGLY, TODO: less ugly?
@@ -557,26 +557,26 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
         cl <- cl[which(!duplicated(sort(x)))]
         names(cl) <- sort(x[!duplicated(x)])
     } else cl <- 1
-    
+
     if ( missing(ylim) )
         ylim <- range(y,na.rm=TRUE)
 
-    if ( substance %in%  colnames(map) ) 
+    if ( substance %in%  colnames(map) )
         subid <- map[wells,substance][1]
     else subid <- substance
-    
+
     #xlim <- range(x)
     #if ( is.na(na.y) ) # if na.y are not plotted limit xaxis
     #  xlim <- range(x[!is.na(y)])
-    
+
     y1 <- y
     x1 <- x
-    
+
     if ( is.na(na.y) ) {
       y1 <- y1[!is.na(y)]
       x1 <- x1[!is.na(y)]
     }
-    
+
     xaxt="s"
     if ( xnum ) {# attempt numerical x-axis
       x1 <- factor(x1, levels = do.call(seq, as.list(range(x1))))
@@ -590,11 +590,11 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
                          method="jitter", pch=1,cex=1,
                          na.action="na.pass")
     if ( xnum ) # numerical xaxis
-      axis(1)    
-    
+      axis(1)
+
     if ( xnum )
       x <- factor(x, levels=do.call(seq, as.list(range(x))))
-    
+
     nay <- y
     nay[is.na(y)] <- na.y
     nay[!is.na(y)] <- NA
@@ -609,8 +609,8 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' of an \code{amount} of a \code{substance} and generates error bars
 #' for all replicates at a given amount; returns the plotted mean values
 #' and error bar ranges.
-#' @param map a plate layout map with columns \code{amount} and some 
-#' calculated value in column \code{val}, 
+#' @param map a plate layout map with columns \code{amount} and some
+#' calculated value in column \code{val},
 #' eg. results from \code{\link[grofit:grofit]{grofit}}
 #' @param wells a list of well IDs to be used in the plot
 #' @param val the name of a column in \code{map} containing numeric values
@@ -618,64 +618,64 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' @param amount the name of a column in \code{map} providing numeric values
 #' that should be plotted on x-axis, typically a substance added to wells
 #' in multiple replicates; the default value "amount" is automatically
-#' generated from appropriate plate layout files by \code{link{readPlateMap}} 
-#' @param substance the name of a column in \code{map} providing the names of 
-#' the substance in \code{amount}, used as x-axis label; if it doesn't 
+#' generated from appropriate plate layout files by \code{link{readPlateMap}}
+#' @param substance the name of a column in \code{map} providing the names of
+#' the substance in \code{amount}, used as x-axis label; if it doesn't
 #' correspond to a column, its value is directly used as label
-#' @param col either a valid color representation or the name of a column in 
+#' @param col either a valid color representation or the name of a column in
 #' \code{map} providing colors for each well or a, if \code{wells} is a named
 #' list of wells, a named vector of colors with matching names. NOTE for the
-#' second case, that wells with the same \code{amount} should have the same color, only 
-#' the first color for a given \code{amount} is used; such colors are automatically 
-#' assigned from a color ramp mapped to the numerical range of \code{amount} by 
+#' second case, that wells with the same \code{amount} should have the same color, only
+#' the first color for a given \code{amount} is used; such colors are automatically
+#' assigned from a color ramp mapped to the numerical range of \code{amount} by
 #' \code{\link{readPlateMap}}, see \code{\link{amountColors}};
 #' @param pch pch of the mean value points
 #' @param bartype type of the error bars, "range" for the full range
-#' of the data, where the average value will be the 
-#' \code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval, 
+#' of the data, where the average value will be the
+#' \code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval,
 #' "sd" for the standard deviation, or "se" for the standard error where
 #' the average value will be the \code{\link[base:mean]{mean}};
 #' TODO: implement boxplot-like quantiles
 #' @param barl length of the horizontal lines of error bars (argument \code{length}
 #' of function \code{\link{arrows}})
-#' @param all logical indicating whether to plot all data points additionally to 
+#' @param all logical indicating whether to plot all data points additionally to
 #' error bars
 #' @param line logical indicating whether to plot a line connecting the mean
 #' values
-#' @param na.y value to be used to plot replicates with \code{NA} in 
+#' @param na.y value to be used to plot replicates with \code{NA} in
 #' column \code{val}; set to NA to supress plotting
 #' @param add add data to existing plot
 #' @param ylim limits of the y-axis
 #' @param xlim limits of the x-axis
 #' @param ylab alternative label for the y-axis, default is to use argument \code{val}
-#' @param xlab alternative label for the x-axis, default is to use argument 
+#' @param xlab alternative label for the x-axis, default is to use argument
 #' \code{substance}, or if this is a column in \code{map}, the substance
 #' indicated there
 #' @param verb print progress messages
 #' @param ... arguments passed on to the main setup \code{\link{plot}}
 #' @export
-doseResponse <- function(map, wells, val, 
-                         amount="amount", substance="substance", 
-                         col="black", pch=1, bartype="range", barl=.05, 
-                         all=FALSE, line=TRUE, na.y=0, add=FALSE, 
+doseResponse <- function(map, wells, val,
+                         amount="amount", substance="substance",
+                         col="black", pch=1, bartype="range", barl=.05,
+                         all=FALSE, line=TRUE, na.y=0, add=FALSE,
                          ylim, xlim, ylab, xlab, verb=TRUE, ...) {
-  
+
   if( missing(wells) ) wells <- map[,"well"]
-  
+
   ## call recursively with add option if wells is a grouping list!
   ## NOTE: interpreting col as a group color list!
   ## TODO: use classes
   if ( typeof(wells)=="list" ) {
-    
+
     ## record call
     mc <- match.call(expand.dots = FALSE)
-    
+
     ## set common xlims/ylims
-    if ( missing(xlim) ) 
+    if ( missing(xlim) )
       mc[["xlim"]] <- range(map[map$well%in%unlist(wells),amount],na.rm=TRUE)
     if ( missing(ylim) )
       mc[["ylim"]] <- range(map[map$well%in%unlist(wells),val],na.rm=TRUE)
-        
+
     ymats <- list()
     for ( i in 1:length(wells) ) {
       mc[["wells"]] <- wells[[i]]
@@ -683,33 +683,33 @@ doseResponse <- function(map, wells, val,
       if ( names(wells)[i]%in%names(col) )
         mc[["col"]] <- col[[names(wells)[i]]]
       if ( verb )
-        cat(paste("plotting group",i, names(wells)[i],"in color", 
+        cat(paste("plotting group",i, names(wells)[i],"in color",
                   mc[["col"]],"\n"))
       #scan()
       ymat <- eval(mc)
       ymats <- append(ymats,list(ymat))
-    }    
+    }
     names(ymats) <- names(wells)
     ## TODO: legend?
     return(invisible(ymats))
   }
-  
+
   wells <- match(wells,map[,"well"])
-  
+
   y <- map[wells,val]
   x <- map[wells,amount]
 
-  if ( substance %in%  colnames(map) ) 
+  if ( substance %in%  colnames(map) )
     subid <- map[wells,substance][1]
   else subid <- substance
   if ( missing(xlab) )
     xlab <- subid
   if ( missing(ylab) )
     ylab <- val
-  
+
   y1 <- y
   x1 <- x
-    
+
   y1 <- y1[!is.na(y)]
   x1 <- x1[!is.na(y)]
 
@@ -720,7 +720,7 @@ doseResponse <- function(map, wells, val,
   ## calculate ranges for duplicates at each x
   xlevels <- sort(unique(x1))
   ymat <- matrix(NA,nrow=length(xlevels),ncol=4)
-  
+
   ## COLOR SELECTION
   ## TODO: organize coloring schemes
   ## default, first color from plotted xlevel or direct coloring
@@ -731,7 +731,7 @@ doseResponse <- function(map, wells, val,
     cl <- sapply(xlevels,function(x) map[map[,amount]==x,col][1])
     names(cl) <- xlevels
     linecol <- 1
-  } else { 
+  } else {
     cl <- rep(col,length(xlevels))
     linecol <- col
   }
@@ -773,9 +773,9 @@ doseResponse <- function(map, wells, val,
   for ( i in 1:nrow(ymat) ) {
     if ( ymat[i,3]<ymat[i,4])
       arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
-    else 
+    else
       points(ymat[i,1], ymat[i,3],pch=3, col=cl[i])
-    if ( !line ) 
+    if ( !line )
       points(ymat[i,1],ymat[i,2], col=cl[i], pch=pch)
     if ( all )
       points(x1[x1==ymat[i,1]], y1[x1==ymat[i,1]], pch=20, cex=.5, , col=cl[i])
@@ -786,7 +786,7 @@ doseResponse <- function(map, wells, val,
 }
 
 #' Box-Plots of Data Ranges
-#' 
+#'
 #' returns data for group of wells in a given range of the x-axis;
 #' if only one value is given, the values closest to this x-axis points
 #' are returned; see "Value" for details.
@@ -819,7 +819,7 @@ boxData <- function(data, rng, groups, xid, yid="OD", plot=TRUE, type="box", ety
 
     bdat <- rep(list(NA),length(groups))
     names(bdat) <- names(groups)
-    for ( sg in 1:length(groups) ) 
+    for ( sg in 1:length(groups) )
         bdat[[sg]] <- cdat[[yid]]$data[,groups[[sg]],drop=FALSE]
     ## get means for all groups
     pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
@@ -837,17 +837,17 @@ boxData <- function(data, rng, groups, xid, yid="OD", plot=TRUE, type="box", ety
                 n2 <- sqrt(unlist(lapply(pdat, length)))
                 ci <-  sd / n2
             }
-            
+
             x <- barplot(mn,ylim=c(0,max(mn+ci,na.rm=TRUE)),ylab=yid,las=2)
             arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
-                   length=.05,lwd=1.5)            
+                   length=.05,lwd=1.5)
         }
         legend("topright",paste("at",xid, "=",paste(rng,collapse="-")),
                bty="n",box.lwd=0)
     }
 
     ## if a range was chosen and not a single point,
-    ## report mean values 
+    ## report mean values
     if ( length(rng)>1 ) {
         bdat <- lapply(pdat,function(x) {
             y<-matrix(x,nrow=1)
@@ -870,7 +870,7 @@ boxData <- function(data, rng, groups, xid, yid="OD", plot=TRUE, type="box", ety
 
 
 #' Skip Wells
-#' 
+#'
 #' Removes wells from plate data, plate layout maps and well groupings
 #' @param data data structures from \code{\link{platexpress}}; either data
 #' (\code{\link{readPlateData}}), a plate layout map
@@ -905,7 +905,7 @@ skipWells <- function(data, skip) {
 }
 
 #' Get List of Wells
-#' 
+#'
 #' get a filtered list of wells that match argument \code{values}
 #' @param plate the plate layout map, see \code{\link{readPlateMap}}
 #' @param blanks if set to \code{TRUE} (default) the argument \code{values}
@@ -924,14 +924,14 @@ getWells <- function(plate, blanks=FALSE, values) {
             plate <- plate[as.character(plate[,key])%in%val,]
         }
     } else blanks <- TRUE # return blank as default
-    if ( blanks ) 
+    if ( blanks )
       plate <- plate[plate[,"blank"]==TRUE,]
     res <- plate[,"well"]
     return(as.character(res[!is.na(res)]))
 }
 
 #' Subtract Blank Values
-#' 
+#'
 #' The function subtracts values from "blank" wells. Optionally this can
 #' be done in bins over time (or the current x-axis value) to account
 #' for time-dependent blanks. E.g. fluorescence blanks from LB medium
@@ -955,7 +955,7 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' @param max.xid the maximal x-axis value where blanks should be used
 #' @param mbins the number of bins the x-axis is to be divided, if blanked
 #' along the x-axis, see \code{xid}
-#' @param base optional minimal value; all values will be raised by 
+#' @param base optional minimal value; all values will be raised by
 #' the same amount using the function \code{\link{adjustBase}}
 #' @param verb issued progress messages and info
 #' @param ... further arguments to \code{\link{adjustBase}}
@@ -965,22 +965,22 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-correctBlanks <- function(data, plate, type="median", by, yids, 
+correctBlanks <- function(data, plate, type="median", by, yids,
                           xid, max.xid, mbins=1, base, verb=TRUE, ...) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
     if ( missing(xid) )
         xid <- data$xids[1]
-    
+
     ## start new data list
     corr <- data
     time <- data[[xid]] ## TODO: take from data xids
-  
+
     ## reduce matrix to requested data
     data <- data[data$dataIDs]
     ptypes <- names(data)
-    if ( !missing(yids) ) # only use requested data 
+    if ( !missing(yids) ) # only use requested data
       ptypes <- ptypes[ptypes%in%yids]
     if ( length(ptypes)==0 )
         stop("no data to blank")
@@ -990,11 +990,11 @@ correctBlanks <- function(data, plate, type="median", by, yids,
     ## get present wells
     pwells <- unique(c(sapply(corr$dataIDs,
                               function(id) colnames(data[[id]]$data))))
-    
+
     ## blank wells
     blanks <- plate[,"blank"]
     blanks[is.na(blanks)] <- FALSE
-    
+
     ## get different types to be blanked separately
     ## convert platemap to char
     types <- rep(TRUE,nrow(plate))
@@ -1004,7 +1004,7 @@ correctBlanks <- function(data, plate, type="median", by, yids,
         colnames(lpl) <- colnames(plate)
         ## collapse requested combinations into new type
         types <- rep("",nrow(plate))
-        for ( b in by ) 
+        for ( b in by )
           types <- paste(types,lpl[,b],sep="_")
     }
     btypes <- unique(types)
@@ -1013,7 +1013,7 @@ correctBlanks <- function(data, plate, type="median", by, yids,
     ## sometimes blanks show trends, e.g., higher fluorescence
     ## in the beginning
 
-    
+
     ## blank each type separately
     for ( i in 1:length(btypes) ) {
         btyp <- btypes[i]
@@ -1023,7 +1023,7 @@ correctBlanks <- function(data, plate, type="median", by, yids,
         ## filter for actually present wells
         dwells <- dwells[dwells%in%pwells]
         bwells <- bwells[bwells%in%pwells]
-        
+
         if ( verb )
           cat(paste("blanking", btyp, ":", length(dwells), "wells, using",
                     length(bwells), "blank wells\n"))
@@ -1031,7 +1031,7 @@ correctBlanks <- function(data, plate, type="median", by, yids,
             ptyp <- ptypes[k]
             dat <- data[[ptyp]]$data
             ## TODO: do this in time bins
-            
+
             timebins <- unique(c(seq(1,nrow(dat),nrow(dat)/mbins),nrow(dat)))
             nbin <- length(timebins)
             timebins <- cbind(ceiling(timebins[1:(nbin-1)]),
@@ -1047,7 +1047,7 @@ correctBlanks <- function(data, plate, type="median", by, yids,
                 ## cut maximal time for blanking
                 bbin <- bin
                 if ( !missing(max.xid) ) {
-                    if ( verb ) 
+                    if ( verb )
                       cat(paste("\tskipping",sum(time[bbin]>max.xid),
                                 "bins at",max.xid,"\n"))
                     bbin <- bbin[time[bbin]<=max.xid]
@@ -1079,13 +1079,13 @@ correctBlanks <- function(data, plate, type="median", by, yids,
                                          paste("blank-corrected by",btyp))
         }
     }
-    if ( !missing(base) ) 
+    if ( !missing(base) )
       corr <- adjustBase(corr, base=base, yids=yids, verb=verb, ...)
     corr
 }
 
-#' Adjusts to Minimal Base 
-#' 
+#' Adjusts to Minimal Base
+#'
 #' The function raises all data to a "base" level, default 0, to avoid
 #' negative values that sometimes occur after blank correction
 #' in \code{\link{correctBlanks}}. The function can be optionally
@@ -1101,16 +1101,16 @@ correctBlanks <- function(data, plate, type="median", by, yids,
 #' @param add.fraction a fraction of the whole data range, added to base
 #' @param each add base for each well separately!
 #' @param verb print messages if true
-#' @return Returns `data' where all data sets (or only those specified in 
-#' option \code{yids}) where raised to a minimum level in 
+#' @return Returns `data' where all data sets (or only those specified in
+#' option \code{yids}) where raised to a minimum level in
 #' @seealso \code{\link{correctBlanks}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=TRUE) {
 
-    if ( missing(yids) ) # only use requested data 
+    if ( missing(yids) ) # only use requested data
         yids <- data$dataIDs # use all
-    
+
     for ( yid in yids ) {
 
         ## each well separately?
@@ -1120,7 +1120,7 @@ adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=
             bins <- list(1:ncol(data[[yid]]$data))
 
         for ( bin in bins ) {
-            
+
             dat <- data[[yid]]$data[,bin,drop=FALSE]
 
             if ( missing(xlim) )
@@ -1133,10 +1133,10 @@ adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=
 
             ## TODO: smarter? only if any value is <0?
             dat <- dat - min(dat[xrng,],na.rm=TRUE) + base
-            
-            if ( !missing(add.fraction) ) 
+
+            if ( !missing(add.fraction) )
                 dat <- dat + diff(range(dat[xrng,],na.rm=TRUE))*add.fraction
-            
+
             data[[yid]]$data[,bin] <- dat
         }
         data[[yid]]$processing <- c(data[[yid]]$processing,
@@ -1161,7 +1161,7 @@ listAverage <- function(lst, id) {
     if ( any(diff(unlist(lapply(vals, length)))!=0) ) {
         stop("data have different lengths: ", id)
         ## TODO: simple solution: take longest vector
-        
+
         ## TODO: find point of discrepancy
         all <- unlist(vals) # concat all values
         # get lengths
@@ -1187,15 +1187,15 @@ listAverage <- function(lst, id) {
                           round(td,3)*100, "% of median difference between",
                           "time points.\n"))
         }
-    }    
+    }
     avg
 }
 
 #' Interpolate to Common Timepoints
-#' 
+#'
 #' interpolates all time-series of a plate to an average
 #' master time, using the R base function \code{\link[stats:spline]{spline}}.
-#' An average time is calculated for each measurement point and all values 
+#' An average time is calculated for each measurement point and all values
 #' are interpolated to these new time points. This is automatically done when
 #' parsing the raw data with \code{\link{readPlateData}}, unless
 #' explicitly suppressed. The same is also done for well temperatures.
@@ -1214,21 +1214,21 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
         data$xids <- c(data$xids, "Time")
         return(data)
     }
-    
+
     if ( verb )
       cat(paste("Interpolating all data to a single master time.\n"))
-    
+
     ## 0) TODO: check whether all data items have the same
     ## number of time-points, and cut end - this can stem from
     ## termination of the measurement before programmed end
     ## 0a: first, cut data at non-increasing time steps, 00:00:00 in Synergy
     ## 0b: check length
-    
+
     ## 1) calculate average (MASTER) time
     mtime <- listAverage(data, "time")
     ## TODO: add back temperature
-    #mtemp <- listAverage(data, "temp") 
-    
+    #mtemp <- listAverage(data, "temp")
+
     ## 2) interpolate all data to MASTER time
     for ( id in data$dataIDs ) {
         data[[id]]$orig <- data[[id]]$data
@@ -1240,7 +1240,7 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
             #mdat[,j] <- approx(x=x,y=y,xout=mtime,rule=2)$y
             ## TODO: is this OK/betterer then simple approx?
             mdat[,j] <- stats::spline(x=x,y=y,xout=mtime,method="fmm")$y
-                
+
         }
         ## replace data
         data[[id]]$data <- mdat
@@ -1248,7 +1248,7 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
         data[[id]]$processing <- c(data[[id]]$processing,
                                    "interpolated")
     }
-    
+
 
     ## add master time and calculate master temperature as well
     ## TODO: separate temperature:time pairs could be used to
@@ -1260,11 +1260,11 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
 }
 
 #' Interpolate Plate Data
-#' 
+#'
 #' interpolate one dataset to common points of another
-#' data set. This is used to change the x-axis of a data set, e.g., 
-#' the measured OD values can become the new x-axis and all fluorescence 
-#' values will be interpolated to common OD vlues, using the 
+#' data set. This is used to change the x-axis of a data set, e.g.,
+#' the measured OD values can become the new x-axis and all fluorescence
+#' values will be interpolated to common OD vlues, using the
 #' R base function \code{\link[stats:spline]{spline}}, the same way
 #' as in \code{\link{interpolatePlateTimes}}.
 #' @param data the list of measurement data as provided by
@@ -1287,7 +1287,7 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
     ## store original master data
     orig.id <- data$xids[1]
     orig <- data[[orig.id]]
-    
+
     ## get new master data
     xdat <- data[[xid]]$data
     if ( missing(n) ) n <- nrow(xdat)
@@ -1295,7 +1295,7 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
         xout <- range(c(xdat),na.rm=TRUE)
         xout <- seq(xout[1], xout[2], length.out=n)
     }
-    
+
     ## 2) interpolate all data to MASTER time
     for ( id in yids ) {
         data[[id]]$orig <- data[[id]]$data
@@ -1329,10 +1329,10 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
 
     ## keep original master data to check
     ##old.id <- paste("original_",xid,sep="")
-    ##names(data)[which(names(data)==xid)] <- 
-    ##    data$dataIDs[data$dataIDs==xid] <- 
+    ##names(data)[which(names(data)==xid)] <-
+    ##    data$dataIDs[data$dataIDs==xid] <-
     ##   names(data$colors)[which(names(data$colors)==xid)] <- old.id
-    
+
     data <- append(data, list(xout), after=0)
     names(data)[1] <- xid
     ## rm old master x-axes
@@ -1346,7 +1346,7 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
 
 
 #' View Plate
-#' 
+#'
 #' plots all data in plate format for a quick inspection of
 #' the current data set. This function should be called immediately
 #' after loading a new platereader dataset to inspect the data
@@ -1354,7 +1354,8 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param wells a list of wells to plot, overrules \code{rows} and \code{cols}
-#' @param wcols named color vector for wells, used for the well ID
+#' @param wcols named color vector for wells, names should correspond to
+#' column IDs in \code{data}, ie. the column 'well' in the plate layout map
 #' @param rows a list of strings/characters used as row ID in the composite
 #' row:col well description in the plate layout (map) and plate data
 #' @param cols as rows but plate column IDs
@@ -1380,9 +1381,9 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
 #' @examples
 #' data(ap12)
 #' # view all data on the plate
-#' viewPlate(ap12data) 
+#' viewPlate(ap12data)
 #' # inspect natural logarithm of OD_600 values, ie. log(X(t))
-#' viewPlate(ap12data, yids="600", log="y") 
+#' viewPlate(ap12data, yids="600", log="y")
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 viewPlate <- function(data, wells, wcols,
@@ -1403,8 +1404,8 @@ viewPlate <- function(data, wells, wcols,
     if ( missing(wcols) ) {
         wcols <- rep(1,length(wells))
         names(wcols) <- wells
-    } 
-    
+    }
+
     ## filter for present wells
     pwells <- unique(c(sapply(data$dataIDs,
                               function(id) colnames(data[[id]][[dtype]]))))
@@ -1412,11 +1413,11 @@ viewPlate <- function(data, wells, wcols,
         #warning("wells ", wells[!wells%in%pwells]," not present, skipped!")
         wells <- wells[wells%in%pwells]
     }
-    
+
     ## get x-axis data: time and temperature or another data set
     if ( missing(xid) )
         xid <- data$xids[1]
-    
+
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
     global.x <- xid %in% data$xids
@@ -1444,7 +1445,7 @@ viewPlate <- function(data, wells, wcols,
             pcols <- data$colors # set colors
         else
             pcols <- getColors(data$dataIDs) # default colors
-    
+
     ## reduce matrix to plot data
     data <- data[data$dataIDs]
     ptypes <- names(data)
@@ -1455,17 +1456,17 @@ viewPlate <- function(data, wells, wcols,
         return()
     } else
         cat(paste("plotting", paste(ptypes,collapse=";"),"\n"))
-    
+
     ## PLOT PARAMS
     ## xlim
-    if ( missing(xlim) ) 
-      if ( !global.x ) 
+    if ( missing(xlim) )
+      if ( !global.x )
         xlim <- range(c(xdat),na.rm=TRUE)
-      else 
-        xlim <- range(time)        
+      else
+        xlim <- range(time)
     else
         xscale <- TRUE
-    
+
     ## set local ylims
     ## TODO: generalize and align with code in viewGroup
     if ( missing(ylim) ) {
@@ -1474,7 +1475,7 @@ viewPlate <- function(data, wells, wcols,
         for ( k in pidx ) {
             dat <- data[[ptypes[k]]][[dtype]][,wells,drop=FALSE] # get plotted wells
             if ( global.x ) # if x is time, limit to plot xlim
-              dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE] 
+              dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE]
             ylm <- range(c(dat[is.finite(dat)]),na.rm=TRUE) # get range
             ylim[[k]] <- ylm
         }
@@ -1482,15 +1483,15 @@ viewPlate <- function(data, wells, wcols,
         if ( !missing(ylims) ) # update by argument ylims
             ylim[names(ylims)] <- ylims[names(ylims)]
         ylims <- ylim
-    } else  { # .. or expand single ylim argument c(y1,y2) 
+    } else  { # .. or expand single ylim argument c(y1,y2)
         ylims <- rep(list(ylim),length(ptypes))
         names(ylims) <- ptypes
-    } 
+    }
 
     ## plot plate
     orig.par <- par(c("mfcol","mai")) # store parameters
     par(mfcol=c(length(rows),length(cols)),mai=rep(0,4))
-    for ( j in cols ) 
+    for ( j in cols )
       for ( i in rows ) {
           well <- paste(i,j,sep="")
           if ( !well%in%wells ) { ## skipped wells
@@ -1498,7 +1499,7 @@ viewPlate <- function(data, wells, wcols,
               next
           }
           ## x data
-          if ( !global.x ) 
+          if ( !global.x )
             x <- xdat[,well]
           else x <- time
           for ( k in 1:length(ptypes) ) {
@@ -1531,7 +1532,7 @@ viewPlate <- function(data, wells, wcols,
       }
     ## add legend to last plot
     if ( add.legend )
-      legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")   
+      legend("topright",ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")
 
     ## reset par
     par(orig.par)
@@ -1546,9 +1547,9 @@ viewPlate <- function(data, wells, wcols,
 
 
 #' Get Groups of Replicates
-#' 
+#'
 #' groups wells by experiment annotations in the plate layout map
-#' (selected by option \code{by}), and returns a list of well IDs 
+#' (selected by option \code{by}), and returns a list of well IDs
 #' that are all replicates for these groups.
 #' @param plate the plate layout map, see \code{\link{readPlateMap}}
 #' @param by a list of column IDs of the plate layout
@@ -1571,18 +1572,18 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
     colnames(lpl) <- colnames(plate)
     ## collapse requested combinations into new type
     types <- rep("",nrow(plate))
-    for ( b in by ) 
+    for ( b in by )
       types <- paste(types,lpl[,b],sep="_")
     types <- sub("^_","",types) # rm leading _
     btypes <- unique(types)
 
     ## rm NA
     btypes <- btypes[btypes!=paste(rep("NA",length(by)),collapse="_")]
-    
+
     ## blank wells
     blanks <- plate[,"blank"]
     blanks[is.na(blanks)] <- FALSE
-    
+
     ## collect wells of each group
     groups <- rep(list(NA),length(btypes))
     names(groups) <- btypes
@@ -1595,7 +1596,7 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
         dwells <- dwells[!is.na(dwells)]
         bwells <- bwells[!is.na(bwells)]
         groups[[btyp]] <- dwells
-        if ( verb ) 
+        if ( verb )
           cat(paste("\tgroup", btyp, ":", length(dwells), "wells, skipping",
                     length(bwells), "blank wells\n"))
     }
@@ -1614,7 +1615,7 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 
 ## TODO: use this in viewGroups as well?
 #' Group Statistics
-#' 
+#'
 #' calculates simple statistics for groups as plotted in
 #' \code{\link{viewGroups}}. TODO: actually use these stats
 #' in viewGroups, optionally add group stats to original data structure
@@ -1632,10 +1633,10 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 groupStats <- function(data, groups, yids) {
-    
+
     if ( missing(yids) )
         yids <- data$dataIDs
-        
+
     for ( yid in yids ) {
         SE <- matrix(NA,nrow=nrow(data[[yid]]$data),ncol=length(groups))
         colnames(SE) <- names(groups)
@@ -1644,7 +1645,7 @@ groupStats <- function(data, groups, yids) {
             wells <- groups[[sg]]
             #wells <- wells[wells%in%pwells] # filter for present wells
             sid <- names(groups)[sg]
-            
+
             ## get data for selected wells
             dat <- data[[yid]]$data[,wells]
             ## calculate stats only for common x!
@@ -1683,14 +1684,14 @@ groupColors <- function(map, group, color="color") {
 }
 
 #' View Group Averages
-#' 
+#'
 #' plot grouped wells as summary plots, incl. means and confidence intervals.
 #' This function gives a first overview of the reproducability between
 #' replicates.
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}
 #' @param groups a list of well grouped wells, as produced by
-#' \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2} 
+#' \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2}
 #' @param groups2 sub-groups of \code{groups}, group2 must be constructed as
 #' \code{groups}, but with one additional grouping, e.g.
 #' \code{\link{getGroups}}(platemap, by=c("media","strain")) following the
@@ -1726,7 +1727,7 @@ groupColors <- function(map, group, color="color") {
 #' @param g1.legend show the main legend, giving plot colors
 #  of the plotted data types (\code{yids})
 #' @param g1.legpos position of the \code{groups} legend, see \code{g1.legend}
-#' @param g2.legend plot a legend for groups in argument \code{groups2} 
+#' @param g2.legend plot a legend for groups in argument \code{groups2}
 #' @param g2.legpos position of the \code{groups2} legend, see \code{g2.legend}
 #' @param lwd.orig line-width of the original single data, set to 0 to
 #' supress plotting of all original data
@@ -1739,7 +1740,7 @@ groupColors <- function(map, group, color="color") {
 #' @param mgp set the position of axis title, tick marks and tick lengths
 #' @param xaxis plot x-axis if TRUE
 #' @param yaxis the data types for which axes are to be plotted, corresponds
-#' to the order in argument \code{yids} and as plotted in the legend 
+#' to the order in argument \code{yids} and as plotted in the legend
 #' (see argument \code{g1.legend}
 #' @param embed setting TRUE allows to embed plots of single groups within
 #' in layouted plots, see ?layout and par("mfcol"); also see argument
@@ -1767,7 +1768,7 @@ viewGroups <- function(data, groups, groups2,
                        mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
                        g1.legpos="topright", g1.legend=TRUE, verb=TRUE) {
-    
+
 
     if ( missing(groups) ) {
         groups <- list(unlist(groups2))
@@ -1786,11 +1787,11 @@ viewGroups <- function(data, groups, groups2,
     ## get x-axis data: time and temperature or another data set
     if ( missing(xid) )
         xid <- data$xids[1]
-    
+
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
     global.x <- xid %in% data$xids
-    if ( global.x ) 
+    if ( global.x )
         time <- data[[xid]]
     else if ( xid %in% data$dataIDs )
         xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
@@ -1818,10 +1819,10 @@ viewGroups <- function(data, groups, groups2,
         stop("no data to plot")
     }else if ( verb )
       cat(paste("y-axis:", paste(ptypes,collapse=";"),"\n"))
-    
+
     ## plot params
-    if ( missing(xlim) ) 
-      if ( !global.x ) 
+    if ( missing(xlim) )
+      if ( !global.x )
         xlim <- range(c(xdat),na.rm=TRUE)
       else
         xlim <- range(time,na.rm=TRUE)
@@ -1835,7 +1836,7 @@ viewGroups <- function(data, groups, groups2,
                 dat <- dat[time>=xlim[1]&time<=xlim[2],,drop=FALSE]
             } else {
                 dt <- NULL
-                for ( i in 1:ncol(dat) ) 
+                for ( i in 1:ncol(dat) )
                     dt <- c(dt,dat[xdat[,i]>=xlim[1]&xdat[,i]<=xlim[2],i])
                 dat <- dt
             }
@@ -1846,14 +1847,14 @@ viewGroups <- function(data, groups, groups2,
         if ( !missing(ylims) ) # update by argument ylims
             ylim[names(ylims)] <- ylims[names(ylims)]
         ylims <- ylim
-    } else if ( missing(ylims) & !missing(ylim) )  { # expand single ylim 
+    } else if ( missing(ylims) & !missing(ylim) )  { # expand single ylim
         ylims <- rep(list(ylim),length(ptypes))
         names(ylims) <- ptypes
     }
 
     ## colors
-    #if ( missing(pcols) ) 
-    #    pcols <- getColors(ptypes) 
+    #if ( missing(pcols) )
+    #    pcols <- getColors(ptypes)
 
     ## colors - TODO - add only missing colors
     #if ( !"colors" %in% names(data) )
@@ -1878,21 +1879,21 @@ viewGroups <- function(data, groups, groups2,
 
         id <- names(groups)[g]
         ## x data other then time
-        if ( !global.x ) 
+        if ( !global.x )
           x <- xdat[,wells]
         else x <- time
 
         ## get subgroups:
         ## each subgroup must be fully contained in
         ## the group!
-        ## TODO: better check of conflicts! 
+        ## TODO: better check of conflicts!
         if ( !missing(groups2) ) {
             gidx <- NULL
             if ( id=="*" )
               gidx <- 1:length(groups2)
             else
-              for ( i in 1:length(groups2) ) 
-                if ( sum(wells%in%groups2[[i]])==length(groups2[[i]]) ) 
+              for ( i in 1:length(groups2) )
+                if ( sum(wells%in%groups2[[i]])==length(groups2[[i]]) )
                   gidx <- c(gidx,i)
                 else if ( any(wells%in%groups2[[i]]) )
                   stop("Some but not all wells from groups group ",id,
@@ -1909,13 +1910,13 @@ viewGroups <- function(data, groups, groups2,
             ## COLOR SELECTION group 1
             col.orig <- pcols[ptyp]
             ## TODO: unify !global.x and group2.col, they seem similar
-            ## override colors if 
+            ## override colors if
             orig.cols <- NA
             if ( !global.x ) # there is no common x-axis
                 orig.cols <- getColors(names(sgroups))
             if ( !missing(group2.col) ) # colors were explicitly provided
                 orig.cols <- group2.col[names(sgroups)]
-          
+
             for ( sg in 1:length(sgroups) ) {
                 wells <- sgroups[[sg]]
                 wells <- wells[wells%in%pwells] # filter for present wells
@@ -1941,7 +1942,7 @@ viewGroups <- function(data, groups, groups2,
                 par(new=parnew) #i!=1)
                 parnew <- TRUE
                 ## override lty.orig=0 and lwd.orig=0 if x is data-specific
-                if ( !global.x ) 
+                if ( !global.x )
                     col.orig <- orig.cols[sid]
                 if ( !is.null(dim(x)) | length(wells)==1 ) {
                     if ( lwd.orig==0 ) lwd.orig <- 0.1
@@ -1952,10 +1953,10 @@ viewGroups <- function(data, groups, groups2,
                 ## COLOR SELECTION group 2
                 g2.col <- col.orig
                 ## group2 colors
-                if ( !missing(group2.col) ) 
+                if ( !missing(group2.col) )
                     g2.col <- group2.col[sid]
                 ##cat(paste(sg, g2.col, "\n"))
-                
+
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
 
@@ -1965,14 +1966,14 @@ viewGroups <- function(data, groups, groups2,
                 ## plot mean and confidence intervals
                 if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
                     if ( show.ci95 ) {
-                           
+
                         px <- c(x,rev(x))
                         py <- c(mn-ci,rev(mn+ci))
                         px <- px[!is.na(py)]
                         py <- py[!is.na(py)]
                         px <- c(px,px[1])
                         py <- c(py,py[1])
-                        if ( log=="y") {                            
+                        if ( log=="y") {
                             py[py<0] <- ylims[[ptyp]][1]
                             warning("mean - 95% c.i. is below 0;",
                                     "raised to ylim for log. y-axis polygon")
@@ -1986,7 +1987,7 @@ viewGroups <- function(data, groups, groups2,
                 }
 
                 ## add axes for first two values
-                if ( yaxis[1]==i & sg==1 ) 
+                if ( yaxis[1]==i & sg==1 )
                     axis(2, tcl=.25, mgp=c(0,-1,-.05),
                          col=ifelse(global.x,col.orig,1),
                          col.axis=ifelse(global.x,col.orig,1))
@@ -1996,7 +1997,7 @@ viewGroups <- function(data, groups, groups2,
             }
         }
         if ( length(sgroups)>1 & g2.legend )
-            if ( global.x & missing(group2.col) ) 
+            if ( global.x & missing(group2.col) )
                 legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
                        col=1,bty="n")
             else
@@ -2005,7 +2006,7 @@ viewGroups <- function(data, groups, groups2,
         else
             legend(g2.legpos,id, bty="n")
         if ( xaxis ) axis(1)
-        if ( missing(xlab) ) 
+        if ( missing(xlab) )
           xlab <- xid
         mtext(xlab, 1, par("mgp")[1])
     }
@@ -2015,7 +2016,7 @@ viewGroups <- function(data, groups, groups2,
 
     ## reset par!
     par(orig.par)
-    
+
     ## TODO: return meaningful and/or non-plotted information
     ## assigning it makes it silent!
     #if ( global.x ) xid <- "Time"
@@ -2024,12 +2025,12 @@ viewGroups <- function(data, groups, groups2,
 
 
 ### COMMENTS FOR EXAMPLE DATA
-  
- 
+
+
 #' ap12plate. example plate layout map by Dennis Dienst and Alice Pawloski,
 #' fitting to the experimental data in \code{\link{ap12data}}
 #' The plate layout table indicates the different strains tested, biological
-#' replicates (B1 to B3), and blank wells (containing only growth medium) 
+#' replicates (B1 to B3), and blank wells (containing only growth medium)
 #'
 #' @name ap12plate
 #' @docType data
@@ -2045,13 +2046,13 @@ NULL
 #' plate reader measurements of E.coli growth, expressing a fluorescent
 #' proteins, in a Synergy Mx platereader; the corresponding plate layout
 #' map is in \code{\link{ap12plate}}.
-#' 
+#'
 #' \itemize{
 #'   \item Data:
 #'   \item Time: the interpolated 'master' time
 #'   \item Temperature: the temperature time-course
 #'   \item Data matrix '600': well absorbance at 600 nm, i.e., the OD,
-#'   \item Data matrix 'YFP_50:500,535': the YFP fluorescence measured by excitation at 500 nm and emission at 535 nm 
+#'   \item Data matrix 'YFP_50:500,535': the YFP fluorescence measured by excitation at 500 nm and emission at 535 nm
 #' }
 #'
 #' @name ap12data
@@ -2061,4 +2062,4 @@ NULL
 ## @format a list of time-courses of absorbance and fluorescence data, read
 ## in by readPlateData("AP12.csv", type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
 ## @seealso \code{link{ap12plate}}, \code{\link{readPlateData}} and
-## \code{\link{readPlateMap}} 
+## \code{\link{readPlateMap}}

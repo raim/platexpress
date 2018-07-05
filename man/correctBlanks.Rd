@@ -32,7 +32,7 @@ by \code{mbins}>1}
 \item{mbins}{the number of bins the x-axis is to be divided, if blanked
 along the x-axis, see \code{xid}}
 
-\item{base}{optional minimal value; all values will be raised by 
+\item{base}{optional minimal value; all values will be raised by
 the same amount using the function \code{\link{adjustBase}}}
 
 \item{verb}{issued progress messages and info}

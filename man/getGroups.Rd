@@ -22,7 +22,7 @@ to summarize data for these groups.
 }
 \description{
 groups wells by experiment annotations in the plate layout map
-(selected by option \code{by}), and returns a list of well IDs 
+(selected by option \code{by}), and returns a list of well IDs
 that are all replicates for these groups.
 }
 \details{

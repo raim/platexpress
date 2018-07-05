@@ -9,8 +9,8 @@ doseResponse.box(map, wells, val, amount = "amount",
   xnum = FALSE)
 }
 \arguments{
-\item{map}{a plate layout map with columns \code{amount} and some 
-calculated value in column \code{val}, 
+\item{map}{a plate layout map with columns \code{amount} and some
+calculated value in column \code{val},
 eg. results from \code{\link[grofit:grofit]{grofit}}}
 
 \item{wells}{a list of well IDs to be used in the plot}
@@ -23,8 +23,8 @@ that should be plotted on x-axis, typically a substance added to wells
 in multiple replicates; the default value "amount" is automatically
 generated from appropriate plate layout files by \code{link{readPlateMap}}}
 
-\item{substance}{the name of a column in \code{map} providing the names of 
-the substance in \code{amount}, used as x-axis label; if it doesn't 
+\item{substance}{the name of a column in \code{map} providing the names of
+the substance in \code{amount}, used as x-axis label; if it doesn't
 correspond to a column, its value is directly used as label}
 
 \item{color}{the name of a column in \code{map} providing colors
@@ -33,7 +33,7 @@ the same color, only the first color for a given \code{amount} is used;
 Colors are automatically assigned from a color ramp mapped to the
 numerical range of \code{amount} by \code{link{readPlateMap}}}
 
-\item{na.y}{value to be used to plot replicates with \code{NA} in 
+\item{na.y}{value to be used to plot replicates with \code{NA} in
 column \code{val}; set to NA to supress plotting}
 
 \item{ylim}{limits of the y-axis}

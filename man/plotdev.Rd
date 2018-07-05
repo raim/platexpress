@@ -18,7 +18,7 @@ plotdev(file = "test", type = "png", width = 5, height = 5, res = 100)
 \item{res}{the figure resolution in ppi (pixels per inch), only used}
 }
 \description{
-plots to png, eps, pdf, tiff, svg or jpeg devices taking the same 
+plots to png, eps, pdf, tiff, svg or jpeg devices taking the same
 width, height and resolution arguments for all
 }
 \author{

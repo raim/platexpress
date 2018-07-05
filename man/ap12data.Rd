@@ -13,6 +13,6 @@ map is in \code{\link{ap12plate}}.}
   \item Time: the interpolated 'master' time
   \item Temperature: the temperature time-course
   \item Data matrix '600': well absorbance at 600 nm, i.e., the OD,
-  \item Data matrix 'YFP_50:500,535': the YFP fluorescence measured by excitation at 500 nm and emission at 535 nm 
+  \item Data matrix 'YFP_50:500,535': the YFP fluorescence measured by excitation at 500 nm and emission at 535 nm
 }
 }

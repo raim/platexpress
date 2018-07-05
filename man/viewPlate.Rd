@@ -14,7 +14,8 @@ viewPlate(data, wells, wcols, rows = toupper(letters[1:8]), cols = 1:12,
 
 \item{wells}{a list of wells to plot, overrules \code{rows} and \code{cols}}
 
-\item{wcols}{named color vector for wells, used for the well ID}
+\item{wcols}{named color vector for wells, names should correspond to
+column IDs in \code{data}, ie. the column 'well' in the plate layout map}
 
 \item{rows}{a list of strings/characters used as row ID in the composite
 row:col well description in the plate layout (map) and plate data}
@@ -61,9 +62,9 @@ and decide on further processing steps.
 \examples{
 data(ap12)
 # view all data on the plate
-viewPlate(ap12data) 
+viewPlate(ap12data)
 # inspect natural logarithm of OD_600 values, ie. log(X(t))
-viewPlate(ap12data, yids="600", log="y") 
+viewPlate(ap12data, yids="600", log="y")
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

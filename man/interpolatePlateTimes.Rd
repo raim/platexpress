@@ -18,7 +18,7 @@ temperature added at the top level
 \description{
 interpolates all time-series of a plate to an average
 master time, using the R base function \code{\link[stats:spline]{spline}}.
-An average time is calculated for each measurement point and all values 
+An average time is calculated for each measurement point and all values
 are interpolated to these new time points. This is automatically done when
 parsing the raw data with \code{\link{readPlateData}}, unless
 explicitly suppressed. The same is also done for well temperatures.

@@ -10,8 +10,8 @@ doseResponse(map, wells, val, amount = "amount", substance = "substance",
   verb = TRUE, ...)
 }
 \arguments{
-\item{map}{a plate layout map with columns \code{amount} and some 
-calculated value in column \code{val}, 
+\item{map}{a plate layout map with columns \code{amount} and some
+calculated value in column \code{val},
 eg. results from \code{\link[grofit:grofit]{grofit}}}
 
 \item{wells}{a list of well IDs to be used in the plot}
@@ -24,23 +24,23 @@ that should be plotted on x-axis, typically a substance added to wells
 in multiple replicates; the default value "amount" is automatically
 generated from appropriate plate layout files by \code{link{readPlateMap}}}
 
-\item{substance}{the name of a column in \code{map} providing the names of 
-the substance in \code{amount}, used as x-axis label; if it doesn't 
+\item{substance}{the name of a column in \code{map} providing the names of
+the substance in \code{amount}, used as x-axis label; if it doesn't
 correspond to a column, its value is directly used as label}
 
-\item{col}{either a valid color representation or the name of a column in 
+\item{col}{either a valid color representation or the name of a column in
 \code{map} providing colors for each well or a, if \code{wells} is a named
 list of wells, a named vector of colors with matching names. NOTE for the
-second case, that wells with the same \code{amount} should have the same color, only 
-the first color for a given \code{amount} is used; such colors are automatically 
-assigned from a color ramp mapped to the numerical range of \code{amount} by 
+second case, that wells with the same \code{amount} should have the same color, only
+the first color for a given \code{amount} is used; such colors are automatically
+assigned from a color ramp mapped to the numerical range of \code{amount} by
 \code{\link{readPlateMap}}, see \code{\link{amountColors}};}
 
 \item{pch}{pch of the mean value points}
 
 \item{bartype}{type of the error bars, "range" for the full range
-of the data, where the average value will be the 
-\code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval, 
+of the data, where the average value will be the
+\code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval,
 "sd" for the standard deviation, or "se" for the standard error where
 the average value will be the \code{\link[base:mean]{mean}};
 TODO: implement boxplot-like quantiles}
@@ -48,13 +48,13 @@ TODO: implement boxplot-like quantiles}
 \item{barl}{length of the horizontal lines of error bars (argument \code{length}
 of function \code{\link{arrows}})}
 
-\item{all}{logical indicating whether to plot all data points additionally to 
+\item{all}{logical indicating whether to plot all data points additionally to
 error bars}
 
 \item{line}{logical indicating whether to plot a line connecting the mean
 values}
 
-\item{na.y}{value to be used to plot replicates with \code{NA} in 
+\item{na.y}{value to be used to plot replicates with \code{NA} in
 column \code{val}; set to NA to supress plotting}
 
 \item{add}{add data to existing plot}
@@ -65,7 +65,7 @@ column \code{val}; set to NA to supress plotting}
 
 \item{ylab}{alternative label for the y-axis, default is to use argument \code{val}}
 
-\item{xlab}{alternative label for the x-axis, default is to use argument 
+\item{xlab}{alternative label for the x-axis, default is to use argument
 \code{substance}, or if this is a column in \code{map}, the substance
 indicated there}
 

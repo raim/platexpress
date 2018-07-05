@@ -25,7 +25,7 @@ executed}
 \item{verb}{print messages if true}
 }
 \value{
-Returns `data' where all data sets (or only those specified in 
+Returns `data' where all data sets (or only those specified in
 option \code{yids}) where raised to a minimum level in
 }
 \description{

@@ -6,10 +6,10 @@
 \alias{platexpress-package}
 \title{platexpress: quick inspection and analysis of microbial growth & expression.}
 \description{
-The platexpress package provides a quick & easy interface to 
+The platexpress package provides a quick & easy interface to
 inspect microbial growth & gene expression data as measured in typical
 platereaders ("96-well plates") or other parallel growth systems.
-Interfaces to existing packages allow growth model fitting 
+Interfaces to existing packages allow growth model fitting
 (currently only \code{\link[grofit:grofit]{grofit}}, and
 partially/untested \code{\link[cellGrowth:fitCellGrowth]{cellGrowth}}.)
 }

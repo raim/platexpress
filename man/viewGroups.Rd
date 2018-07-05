@@ -98,7 +98,7 @@ you can change the ordering of the input \code{groups}/}
 \item{xaxis}{plot x-axis if TRUE}
 
 \item{yaxis}{the data types for which axes are to be plotted, corresponds
-to the order in argument \code{yids} and as plotted in the legend 
+to the order in argument \code{yids} and as plotted in the legend
 (see argument \code{g1.legend}}
 
 \item{g1.legpos}{position of the \code{groups} legend, see \code{g1.legend}}
