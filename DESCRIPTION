@@ -9,6 +9,8 @@ Description: The platexpress package provides a quick&easy interface to
     measurements summarized over replicates.
 Depends:
     R (>= 2.5.0)
+Imports:
+    readxl, tidyr
 Suggests:
     grofit,
     growthrates,
