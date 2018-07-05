@@ -4,12 +4,12 @@
 \alias{prettyData}
 \title{Set Data IDs and colors}
 \usage{
-prettyData(data, dids, colors)
+prettyData(data, yids, colors)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
 
-\item{dids}{a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names}
+\item{yids}{a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names}
 
 \item{colors}{a vector of plot colors as RGB strings, optionally already named by dataIDs}
 }

@@ -4,7 +4,7 @@
 \alias{callGrofit}
 \title{high-level wrapper for \code{\link[grofit:grofit]{grofit}}}
 \usage{
-callGrofit(data, plate, did = "OD", fields = c("strain", "medium",
+callGrofit(data, plate, yid, amount, fields = c("strain", "medium",
   "substance"), control, model.type = c("richards", "gompertz.exp",
   "gompertz"), nboot.gc = 100, plot = TRUE, interactive = FALSE, ...)
 }
@@ -15,7 +15,11 @@ callGrofit(data, plate, did = "OD", fields = c("strain", "medium",
 of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
 annotation}
 
-\item{did}{data ID of the data to be converted, from \code{data$dataIDs}}
+\item{yid}{data ID of the data to be converted; default
+is to take the first of \code{data$dataIDs}}
+
+\item{amount}{name of a column in \code{plate} that provides a numeric
+'amount', to be used as a 'dose' annotation in grofit}
 
 \item{fields}{column IDs in the plate layout map to be used for
 \code{\link[grofit:grofit]{grofit}} data annotation; if \code{plate} is not
@@ -46,12 +50,12 @@ Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
 plate data and layout, using established settings. Please see
 the documentation of package \code{\link[grofit:grofit]{grofit}}
 for details of the fitting procedure. This high-level wrapper used
-\code{platexpress} functions \code{\link{data2grofit}}, 
+\code{platexpress} functions \code{\link{data2grofit}},
 \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
 data, set parameters and call \code{\link[grofit:grofit]{grofit}},
 and then maps results (lag phase lambda, growth rate mu and capacity A)
 to the \code{plate} layout map, and \code{\link{addModel}} to add modelled
-prediction of the fitted data to the plate \code{data} object. 
+prediction of the fitted data to the plate \code{data} object.
 The function returns a list containing the new \code{data} and \code{plate}
 objects, as well as the original \code{grofit} result object.
 }

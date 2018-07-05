@@ -4,7 +4,7 @@
 \alias{viewGroups}
 \title{View Group Averages}
 \usage{
-viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, dids,
+viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
   dtype = "data", pcols, group2.col, yscale = TRUE, ylims, ylim, log = "",
   show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
   lty.orig = 1, lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2,
@@ -35,7 +35,7 @@ specifies a subset of the data as x-axis}
 
 \item{xlab}{custom x-axis label}
 
-\item{dids}{IDs of the data to be plotted; if missing, all data will
+\item{yids}{IDs of the data to be plotted; if missing, all data will
 be plotted}
 
 \item{dtype}{type of the data to be plotted, default is the main 'data', but
@@ -98,7 +98,7 @@ you can change the ordering of the input \code{groups}/}
 \item{xaxis}{plot x-axis if TRUE}
 
 \item{yaxis}{the data types for which axes are to be plotted, corresponds
-to the order in argument \code{dids} and as plotted in the legend 
+to the order in argument \code{yids} and as plotted in the legend 
 (see argument \code{g1.legend}}
 
 \item{g1.legpos}{position of the \code{groups} legend, see \code{g1.legend}}

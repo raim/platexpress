@@ -4,16 +4,16 @@
 \alias{data2growthrates}
 \title{interface to package \code{\link[growthrates:growthrates]{growthrates}}}
 \usage{
-data2growthrates(data, did)
+data2growthrates(data, yid)
 }
 \arguments{
 \item{data}{platexpress data set, see \code{\link{readPlateData}}}
 
-\item{did}{data ID of the data to be converted for growthrates, from 
+\item{yid}{data ID of the data to be converted for growthrates, from
 \code{data$dataIDs}}
 }
 \description{
-converts \code{platexpress} data for 
+converts \code{platexpress} data for
 use with \code{\link[growthrates:growthrates]{growthrates}}
 }
 \seealso{

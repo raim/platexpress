@@ -5,15 +5,15 @@
 \title{batch wrapper for fitCellGrowth
 TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths}
 \usage{
-fitCellGrowths.2(data, did, mid, wells, ...)
+fitCellGrowths.2(data, yid, xid, wells, ...)
 }
 \arguments{
 \item{data}{platexpress data set, see \code{\link{readPlateData}}}
 
-\item{did}{data ID of the data to be converted for grofit, from 
+\item{yid}{data ID of the data to be converted for grofit, from
 \code{data$dataIDs}}
 
-\item{mid}{the x-axis to be used, defaults to the first available
+\item{xid}{the x-axis to be used, defaults to the first available
 (usually "Time")}
 
 \item{wells}{column IDs of the data set to use, if missing all wells

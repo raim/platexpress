@@ -4,7 +4,7 @@
 \alias{adjustBase}
 \title{Adjusts to Minimal Base}
 \usage{
-adjustBase(data, base = 0, dids, add.fraction, xlim, each = FALSE,
+adjustBase(data, base = 0, yids, add.fraction, xlim, each = FALSE,
   verb = TRUE)
 }
 \arguments{
@@ -13,7 +13,7 @@ adjustBase(data, base = 0, dids, add.fraction, xlim, each = FALSE,
 \item{base}{the new minimum for the data, default is 0, but it could
 e.g. be the OD used for inoculation}
 
-\item{dids}{vector of ID strings for which base correction should be
+\item{yids}{vector of ID strings for which base correction should be
 executed}
 
 \item{add.fraction}{a fraction of the whole data range, added to base}
@@ -26,7 +26,7 @@ executed}
 }
 \value{
 Returns `data' where all data sets (or only those specified in 
-option \code{dids}) where raised to a minimum level in
+option \code{yids}) where raised to a minimum level in
 }
 \description{
 The function raises all data to a "base" level, default 0, to avoid

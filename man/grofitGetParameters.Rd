@@ -9,7 +9,7 @@ grofitGetParameters(fit, p = c("TestId", "AddId", "lambda.model", "mu.model",
   "A.model", "used.model"))
 }
 \arguments{
-\item{fit}{grofit object, the result of a call to 
+\item{fit}{grofit object, the result of a call to
 \code{\link[grofit:gcFit]{gcFit}}
 or the \code{platexpress} version \code{\link{gcFit.2}}}
 

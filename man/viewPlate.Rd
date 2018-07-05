@@ -5,7 +5,7 @@
 \title{View Plate}
 \usage{
 viewPlate(data, wells, wcols, rows = toupper(letters[1:8]), cols = 1:12,
-  xid, xscale = FALSE, xlim, dids, dtype = "data", pcols, yscale = TRUE,
+  xid, xscale = FALSE, xlim, yids, dtype = "data", pcols, yscale = TRUE,
   ylims, ylim, log = "", legpos = "topleft", add.legend = TRUE)
 }
 \arguments{
@@ -28,7 +28,7 @@ instead of the default Time vector}
 
 \item{xlim}{plot range of the x-axis}
 
-\item{dids}{IDs of the data to be plotted; if missing, all data will
+\item{yids}{IDs of the data to be plotted; if missing, all data will
 be plotted}
 
 \item{dtype}{type of the data to be plotted, default is the main 'data', but
@@ -50,7 +50,7 @@ log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 \item{legpos}{position of the well IDs on the plots}
 
 \item{add.legend}{add a legend for the plotted data types (see
-argument \code{dids}) in the last plotted well}
+argument \code{yids}) in the last plotted well}
 }
 \description{
 plots all data in plate format for a quick inspection of
@@ -63,7 +63,7 @@ data(ap12)
 # view all data on the plate
 viewPlate(ap12data) 
 # inspect natural logarithm of OD_600 values, ie. log(X(t))
-viewPlate(ap12data, dids="600", log="y") 
+viewPlate(ap12data, yids="600", log="y") 
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

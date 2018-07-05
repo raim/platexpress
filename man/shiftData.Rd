@@ -4,7 +4,7 @@
 \alias{shiftData}
 \title{Shift Data}
 \usage{
-shiftData(data, lag, mid)
+shiftData(data, lag, xid)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data set}
@@ -12,7 +12,7 @@ shiftData(data, lag, mid)
 \item{lag}{a named vector providing the lag-phase to be removed; the names
 correspond to the wells in data}
 
-\item{mid}{the x-axis to be used, defaults to the first available
+\item{xid}{the x-axis to be used, defaults to the first available
 (usually "Time")}
 }
 \description{

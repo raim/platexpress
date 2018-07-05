@@ -4,7 +4,7 @@
 \alias{correctBlanks}
 \title{Subtract Blank Values}
 \usage{
-correctBlanks(data, plate, type = "median", by, dids, mid, max.mid,
+correctBlanks(data, plate, type = "median", by, yids, xid, max.xid,
   mbins = 1, base, verb = TRUE, ...)
 }
 \arguments{
@@ -21,16 +21,16 @@ minus  the 95\% confidence interval to avoid blanked values below 0}
 correction will be attempted for groups in these columns; each group
 must have at least one specified blank associated}
 
-\item{dids}{IDs of the data which should be blank-corrected, all will be
+\item{yids}{IDs of the data which should be blank-corrected, all will be
 blanked if missing}
 
-\item{mid}{ID of the x-axis data to be used, if blanked along x-axis, set
+\item{xid}{ID of the x-axis data to be used, if blanked along x-axis, set
 by \code{mbins}>1}
 
-\item{max.mid}{the maximal x-axis value where blanks should be used}
+\item{max.xid}{the maximal x-axis value where blanks should be used}
 
 \item{mbins}{the number of bins the x-axis is to be divided, if blanked
-along the x-axis, see \code{mid}}
+along the x-axis, see \code{xid}}
 
 \item{base}{optional minimal value; all values will be raised by 
 the same amount using the function \code{\link{adjustBase}}}

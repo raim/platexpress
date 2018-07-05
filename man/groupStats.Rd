@@ -4,7 +4,7 @@
 \alias{groupStats}
 \title{Group Statistics}
 \usage{
-groupStats(data, groups, dids)
+groupStats(data, groups, yids)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
@@ -12,7 +12,7 @@ groupStats(data, groups, dids)
 \item{groups}{a list of well grouped wells, as produced by
 \code{\link{getGroups}}}
 
-\item{dids}{data IDs for which statistics should be reported,
+\item{yids}{data IDs for which statistics should be reported,
 if missing stats for all data will be reported}
 }
 \value{

@@ -476,12 +476,12 @@ readSynergyPlate <- function(files, data.ids,
     
     ## data IDs are in column 1, followed by data matrices starting
     ## in column 2; skip internal result calculation
-    didx <- c(which(indat[,1]!="" & indat[,1]!="Results"))
+    yidx <- c(which(indat[,1]!="" & indat[,1]!="Results"))
 
     ## filter only requested data
-    dataIDs <- indat[didx,1]
-    didx <- c(didx, which(indat[,1]=="Results")) # add "Results" index
-    names(didx) <- c(dataIDs,"end")
+    dataIDs <- indat[yidx,1]
+    yidx <- c(yidx, which(indat[,1]=="Results")) # add "Results" index
+    names(yidx) <- c(dataIDs,"end")
     
     if ( !missing(data.ids) )
       dataIDs <- dataIDs[dataIDs%in%data.ids]
@@ -496,10 +496,10 @@ readSynergyPlate <- function(files, data.ids,
         ## get DATA:
         ## rows: the header is 2 rows after the ID, data starts 3 rows after
         ## and ends 2 rows before next
-        i <- which(names(didx)==dataID)
-        hidx <- didx[i]+2
-        sidx <- didx[i]+3
-        eidx <- didx[i+1]-2
+        i <- which(names(yidx)==dataID)
+        hidx <- yidx[i]+2
+        sidx <- yidx[i]+3
+        eidx <- yidx[i+1]-2
         ## columns:
         ## time: column 2; temperature: column 3;
         ## data: columns 4 to last-1; last data set ends with nrow

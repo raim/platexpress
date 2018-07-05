@@ -4,12 +4,12 @@
 \alias{data2grofit}
 \title{interface to package \code{\link[grofit:grofit]{grofit}}}
 \usage{
-data2grofit(data, did, min.time, max.time, wells, plate, eid, dose)
+data2grofit(data, yid, min.time, max.time, wells, plate, eid, dose)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
-\item{did}{data ID of the data to be converted for grofit, from \code{data$dataIDs}}
+\item{yid}{data ID of the data to be converted for grofit, from \code{data$dataIDs}}
 
 \item{min.time}{minimal time of the data to be used}
 

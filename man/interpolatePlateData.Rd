@@ -4,7 +4,7 @@
 \alias{interpolatePlateData}
 \title{Interpolate Plate Data}
 \usage{
-interpolatePlateData(data, xid, dids, n, xout)
+interpolatePlateData(data, xid, yids, n, xout)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by
@@ -14,7 +14,7 @@ interpolatePlateData(data, xid, dids, n, xout)
 all data will be interpolated to equi-spaced points along the range
 of measured values}
 
-\item{dids}{restrict interpolation to these data IDs}
+\item{yids}{restrict interpolation to these data IDs}
 
 \item{n}{specify the number of interpolation points, if missing the
 original number of rows will be used}

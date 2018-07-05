@@ -7,7 +7,7 @@
 grofitResults(fit)
 }
 \arguments{
-\item{fit}{grofit object, the result of a call to 
+\item{fit}{grofit object, the result of a call to
 \code{\link[grofit:gcFit]{gcFit}}
 or the \code{platexpress} version \code{\link{gcFit.2}}}
 }

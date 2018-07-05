@@ -4,7 +4,7 @@
 \alias{boxData}
 \title{Box-Plots of Data Ranges}
 \usage{
-boxData(data, rng, groups, mid, did = "OD", plot = TRUE, type = "box",
+boxData(data, rng, groups, xid, yid = "OD", plot = TRUE, type = "box",
   etype = "ci")
 }
 \arguments{
@@ -15,9 +15,9 @@ point will be selected}
 
 \item{groups}{a grouping of wells, see \code{\link{getGroups}}}
 
-\item{mid}{the x-axis ID, if multiple x-axes are present}
+\item{xid}{the x-axis ID, if multiple x-axes are present}
 
-\item{did}{the y-axis data to be grouped}
+\item{yid}{the y-axis data to be grouped}
 
 \item{plot}{if TRUE a box-plot or bar-plot will be plotted}
 

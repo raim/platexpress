@@ -4,7 +4,7 @@
 \alias{cutData}
 \title{Cut Data Range}
 \usage{
-cutData(data, yrng, mid, did, xrng)
+cutData(data, yrng, xid, yid, xrng)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{link{readPlateData}}}
@@ -12,9 +12,9 @@ cutData(data, yrng, mid, did, xrng)
 \item{yrng}{a single or two value(s) for x-axis cuts, only data smaller
 then single value, or within the range of two values will be retained}
 
-\item{mid}{ID of the x-axis data to cut, default is the main x-axis ('Time')}
+\item{xid}{ID of the x-axis data to cut, default is the main x-axis ('Time')}
 
-\item{did}{ID of the y-axis data to cut}
+\item{yid}{ID of the y-axis data to cut}
 
 \item{xrng}{a single or two value(s) for x-axis cuts, only within the range
 of two values will be retained; if only one value is passed only the
@@ -26,7 +26,7 @@ all y-axis values within a range
 }
 \details{
 Cuts the passed \code{\link{platexpress}} data to ranges of
-of the x-axis (time or other, see \code{data$mids}) and/or y-axis.
+of the x-axis (time or other, see \code{data$xids}) and/or y-axis.
 Note that the behaviour is different for passing single values to
 \code{xrng} or \code{yrng}:
 If \code{xrng} is a single value, data for the closest x value will be

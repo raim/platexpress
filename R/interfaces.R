@@ -11,24 +11,27 @@
 
 ### HIGH-LEVEL WRAPPER FOR GROFIT
 #' high-level wrapper for \code{\link[grofit:grofit]{grofit}}
-#' 
+#'
 #' Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
 #' plate data and layout, using established settings. Please see
 #' the documentation of package \code{\link[grofit:grofit]{grofit}}
 #' for details of the fitting procedure. This high-level wrapper used
-#' \code{platexpress} functions \code{\link{data2grofit}}, 
+#' \code{platexpress} functions \code{\link{data2grofit}},
 #' \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
 #' data, set parameters and call \code{\link[grofit:grofit]{grofit}},
 #' and then maps results (lag phase lambda, growth rate mu and capacity A)
 #' to the \code{plate} layout map, and \code{\link{addModel}} to add modelled
-#' prediction of the fitted data to the plate \code{data} object. 
+#' prediction of the fitted data to the plate \code{data} object.
 #' The function returns a list containing the new \code{data} and \code{plate}
 #' objects, as well as the original \code{grofit} result object.
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
 #' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
 #' annotation
-#' @param did data ID of the data to be converted, from \code{data$dataIDs}
+#' @param yid data ID of the data to be converted; default
+#' is to take the first of \code{data$dataIDs}
+#' @param amount name of a column in \code{plate} that provides a numeric
+#' 'amount', to be used as a 'dose' annotation in grofit
 #' @param fields column IDs in the plate layout map to be used for
 #' \code{\link[grofit:grofit]{grofit}} data annotation; if \code{plate} is not
 #' missing at least 1 column is required
@@ -42,24 +45,37 @@
 #' if \code{control} is passed directly
 #' @param nboot.gc numbers of bootstrap samples,
 #' see \code{\link[grofit:grofit.control]{grofit.control}}; will be igonred
-#' if \code{control} is passed directly 
+#' if \code{control} is passed directly
 #' @param plot set to TRUE for plots even without \code{interactive} use
 #' @param interactive set to TRUE for interactive growth curve fitting
 #' @param ... further arguments to \code{\link{grofit.2.control}}
-#'@export 
-callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substance"),
-                       control, model.type=c("richards","gompertz.exp","gompertz"), 
+#'@export
+callGrofit <- function(data, plate, yid, amount,
+                       fields=c("strain","medium","substance"),
+                       control, model.type=c("richards","gompertz.exp","gompertz"),
                        nboot.gc=100, plot=TRUE, interactive=FALSE, ...) {
-  
+
   ## generate input data, plate annotation
   if ( missing(plate) )
     gdat <- data2grofit(data)
-  else
-    gdat <- data2grofit(data, plate=plate, did=did,
-                        wells=plate$well[!plate$blank],
-                        dose=plate$amount[!plate$blank],
-                        eid=fields, ...)
-  
+  else {
+    ## if a plate map is available, use this for annotation!
+
+    ## take the first data, if none was passed
+    if ( missing(yid) )
+      yid <- data$dataIDs[1]
+
+    ## allow for full capabilities of grofit results: add dose
+    if ( missing(amount) )
+      gdat <- data2grofit(data, plate=plate, yid=yid,
+                          wells=plate$well[!plate$blank],
+                          eid=fields, ...)
+    else
+      gdat <- data2grofit(data, plate=plate, yid=yid,
+                          wells=plate$well[!plate$blank],
+                          dose=plate[[amount]][!plate$blank],
+                          eid=fields, ...)
+  }
   ## set grofit paraameters
   if ( missing(control) )
     control <- grofit.2.control(plot=plot, interactive=interactive,
@@ -68,34 +84,34 @@ callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substa
                                 model.type=model.type)
   if ( !"plot" %in% names(control) )
     control$plot <- plot
-  
+
   ## call grofit; redirect plots to detail pdf
   odfit <- gcFit.2(gdat$time, gdat$data, control)
-  
+
   ## get grofit results
   params <- grofitResults(odfit)
-  colnames(params) <- paste0(did,"_",colnames(params))
-  
+  colnames(params) <- paste0(yid,"_",colnames(params))
+
   ## ... add to layout data
   if ( !missing(plate) )
     plate <- cbind.data.frame(plate, params[as.character(plate[,"well"]),])
   else plate <- params
-  
+
   ## add modelled data!
-  data <- addModel(data, odfit, ID=paste0(did,"_model"), col="#0000FF")
-  
+  data <- addModel(data, odfit, ID=paste0(yid,"_model"), col="#0000FF")
+
   res <- list(data=data, plate=plate, fit=odfit)
-  
+
   res
-}  
-  
+}
+
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
 #' interface to package \code{\link[grofit:grofit]{grofit}}
-#' 
+#'
 #' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
 #' \code{\link[grofit:grofit]{grofit}} data format
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
-#' @param did data ID of the data to be converted for grofit, from \code{data$dataIDs}
+#' @param yid data ID of the data to be converted for grofit, from \code{data$dataIDs}
 #' @param min.time minimal time of the data to be used
 #' @param max.time maximal time of the data to be used
 #' @param wells column IDs of the data set to use, if missing all wells
@@ -113,11 +129,11 @@ callGrofit <- function(data, plate, did="OD", fields=c("strain","medium","substa
 #' as required for \code{\link[grofit:grofit]{grofit}}.
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) {
+data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose) {
 
-    if ( missing(did) )
-        did <- data$dataIDs[1]
-    dat <- data[[did]]$data
+    if ( missing(yid) )
+        yid <- data$dataIDs[1]
+    dat <- data[[yid]]$data
     if ( missing(wells) )
         wells <- colnames(dat)
     else wells <- as.character(wells)
@@ -151,14 +167,14 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
             for ( k in 2:length(eid) )
                 annotation2 <- paste0(annotation2,"-",plate[idx,eid[k]])
         annotation <- data.frame(annotation1, annotation2)
-        
+
     } else
         annotation <- data.frame(cbind(colnames(dat),
                                        rep("",ncol(dat))))
     ## dose information for grofit dose-response calculations
     ## TODO: this is ugly, do nicer!
     found.dose <- !missing(dose)
-    if ( !found.dose ) 
+    if ( !found.dose )
         if ( !missing(plate) ) ## get dose info from plate layout: TODO
             if ( "amount" %in% colnames(plate) ) {
                 idx <- match(wells,as.character(plate[,"well"]))
@@ -179,7 +195,7 @@ data2grofit <- function(data, did, min.time, max.time, wells, plate, eid, dose) 
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well
-#' @param fit grofit object, the result of a call to 
+#' @param fit grofit object, the result of a call to
 #' \code{\link[grofit:gcFit]{gcFit}}
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @seealso \code{\link{data2grofit}}, \code{\link{growthratesResults}}
@@ -195,7 +211,7 @@ grofitResults <- function(fit) {
 
 #' Convenience function to quickly extract growth parameters
 #' from a \code{\link[grofit:grofit]{grofit}} results list.
-#' @param fit grofit object, the result of a call to 
+#' @param fit grofit object, the result of a call to
 #' \code{\link[grofit:gcFit]{gcFit}}
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @param p list of parameters to obtain from the table \code{fits$gcTable}
@@ -213,7 +229,7 @@ grofitGetParameters <- function(fit, p=c("TestId","AddId","lambda.model","mu.mod
 addModel <- function(data, fit, ID="model", ...) {
 
     testid <- "TestId" # this requires wells being used as TestId in grofit
-   
+
     ## copy first existing data set
     newdat <- data[[data$dataIDs[[1]]]]$data
     newdat[] <- NA
@@ -266,10 +282,10 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 #' @seealso \code{\link{gcFit.2}}
 #' @export
 gcFit.2 <- function (time, data, control = grofit.2.control())  {
-  
-    if (methods::is(control) != "grofit.control") 
+
+    if (methods::is(control) != "grofit.control")
         stop("control must be of class grofit.control!")
-    if ((dim(time)[1]) != (dim(data)[1])) 
+    if ((dim(time)[1]) != (dim(data)[1]))
         stop("gcFit: Different number of datasets in data and time")
     if (!is.element(control$fit.opt, c("s", "m", "b"))) {
         warning("fit.opt must be set to 's', 'm' or 'b'. Changed to 'b'!")
@@ -279,7 +295,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
      ## add gcFit.2 specific controls
     if ( !"plot"%in%names(control) )
       control$plot <- TRUE
-   
+
     out.table <- NULL
     used.model <- NULL
     fitpara.all <- list()
@@ -295,7 +311,7 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
         if ((control$suppress.messages == FALSE)) {
             cat("\n\n")
             cat(paste("= ", as.character(i),
-                      ". growth curve =================================\n", 
+                      ". growth curve =================================\n",
                 sep = ""))
             cat("----------------------------------------------------\n")
         }
@@ -304,9 +320,9 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
             fitpara.all[[i]] <- fitpara
         }
         else {
-            fitpara <- list(raw.x = acttime, raw.y = actwell, 
-                gcID = gcID, fit.x = NA, fit.y = NA, parameters = list(A = NA, 
-                  mu = NA, lambda = NA, integral = NA), model = NA, 
+            fitpara <- list(raw.x = acttime, raw.y = actwell,
+                gcID = gcID, fit.x = NA, fit.y = NA, parameters = list(A = NA,
+                  mu = NA, lambda = NA, integral = NA), model = NA,
                 nls = NA, reliable = NULL, fitFlag = FALSE, control = control)
             class(fitpara) <- "gcFitModel"
             fitpara.all[[i]] <- fitpara
@@ -316,39 +332,39 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
             fitnonpara.all[[i]] <- nonpara
         }
         else {
-            nonpara <- list(raw.x = acttime, raw.y = actwell, 
+            nonpara <- list(raw.x = acttime, raw.y = actwell,
                             gcID = gcID, fit.x = NA, fit.y = NA,
                             parameters = list(A=NA,mu=NA,lambda=NA,integral=NA),
                             parametersLowess = list(A=NA,mu=NA,lambda=NA),
-                            spline = NA, reliable = NULL, 
+                            spline = NA, reliable = NULL,
                             fitFlag = FALSE, control = control)
             class(nonpara) <- "gcFitSpline"
             fitnonpara.all[[i]] <- nonpara
         }
-        wellname <- paste(as.character(data[i, 1]), as.character(data[i, 
+        wellname <- paste(as.character(data[i, 1]), as.character(data[i,
             2]), as.character(data[i, 3]), sep = "-")
         if ((control$plot == TRUE)) {
             if (fitpara$fitFlag == TRUE) {
                 plot(fitpara, colData = "black", colModel = "blue", cex = 0.5)
-                plot(nonpara, add = TRUE, raw = FALSE, colData = 0, 
+                plot(nonpara, add = TRUE, raw = FALSE, colData = 0,
                   colSpline = "red", cex = 1.5)
-                abline(h=summary(fitpara)$A,lwd=2,col="blue") 
-                abline(v=summary(fitpara)$lambda,lwd=2,col="blue") 
+                abline(h=summary(fitpara)$A,lwd=2,col="blue")
+                abline(v=summary(fitpara)$lambda,lwd=2,col="blue")
             }
             else {
-                plot(nonpara, add = FALSE, raw = TRUE, colData = "black", 
+                plot(nonpara, add = FALSE, raw = TRUE, colData = "black",
                   colSpline = "red", cex = 0.5)
             }
             title(wellname)
-            if (control$fit.opt == "m") 
-                legend(x = "bottomright", legend = fitpara$model, 
+            if (control$fit.opt == "m")
+                legend(x = "bottomright", legend = fitpara$model,
                   col = "black", lty = 1)
-            if (control$fit.opt == "s") 
-                legend(x = "bottomright", legend = "spline fit", 
+            if (control$fit.opt == "s")
+                legend(x = "bottomright", legend = "spline fit",
                   col = "red", lty = 1)
-            if (control$fit.opt == "b") 
-                legend(x = "bottomright", legend = c(fitpara$model, 
-                  "spline fit"), col = c("blue", "red"), lty = c(1, 
+            if (control$fit.opt == "b")
+                legend(x = "bottomright", legend = c(fitpara$model,
+                  "spline fit"), col = c("blue", "red"), lty = c(1,
                   1))
         }
         reliability_tag <- NA
@@ -370,30 +386,30 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
         else {
             reliability_tag <- TRUE
         }
-        if (control$interactive == TRUE) 
+        if (control$interactive == TRUE)
             graphics.off()
         if ((control$nboot.gc > 0) && (reliability_tag == TRUE)) {
             bt <- grofit::gcBootSpline(acttime, actwell, gcID, control)
             boot.all[[i]] <- bt
         }
         else {
-            bt <- list(raw.x = acttime, raw.y = actwell, gcID = gcID, 
-                boot.x = NA, boot.y = NA, boot.gcSpline = NA, 
-                lambda = NA, mu = NA, A = NA, integral = NA, 
+            bt <- list(raw.x = acttime, raw.y = actwell, gcID = gcID,
+                boot.x = NA, boot.y = NA, boot.gcSpline = NA,
+                lambda = NA, mu = NA, A = NA, integral = NA,
                 bootFlag = FALSE, control = control)
             class(bt) <- "gcBootSpline"
             boot.all[[i]] <- bt
         }
-        description <- data.frame(TestId = data[i, 1], AddId = data[i, 
-            2], concentration = data[i, 3], reliability = reliability_tag, 
-            used.model = fitpara$model, log.x = control$log.x.gc, 
+        description <- data.frame(TestId = data[i, 1], AddId = data[i,
+            2], concentration = data[i, 3], reliability = reliability_tag,
+            used.model = fitpara$model, log.x = control$log.x.gc,
             log.y = control$log.y.gc, nboot.gc = control$nboot.gc)
-        fitted <- cbind(description, summary(fitpara), summary(nonpara), 
+        fitted <- cbind(description, summary(fitpara), summary(nonpara),
             summary(bt))
         out.table <- rbind(out.table, fitted)
     }
-    gcFit <- list(raw.time = time, raw.data = data, gcTable = out.table, 
-        gcFittedModels = fitpara.all, gcFittedSplines = fitnonpara.all, 
+    gcFit <- list(raw.time = time, raw.data = data, gcTable = out.table,
+        gcFittedModels = fitpara.all, gcFittedSplines = fitnonpara.all,
         gcBootSplines = boot.all, control = control)
     class(gcFit) <- "gcFit"
     ## TODO: add fits to data
@@ -406,28 +422,28 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
 
 ### cellGrowth INTERFACE
 
-#' hack of the cellGrowth package function 
-#' \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+#' hack of the cellGrowth package function
+#' \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
 #' to work with the \code{platexpress} data format, using adjusted default
 #' values
 #' TODO: select bandwidths from data$Time
 #'
-#' @param data platexpress data set, see \code{\link{readPlateData}} 
-#' @param did data ID of the data to be converted for grofit, from 
+#' @param data platexpress data set, see \code{\link{readPlateData}}
+#' @param yid data ID of the data to be converted for grofit, from
 #' \code{data$dataIDs}
-#' @param mid the x-axis to be used, defaults to the first available
+#' @param xid the x-axis to be used, defaults to the first available
 #' (usually "Time")
 #' @param wells column IDs of the data set to use, if missing all wells
 #' are used
 #' @param bandwidths see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
-#' @param nFold see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
-#' @param nWell see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
-#' @param cutoff see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}} 
+#' @param nFold see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
+#' @param nWell see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
+#' @param cutoff see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
 #' @param scaleY see \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
 #' @seealso \code{\link[cellGrowth:bandwidthCV]{bandwidthCV}}
 #'
 #' @export
-bandwidthCV.2 = function(data, did, mid, wells,
+bandwidthCV.2 = function(data, yid, xid, wells,
                          bandwidths=seq(0.5,10, length.out=30), # hours - TODO: take 1/5th of data$Time
                          nFold=10,
                          nWell=50,
@@ -436,17 +452,17 @@ bandwidthCV.2 = function(data, did, mid, wells,
                          scaleY=identity # log2
 ) {
 
-    if ( missing(mid) )
-      mid <- data$mids[1]
-    
-    if ( missing(did) ) # only use requested data 
-      did <- data$dataIDs[1]
-    
+    if ( missing(xid) )
+      xid <- data$xids[1]
+
+    if ( missing(yid) ) # only use requested data
+      yid <- data$dataIDs[1]
+
     ## function to split sample in n folds
     cv.folds = function (n ) {
         split(sample(1:n), rep(1:nFold, length = n))
     }
-	
+
     ## function to predict max growth rate
     cvpred_mu = function(cv, h, x, z) {
         ls = lapply(
@@ -467,65 +483,65 @@ bandwidthCV.2 = function(data, did, mid, wells,
         list(pred = unlist(lapply(ls, function(x) x$pred)),
              mu = unlist(lapply(ls, function(x) x$mu)))
     }
-    
+
     ## function to calculate error and std
     err2_mustd_well = function(dat, w, hs) {
         x = dat$Time
-        y = dat[[did]]$data[ , match(w, wells)]
+        y = dat[[yid]]$data[ , match(w, wells)]
         ## negative ODs?
         if ( !all(y>=0)) {
-            warning("Negative values ",did," found. If you are using a calibration function, this might be the problem. Values are set to NAs")
+            warning("Negative values ",yid," found. If you are using a calibration function, this might be the problem. Values are set to NAs")
             y[y<0] = NA
         }
-        
+
         z = scaleY( y )
-        
+
         cv = cv.folds(length(x))
         pms = lapply(hs, function(h) cvpred_mu(cv,h,x,z))
         pred = sapply(pms, function(x) x$pred)
         mu = sapply(pms, function(x) x$mu)
-        
+
         err = pred - z[unlist(cv)]
         list(err2 = colMeans(err^2),
              err2std = apply(err^2, 2, sd),
              mustd =  apply(mu, 2, sd))
     }
-    
+
     ## do cv
     ws = sample(length(wells),nWell) # wells to perform cv on
     hs = bandwidths # possible bandwidths
-    
-    
+
+
     ## calculate mu error and std
     err2_mustd = lapply(ws,
       function(w) {
-          cat(paste("Treating well",w,colnames(data[[did]]$data)[w],"\n"))
+          cat(paste("Treating well",w,colnames(data[[yid]]$data)[w],"\n"))
           data <- err2_mustd_well(dat=data, w=wells[w], hs=hs)
       })
-    
-    
+
+
     err2 = sapply(err2_mustd, function(x) x$err2)
     err2std = sapply(err2_mustd, function(x) x$err2std)
     mustd = sapply(err2_mustd, function(x) x$mustd)
-    
+
     ## which bandwidth are at one std of mini in average
     onestd_of_mini = sapply(1:ncol(err2),
       function(i) {
           m = which.min(err2[,i])
           err2[,i] <= err2[m,i] + err2std[m,i]
       })
-    
+
     ## onestd_of_mini returns a list
     if( is.list(onestd_of_mini) )
       onestd_of_mini = do.call(cbind,onestd_of_mini)
-    
+
     ## calculate "optimal" bandwidth
     bandwidth = hs[max( which(rowMeans(onestd_of_mini,na.rm=TRUE)>= cutoff))]
 
-    
+
     return(list(bandwidth=bandwidth,
                 wells=wells,
-                bandwidths=hs, 
+                bandwidths=hs,
                 err2=err2,
                 err2std=err2std,
                 muStd=mustd,
@@ -536,9 +552,9 @@ bandwidthCV.2 = function(data, did, mid, wells,
 #' TODO: align in/out with gcFit.2 or optionally cellGrowth::fitCellGrowths
 #'
 #' @param data platexpress data set, see \code{\link{readPlateData}}
-#' @param did data ID of the data to be converted for grofit, from 
+#' @param yid data ID of the data to be converted for grofit, from
 #' \code{data$dataIDs}
-#' @param mid the x-axis to be used, defaults to the first available
+#' @param xid the x-axis to be used, defaults to the first available
 #' (usually "Time")
 #' @param wells column IDs of the data set to use, if missing all wells
 #' are used
@@ -547,24 +563,24 @@ bandwidthCV.2 = function(data, did, mid, wells,
 #' @seealso \code{\link[cellGrowth:fitCellGrowth]{fitCellGrowth}}
 #'
 #' @export
-fitCellGrowths.2 = function(data, did, mid, wells, ...) {
+fitCellGrowths.2 = function(data, yid, xid, wells, ...) {
 
-    if ( missing(mid) )
-      mid <- data$mids[1]
-    
-    if ( missing(did) ) # only use requested data 
-      did <- data$dataIDs[1]
+    if ( missing(xid) )
+      xid <- data$xids[1]
+
+    if ( missing(yid) ) # only use requested data
+      yid <- data$dataIDs[1]
 
     if ( missing(wells) )
-      wells <- colnames(data[[did]]$data)
+      wells <- colnames(data[[yid]]$data)
 
     ##fits <- matrix(NA,ncol=4,nrow=length(wells))
     ##rownames(fits) <- wells
     fits <- NULL
-    x <- data[[mid]]
+    x <- data[[xid]]
     for ( well in wells ) {
         cat(paste("well", well, "\n"))
-        y <- data[[did]]$data[,well]
+        y <- data[[yid]]$data[,well]
         fit <- cellGrowth::fitCellGrowth(x, z=y, ...)
         ##fits[well,] <- unlist(attributes(fit)[c(3,4,5,6)])
         fits <- append(fits, list(fit))
@@ -573,7 +589,7 @@ fitCellGrowths.2 = function(data, did, mid, wells, ...) {
         ## calculate lag from pointOfMaxGrowthRate and MaxGrowthRate
         ## calculate X(0)
         ## TODO: add fits to data for plots
-        ## data[[did]]$fit <- fit...data
+        ## data[[yid]]$fit <- fit...data
     }
     names(fits) <- wells
     fits
@@ -584,31 +600,31 @@ fitCellGrowths.2 = function(data, did, mid, wells, ...) {
 ## TODO: wrapper to call all_easylinearfits etc?
 
 #' interface to package \code{\link[growthrates:growthrates]{growthrates}}
-#' 
-#' converts \code{platexpress} data for 
+#'
+#' converts \code{platexpress} data for
 #' use with \code{\link[growthrates:growthrates]{growthrates}}
 #' @param data platexpress data set, see \code{\link{readPlateData}}
-#' @param did data ID of the data to be converted for growthrates, from 
+#' @param yid data ID of the data to be converted for growthrates, from
 #' \code{data$dataIDs}
 #' @seealso \code{\link{growthratesResults}}, \code{\link{data2grofit}}
 #' @export
-data2growthrates <- function(data, did) {
-  
+data2growthrates <- function(data, yid) {
+
   ## TODO: use blank and amount columns in plate layout to filter
-  
-  value <- c(data[[did]]$data)
-  time <- rep(data$Time, ncol(data[[did]]$data))
-  well <- rep(colnames(data[[did]]$data), each=nrow(data[[did]]$data))
-  df <- data.frame(time=time, value=value, 
-                   well=factor(well, levels=colnames(data[[did]]$data)))
+
+  value <- c(data[[yid]]$data)
+  time <- rep(data$Time, ncol(data[[yid]]$data))
+  well <- rep(colnames(data[[yid]]$data), each=nrow(data[[yid]]$data))
+  df <- data.frame(time=time, value=value,
+                   well=factor(well, levels=colnames(data[[yid]]$data)))
   df
 }
 
-#' parse results \code{\link[growthrates:growthrates]{growthrates}} 
+#' parse results \code{\link[growthrates:growthrates]{growthrates}}
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well
-#' @param fit growthrates object, the result of a call to 
+#' @param fit growthrates object, the result of a call to
 #' \code{\link[grofit:gcFit]{gcFit}}
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}

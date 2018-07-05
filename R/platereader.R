@@ -262,37 +262,37 @@ se <- function(data,na.rm=TRUE) {
 #' 
 #' Sets colors, rename, order or filter the data set
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
-#' @param dids a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names
+#' @param yids a vector of data IDs, data will be filtered and sorted by this list; if the vector is named the IDs will be replaced by these names
 #' @param colors a vector of plot colors as RGB strings, optionally already named by dataIDs 
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}
 #' @export
-prettyData <- function(data, dids, colors) {
+prettyData <- function(data, yids, colors) {
 
-    ## dids: data sorting, if missing, take all
-    if ( missing(dids) )
-        dids <- data$dataIDs
+    ## yids: data sorting, if missing, take all
+    if ( missing(yids) )
+        yids <- data$dataIDs
 
-    ## get mids (global x-axis data)
-    mids <- data$mids
+    ## get xids (global x-axis data)
+    xids <- data$xids
     
-    if ( any(is.na(match(dids,names(data))))) 
-      stop("IDs (dids) not found in data", paste(dids,sep=";"))
+    if ( any(is.na(match(yids,names(data))))) 
+      stop("IDs (yids) not found in data", paste(yids,sep=";"))
     
-    ## re-order: mids first and IDs last
-    data$dataIDs <- dids
+    ## re-order: xids first and IDs last
+    data$dataIDs <- yids
     ## store colors
     origcols <- data$colors
-    data <- data[c(match(mids,names(data)),
-                   match("mids",names(data)),
-                   match(dids,names(data)),
+    data <- data[c(match(xids,names(data)),
+                   match("xids",names(data)),
+                   match(yids,names(data)),
                    match("dataIDs",names(data)))]
     data$colors <- origcols
 
     ## rename!
-    if ( !is.null(names(dids)) ) {
-        names(data)[match(dids,names(data))] <- names(dids)
-        data$dataIDs[match(dids,data$dataIDs)] <- names(dids)
+    if ( !is.null(names(yids)) ) {
+        names(data)[match(yids,names(data))] <- names(yids)
+        data$dataIDs[match(yids,data$dataIDs)] <- names(yids)
     }
     
     ## generate colors, if none are present
@@ -412,29 +412,29 @@ getData <- function(data, ID, type="data") {
 #' @param data \code{\link{platexpress}} data set
 #' @param lag a named vector providing the lag-phase to be removed; the names
 #' correspond to the wells in data
-#' @param mid the x-axis to be used, defaults to the first available
+#' @param xid the x-axis to be used, defaults to the first available
 #' (usually "Time")
 #' @export
-shiftData <- function(data, lag, mid) {
+shiftData <- function(data, lag, xid) {
 
     ## NOTE: not optional, since data don't fit anymore
     ## if only some are shifted for a given well list (names of lag)
-    dids <- data$dataIDs
+    yids <- data$dataIDs
 
-    if ( missing(mid) )
-        mid <- data$mids[1]
-    xdat <- data[[mid]]
+    if ( missing(xid) )
+        xid <- data$xids[1]
+    xdat <- data[[xid]]
     
     for ( i in 1:length(lag) ) {
         well <- names(lag)[i]
         idx <- which(xdat >= lag[i])[1]
         end <- length(xdat)
-        for ( did in dids ) {
-            data[[did]]$data[,well] <-
-                          c(data[[did]]$data[idx:end, well],
+        for ( yid in yids ) {
+            data[[yid]]$data[,well] <-
+                          c(data[[yid]]$data[idx:end, well],
                             rep(NA,idx-1))
         }
-        data[[did]]$processing <- c(data[[did]]$processing,
+        data[[yid]]$processing <- c(data[[yid]]$processing,
                                     paste("well",well,"shifted by lag", lag[i]))
     }
     data
@@ -446,16 +446,16 @@ shiftData <- function(data, lag, mid) {
 #' Cuts data to a range or single point of the x-axis, and/or cuts
 #' all y-axis values within a range
 #' @param data \code{\link{platexpress}} data, see \code{link{readPlateData}}
-#' @param mid ID of the x-axis data to cut, default is the main x-axis ('Time')
+#' @param xid ID of the x-axis data to cut, default is the main x-axis ('Time')
 #' @param xrng a single or two value(s) for x-axis cuts, only within the range
 #' of two values will be retained; if only one value is passed only the
 #' data closest to this point will be retained!
-#' @param did ID of the y-axis data to cut
+#' @param yid ID of the y-axis data to cut
 #' @param yrng a single or two value(s) for x-axis cuts, only data smaller
 #' then single value, or within the range of two values will be retained
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @details Cuts the passed \code{\link{platexpress}} data to ranges of
-#' of the x-axis (time or other, see \code{data$mids}) and/or y-axis.
+#' of the x-axis (time or other, see \code{data$xids}) and/or y-axis.
 #' Note that the behaviour is different for passing single values to
 #' \code{xrng} or \code{yrng}:
 #' If \code{xrng} is a single value, data for the closest x value will be
@@ -463,38 +463,38 @@ shiftData <- function(data, lag, mid) {
 #' value will be returned. Note that data outside \code{yrng} are simply
 #' set to NA, which may cause problems downstream.
 #' @export
-cutData <- function(data, yrng, mid, did, xrng) {
+cutData <- function(data, yrng, xid, yid, xrng) {
 
     ## default x-axis cut
-    if ( missing(mid) & missing(did) ) 
-        mid <- data$mids[1]
+    if ( missing(xid) & missing(yid) ) 
+        xid <- data$xids[1]
 
     ## TODO: allow cutting both x and y data
-    ## default no mid and did: cut mid
-    ## only mid: cut mid
-    ## only did: cut did
-    ## both did and mid: cut both, first mid
+    ## default no xid and yid: cut xid
+    ## only xid: cut xid
+    ## only yid: cut yid
+    ## both yid and xid: cut both, first xid
 
     ## first, cut x-axis
-    if ( !missing(mid) ) {
-        xdat <- data[[mid]]
+    if ( !missing(xid) ) {
+        xdat <- data[[xid]]
         if ( length(xrng)==2 )
             filter <- xdat >= xrng[1] & xdat <= xrng[2]
         else if ( length(xrng)==1 )
             filter <- abs(xrng-xdat) == min(abs(xrng-xdat))
-        for ( did in data$dataIDs ) {
-            data[[did]]$data <- data[[did]]$data[filter,,drop=FALSE]
-            data[[did]]$processing <- c(data[[did]]$processing,
+        for ( yid in data$dataIDs ) {
+            data[[yid]]$data <- data[[yid]]$data[filter,,drop=FALSE]
+            data[[yid]]$processing <- c(data[[yid]]$processing,
                                         paste("cut at", paste(xrng,collapse="-")))
         }
-        data[[mid]] <- xdat[filter]
+        data[[xid]] <- xdat[filter]
     }
     ## second, cut y-axis
     ## TODO: cut ALL Y-DATA at these points?
     ## TODO: cut time at points where all are NA!!
-    if ( !missing(did) & !missing(yrng) ) {
+    if ( !missing(yid) & !missing(yrng) ) {
         ## get indices where to cut
-        ydat <- data[[did]]$data
+        ydat <- data[[yid]]$data
 
         ## expand x range to minimum - maximum
         if ( length(yrng)==1 ) ## max value
@@ -503,7 +503,7 @@ cutData <- function(data, yrng, mid, did, xrng) {
         ## just set to NA
         ydat <- apply(ydat, 2, function(y) {
             y[y < yrng[1] | y > yrng[2]]<-NA;y})
-        data[[did]]$data <- ydat 
+        data[[yid]]$data <- ydat 
     }
     data
 }
@@ -794,8 +794,8 @@ doseResponse <- function(map, wells, val,
 #' @param groups a grouping of wells, see \code{\link{getGroups}}
 #' @param rng x-axis range or a single point, for the latter the closest
 #' point will be selected
-#' @param mid the x-axis ID, if multiple x-axes are present
-#' @param did the y-axis data to be grouped
+#' @param xid the x-axis ID, if multiple x-axes are present
+#' @param yid the y-axis data to be grouped
 #' @param plot if TRUE a box-plot or bar-plot will be plotted
 #' @param type either "box" (default) or "bar" for box-plot or bar-plot
 #' @param etype type of statistics to be used for error bars in the bar-plot,
@@ -807,27 +807,27 @@ doseResponse <- function(map, wells, val,
 #' on the x-axis) or mean values (if argument\code{rng} was a range).
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", etype="ci") {
+boxData <- function(data, rng, groups, xid, yid="OD", plot=TRUE, type="box", etype="ci") {
 
-    if ( missing(mid) )
-        mid <- data$mids[1]
+    if ( missing(xid) )
+        xid <- data$xids[1]
     ## cut data to selected range (closest point if length(rng)==1)
-    cdat <- cutData(data, mid=mid, xrng=rng)
+    cdat <- cutData(data, xid=xid, xrng=rng)
 
     ## get the actual point if only one points was chosen
-    if ( length(rng)==1) rng <- signif(unique(range(cdat[[mid]])),4)
+    if ( length(rng)==1) rng <- signif(unique(range(cdat[[xid]])),4)
 
     bdat <- rep(list(NA),length(groups))
     names(bdat) <- names(groups)
     for ( sg in 1:length(groups) ) 
-        bdat[[sg]] <- cdat[[did]]$data[,groups[[sg]],drop=FALSE]
+        bdat[[sg]] <- cdat[[yid]]$data[,groups[[sg]],drop=FALSE]
     ## get means for all groups
     pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
 
     if ( plot ) {
         #par(mai=c(1,.75,.1,.1))
         if ( type=="box" )
-            boxplot(pdat,ylab=did,las=2)
+            boxplot(pdat,ylab=yid,las=2)
         else if ( type=="bar" ) {
             mn <- unlist(lapply(pdat, mean,na.rm=TRUE))
             if ( etype=="ci" ) # 95% confidence interval
@@ -838,11 +838,11 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
                 ci <-  sd / n2
             }
             
-            x <- barplot(mn,ylim=c(0,max(mn+ci,na.rm=TRUE)),ylab=did,las=2)
+            x <- barplot(mn,ylim=c(0,max(mn+ci,na.rm=TRUE)),ylab=yid,las=2)
             arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
                    length=.05,lwd=1.5)            
         }
-        legend("topright",paste("at",mid, "=",paste(rng,collapse="-")),
+        legend("topright",paste("at",xid, "=",paste(rng,collapse="-")),
                bty="n",box.lwd=0)
     }
 
@@ -860,7 +860,7 @@ boxData <- function(data, rng, groups, mid, did="OD", plot=TRUE, type="box", ety
                         function(x) rep(names(bdat)[x],length(bdat[[x]])),
                         simplify = FALSE)),
                       data=unlist(bdat))
-    colnames(tmp)[3] <- paste(did,paste(rng,collapse="-"),sep="@")
+    colnames(tmp)[3] <- paste(yid,paste(rng,collapse="-"),sep="@")
     bdat <- tmp
     rownames(bdat) <- NULL
 
@@ -942,7 +942,7 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' @param data the plate data list to be blank-corrected
 #' @param plate the plate layout where column "blanks" indicates which wells
 #' are to be treated as blanks
-#' @param dids IDs of the data which should be blank-corrected, all will be
+#' @param yids IDs of the data which should be blank-corrected, all will be
 #' blanked if missing
 #' @param by a list of column IDs of the plate layout; separate blank
 #' correction will be attempted for groups in these columns; each group
@@ -950,11 +950,11 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' @param type calculation of blank values from multiple time-points and
 #' wells; "median", "mean" or "ci95", where the latter subtracts the mean
 #' minus  the 95\% confidence interval to avoid blanked values below 0
-#' @param mid ID of the x-axis data to be used, if blanked along x-axis, set
+#' @param xid ID of the x-axis data to be used, if blanked along x-axis, set
 #' by \code{mbins}>1
-#' @param max.mid the maximal x-axis value where blanks should be used
+#' @param max.xid the maximal x-axis value where blanks should be used
 #' @param mbins the number of bins the x-axis is to be divided, if blanked
-#' along the x-axis, see \code{mid}
+#' along the x-axis, see \code{xid}
 #' @param base optional minimal value; all values will be raised by 
 #' the same amount using the function \code{\link{adjustBase}}
 #' @param verb issued progress messages and info
@@ -965,23 +965,23 @@ getWells <- function(plate, blanks=FALSE, values) {
 #' data <- correctBlanks(data=ap12data, plate=ap12plate, by="strain")
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-correctBlanks <- function(data, plate, type="median", by, dids, 
-                          mid, max.mid, mbins=1, base, verb=TRUE, ...) {
+correctBlanks <- function(data, plate, type="median", by, yids, 
+                          xid, max.xid, mbins=1, base, verb=TRUE, ...) {
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
-    if ( missing(mid) )
-        mid <- data$mids[1]
+    if ( missing(xid) )
+        xid <- data$xids[1]
     
     ## start new data list
     corr <- data
-    time <- data[[mid]] ## TODO: take from data mids
+    time <- data[[xid]] ## TODO: take from data xids
   
     ## reduce matrix to requested data
     data <- data[data$dataIDs]
     ptypes <- names(data)
-    if ( !missing(dids) ) # only use requested data 
-      ptypes <- ptypes[ptypes%in%dids]
+    if ( !missing(yids) ) # only use requested data 
+      ptypes <- ptypes[ptypes%in%yids]
     if ( length(ptypes)==0 )
         stop("no data to blank")
     else if ( verb )
@@ -1046,17 +1046,17 @@ correctBlanks <- function(data, plate, type="median", by, dids,
 
                 ## cut maximal time for blanking
                 bbin <- bin
-                if ( !missing(max.mid) ) {
+                if ( !missing(max.xid) ) {
                     if ( verb ) 
-                      cat(paste("\tskipping",sum(time[bbin]>max.mid),
-                                "bins at",max.mid,"\n"))
-                    bbin <- bbin[time[bbin]<=max.mid]
+                      cat(paste("\tskipping",sum(time[bbin]>max.xid),
+                                "bins at",max.xid,"\n"))
+                    bbin <- bbin[time[bbin]<=max.xid]
                 }
 
                 ## TODO: this should only happen if time is
                 if ( length(bbin)==0 ) {
-                    #cat(paste("skipping time bin", t, "at", max.mid, "\n"))
-                    warning("no blank data at time bin", t, "at", max.mid)
+                    #cat(paste("skipping time bin", t, "at", max.xid, "\n"))
+                    warning("no blank data at time bin", t, "at", max.xid)
                     blank <- 0
                     #next # TODO: warning?
                 } else {
@@ -1080,7 +1080,7 @@ correctBlanks <- function(data, plate, type="median", by, dids,
         }
     }
     if ( !missing(base) ) 
-      corr <- adjustBase(corr, base=base, dids=dids, verb=verb, ...)
+      corr <- adjustBase(corr, base=base, yids=yids, verb=verb, ...)
     corr
 }
 
@@ -1093,7 +1093,7 @@ correctBlanks <- function(data, plate, type="median", by, dids,
 #' @details Adjusts data to a new mininum, this is useful for adjustment
 #' of negative values after blank corrections.
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
-#' @param dids vector of ID strings for which base correction should be
+#' @param yids vector of ID strings for which base correction should be
 #' executed
 #' @param base the new minimum for the data, default is 0, but it could
 #' e.g. be the OD used for inoculation
@@ -1102,26 +1102,26 @@ correctBlanks <- function(data, plate, type="median", by, dids,
 #' @param each add base for each well separately!
 #' @param verb print messages if true
 #' @return Returns `data' where all data sets (or only those specified in 
-#' option \code{dids}) where raised to a minimum level in 
+#' option \code{yids}) where raised to a minimum level in 
 #' @seealso \code{\link{correctBlanks}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-adjustBase <- function(data, base=0, dids, add.fraction, xlim, each=FALSE, verb=TRUE) {
+adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=TRUE) {
 
-    if ( missing(dids) ) # only use requested data 
-        dids <- data$dataIDs # use all
+    if ( missing(yids) ) # only use requested data 
+        yids <- data$dataIDs # use all
     
-    for ( did in dids ) {
+    for ( yid in yids ) {
 
         ## each well separately?
         if ( each )
-            bins <- as.list(1:ncol(data[[did]]$data))
+            bins <- as.list(1:ncol(data[[yid]]$data))
         else
-            bins <- list(1:ncol(data[[did]]$data))
+            bins <- list(1:ncol(data[[yid]]$data))
 
         for ( bin in bins ) {
             
-            dat <- data[[did]]$data[,bin,drop=FALSE]
+            dat <- data[[yid]]$data[,bin,drop=FALSE]
 
             if ( missing(xlim) )
                 xlim <- c(1,nrow(dat))
@@ -1137,9 +1137,9 @@ adjustBase <- function(data, base=0, dids, add.fraction, xlim, each=FALSE, verb=
             if ( !missing(add.fraction) ) 
                 dat <- dat + diff(range(dat[xrng,],na.rm=TRUE))*add.fraction
             
-            data[[did]]$data[,bin] <- dat
+            data[[yid]]$data[,bin] <- dat
         }
-        data[[did]]$processing <- c(data[[did]]$processing,
+        data[[yid]]$processing <- c(data[[yid]]$processing,
                                     paste("corrected to base",base))
     }
     data
@@ -1211,7 +1211,7 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
     ## catch single data case
     if ( length(data$dataIDs)==1 ) {
         data$Time <- data[[data$dataIDs[1]]]$time
-        data$mids <- c(data$mids, "Time")
+        data$xids <- c(data$xids, "Time")
         return(data)
     }
     
@@ -1254,7 +1254,7 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
     ## TODO: separate temperature:time pairs could be used to
     ## interpolate temperatures to master time as well
     data$Time <- mtime
-    data$mids <- c(data$mids, "Time")
+    data$xids <- c(data$xids, "Time")
     #data$Temperature <- mtemp
     data
 }
@@ -1272,20 +1272,20 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
 #' @param xid ID of the data set which should serve as the new x-axis
 #' all data will be interpolated to equi-spaced points along the range
 #' of measured values
-#' @param dids restrict interpolation to these data IDs
+#' @param yids restrict interpolation to these data IDs
 #' @param n specify the number of interpolation points, if missing the
 #' original number of rows will be used
 #' @param xout specify the interpolation points directly
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-interpolatePlateData <- function(data, xid, dids, n, xout) {
+interpolatePlateData <- function(data, xid, yids, n, xout) {
 
-    if ( missing(dids) )
-        dids <- data$dataIDs
-    dids <- dids[dids!=xid] # rm target value
+    if ( missing(yids) )
+        yids <- data$dataIDs
+    yids <- yids[yids!=xid] # rm target value
 
     ## store original master data
-    orig.id <- data$mids[1]
+    orig.id <- data$xids[1]
     orig <- data[[orig.id]]
     
     ## get new master data
@@ -1297,7 +1297,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
     }
     
     ## 2) interpolate all data to MASTER time
-    for ( id in dids ) {
+    for ( id in yids ) {
         data[[id]]$orig <- data[[id]]$data
         mdat <- data[[id]]$data
         tmp <- mdat ## reverse interpolation of original master data
@@ -1336,11 +1336,11 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
     data <- append(data, list(xout), after=0)
     names(data)[1] <- xid
     ## rm old master x-axes
-    data <- data[-which(names(data)%in%data$mids)]
+    data <- data[-which(names(data)%in%data$xids)]
     ## and set new master
-    data$mids <- xid
+    data$xids <- xid
     ## set new data IDs
-    data$dataIDs <- dids
+    data$dataIDs <- yids
     data
 }
 
@@ -1360,7 +1360,7 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' @param cols as rows but plate column IDs
 #' @param xid ID of a data-set in the input data that can be used as x-axis
 #' instead of the default Time vector
-#' @param dids IDs of the data to be plotted; if missing, all data will
+#' @param yids IDs of the data to be plotted; if missing, all data will
 #' be plotted
 #' @param dtype type of the data to be plotted, default is the main 'data', but
 #' e.g. 'orig' allows to plot the original data w/o processing (e.g.
@@ -1376,19 +1376,19 @@ interpolatePlateData <- function(data, xid, dids, n, xout) {
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
 #' @param legpos position of the well IDs on the plots
 #' @param add.legend add a legend for the plotted data types (see
-#' argument \code{dids}) in the last plotted well
+#' argument \code{yids}) in the last plotted well
 #' @examples
 #' data(ap12)
 #' # view all data on the plate
 #' viewPlate(ap12data) 
 #' # inspect natural logarithm of OD_600 values, ie. log(X(t))
-#' viewPlate(ap12data, dids="600", log="y") 
+#' viewPlate(ap12data, yids="600", log="y") 
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 viewPlate <- function(data, wells, wcols,
                       rows=toupper(letters[1:8]),cols=1:12,
                       xid, xscale=FALSE,xlim,
-                      dids, dtype="data", pcols, yscale=TRUE,ylims,ylim,log="",
+                      yids, dtype="data", pcols, yscale=TRUE,ylims,ylim,log="",
                       legpos="topleft",add.legend=TRUE) {
 
     ## which wells to plot?
@@ -1415,11 +1415,11 @@ viewPlate <- function(data, wells, wcols,
     
     ## get x-axis data: time and temperature or another data set
     if ( missing(xid) )
-        xid <- data$mids[1]
+        xid <- data$xids[1]
     
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
-    global.x <- xid %in% data$mids
+    global.x <- xid %in% data$xids
     if ( global.x ) {
         time <- data[[xid]]
     } else if ( xid %in% data$dataIDs )
@@ -1431,9 +1431,9 @@ viewPlate <- function(data, wells, wcols,
     ## or a data set specified via xid
     ## TODO: implement absence of master time, if interpolate=FALSE
     ## upon reading of data
-    ## TODO: adapt to new data$mids,
-    ## if xid is not present in data$mids, get it from dataIDs
-    #time <- data[[data$mids[1]]]
+    ## TODO: adapt to new data$xids,
+    ## if xid is not present in data$xids, get it from dataIDs
+    #time <- data[[data$xids[1]]]
     #if ( !missing(xid) ) { # or use other data-set as x
     #    xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
     #} else xid <- NULL
@@ -1448,8 +1448,8 @@ viewPlate <- function(data, wells, wcols,
     ## reduce matrix to plot data
     data <- data[data$dataIDs]
     ptypes <- names(data)
-    if ( !missing(dids) ) # only use requested data for plots
-      ptypes <- ptypes[ptypes%in%dids]
+    if ( !missing(yids) ) # only use requested data for plots
+      ptypes <- ptypes[ptypes%in%yids]
     if ( length(ptypes)==0 ) {
         cat(paste("no data to plot\n"))
         return()
@@ -1621,7 +1621,7 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a list of well grouped wells, as produced by
 #' \code{\link{getGroups}}
-#' @param dids data IDs for which statistics should be reported,
+#' @param yids data IDs for which statistics should be reported,
 #' if missing stats for all data will be reported
 #' @details Calculates the simple statistics over grouped wells
 #' (means, 95% confidence intervals, stdandard errors) along the x-axis
@@ -1631,13 +1631,13 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' @seealso \code{\link{readPlateMap}}, \code{\link{viewGroups}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-groupStats <- function(data, groups, dids) {
+groupStats <- function(data, groups, yids) {
     
-    if ( missing(dids) )
-        dids <- data$dataIDs
+    if ( missing(yids) )
+        yids <- data$dataIDs
         
-    for ( did in dids ) {
-        SE <- matrix(NA,nrow=nrow(data[[did]]$data),ncol=length(groups))
+    for ( yid in yids ) {
+        SE <- matrix(NA,nrow=nrow(data[[yid]]$data),ncol=length(groups))
         colnames(SE) <- names(groups)
         MN<-CI<-SE
         for ( sg in 1:length(groups) ) {
@@ -1646,13 +1646,13 @@ groupStats <- function(data, groups, dids) {
             sid <- names(groups)[sg]
             
             ## get data for selected wells
-            dat <- data[[did]]$data[,wells]
+            dat <- data[[yid]]$data[,wells]
             ## calculate stats only for common x!
             MN[,sg] <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
             SE[,sg] <- apply(dat,1,function(x) se(x,na.rm=TRUE))
             CI[,sg] <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
         }
-        data[[did]]$stats <- list(mean=MN,ci05=CI,se=SE)
+        data[[yid]]$stats <- list(mean=MN,ci05=CI,se=SE)
     }
     data
 }
@@ -1697,7 +1697,7 @@ groupColors <- function(map, group, color="color") {
 #' example for parameter see \code{groups}
 #' @param xid ID of a data-set in the input data that can be used as x-axis
 #' instead of the default Time vector
-#' @param dids IDs of the data to be plotted; if missing, all data will
+#' @param yids IDs of the data to be plotted; if missing, all data will
 #' be plotted
 #' @param dtype type of the data to be plotted, default is the main 'data', but
 #' e.g. 'orig' allows to plot the original data w/o processing (e.g.
@@ -1724,7 +1724,7 @@ groupColors <- function(map, group, color="color") {
 #' this can help to emphasize the means in noisy data (broad overlapping
 #' confidence intervals
 #' @param g1.legend show the main legend, giving plot colors
-#  of the plotted data types (\code{dids})
+#  of the plotted data types (\code{yids})
 #' @param g1.legpos position of the \code{groups} legend, see \code{g1.legend}
 #' @param g2.legend plot a legend for groups in argument \code{groups2} 
 #' @param g2.legpos position of the \code{groups2} legend, see \code{g2.legend}
@@ -1739,7 +1739,7 @@ groupColors <- function(map, group, color="color") {
 #' @param mgp set the position of axis title, tick marks and tick lengths
 #' @param xaxis plot x-axis if TRUE
 #' @param yaxis the data types for which axes are to be plotted, corresponds
-#' to the order in argument \code{dids} and as plotted in the legend 
+#' to the order in argument \code{yids} and as plotted in the legend 
 #' (see argument \code{g1.legend}
 #' @param embed setting TRUE allows to embed plots of single groups within
 #' in layouted plots, see ?layout and par("mfcol"); also see argument
@@ -1758,7 +1758,7 @@ groupColors <- function(map, group, color="color") {
 #' @export
 viewGroups <- function(data, groups, groups2,
                        xid, xscale=FALSE, xlim, xlab,
-                       dids, dtype="data",pcols,group2.col,
+                       yids, dtype="data",pcols,group2.col,
                        yscale=TRUE,ylims,ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
@@ -1785,11 +1785,11 @@ viewGroups <- function(data, groups, groups2,
 
     ## get x-axis data: time and temperature or another data set
     if ( missing(xid) )
-        xid <- data$mids[1]
+        xid <- data$xids[1]
     
     ## TODO: interpolate data here on the fly, if not done
     ## upon parsing data or subsequently
-    global.x <- xid %in% data$mids
+    global.x <- xid %in% data$xids
     if ( global.x ) 
         time <- data[[xid]]
     else if ( xid %in% data$dataIDs )
@@ -1812,8 +1812,8 @@ viewGroups <- function(data, groups, groups2,
     ## reduce data to plotted data
     data <- data[data$dataIDs]
     ptypes <- names(data)
-    if ( !missing(dids) ) # only use requested data for plots
-      ptypes <- ptypes[ptypes%in%dids]
+    if ( !missing(yids) ) # only use requested data for plots
+      ptypes <- ptypes[ptypes%in%yids]
     if ( length(ptypes)==0 ) {
         stop("no data to plot")
     }else if ( verb )
