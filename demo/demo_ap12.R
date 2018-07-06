@@ -23,7 +23,7 @@ plate <- skipWells(plate, skip="A9")
 data <- correctBlanks(data=raw, plate=plate)
 viewPlate(data, rows=c("A","B","C"),cols=1:9)
 
-data <- prettyData(data=raw,dids=c(OD="600",YFP="YFP_50:500,535"), 
+data <- prettyData(data=raw,yids=c(OD="600",YFP="YFP_50:500,535"), 
                    colors=c(OD="#000000",YFP="#FFFF00"))
 groups <- getGroups(plate, by="strain")
 viewGroups(data,groups=groups,lwd.orig=0,nrow=1)
@@ -35,16 +35,16 @@ names(lag) <- groups$EVC
 data <- shiftData(data, lag=lag)
 viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
 
-boxData(data,rng=7,groups=groups,did="YFP")
-boxData(data,rng=7,groups=groups,did="YFP",type="bar")
+boxData(data,rng=7,groups=groups,yid="YFP")
+boxData(data,rng=7,groups=groups,yid="YFP",type="bar")
 
 yfp <- getData(data, "YFP")
 od <- getData(data, "OD")
 data <- addData(data, dat=yfp/od, ID="YFP/OD", col=wavelength2RGB(500))
-viewGroups(data,groups2=groups,lwd.orig=0,dids=c("OD","YFP/OD"))
+viewGroups(data,groups2=groups,lwd.orig=0,yids=c("OD","YFP/OD"))
 
 od.data <- interpolatePlateData(data, xid="OD")
-viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
+viewGroups(od.data,groups2=groups,yids=c("YFP","YFP/OD"))
 
-boxData(od.data,rng=0.7,groups=groups,did="YFP/OD",type="bar")
+boxData(od.data,rng=0.7,groups=groups,yid="YFP/OD",type="bar")
 

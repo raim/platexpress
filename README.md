@@ -115,7 +115,7 @@ Now the raw data processing is done, so let's assign more informative IDs
 and select nicer colors, as R RGB strings:
 
 ```R
-data <- prettyData(data=raw,dids=c(OD="600",YFP="YFP_50:500,535"), 
+data <- prettyData(data=raw,yids=c(OD="600",YFP="YFP_50:500,535"), 
                    colors=c(OD="#000000",YFP=wavelength2RGB(690)))
 ```
 
@@ -173,8 +173,8 @@ Diverse further functions allow to further summarize and visualize results,
 e.g., 
 
 ```R
-boxData(data,rng=7,groups=groups,did="YFP")
-boxData(data,rng=7,groups=groups,did="YFP",type="bar")
+boxData(data,rng=7,groups=groups,yid="YFP")
+boxData(data,rng=7,groups=groups,yid="YFP",type="bar")
 ```
 
 gives you boxplots or barplots (with standard errors or 95% confidence
@@ -191,7 +191,7 @@ You can `getData` and `addData`, e.g., to calculate YFP/OD:
 yfp <- getData(data, "YFP")
 od <- getData(data, "OD")
 data <- addData(data, dat=yfp/od, ID="YFP/OD", col=wavelength2RGB(459))
-viewGroups(data,groups2=groups,lwd.orig=0,dids=c("OD","YFP/OD"))
+viewGroups(data,groups2=groups,lwd.orig=0,yids=c("OD","YFP/OD"))
 ```
 
 #### Interpolate to new x-axis
@@ -205,11 +205,11 @@ structure, and the two should not be mixed up:
 
 ```R
 od.data <- interpolatePlateData(data, xid="OD")
-viewGroups(od.data,groups2=groups,dids=c("YFP","YFP/OD"))
+viewGroups(od.data,groups2=groups,yids=c("YFP","YFP/OD"))
 ```
 
 And now we are ready for nice compact result figure:
 
 ```R
-boxData(od.data,rng=0.7,groups=groups,did="YFP/OD",type="bar")
+boxData(od.data,rng=0.7,groups=groups,yid="YFP/OD",type="bar")
 ```
