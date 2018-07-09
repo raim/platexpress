@@ -1914,9 +1914,10 @@ viewGroups <- function(data, groups, groups2,
             orig.cols <- NA
             if ( !global.x ) # there is no common x-axis
                 orig.cols <- getColors(names(sgroups))
-            if ( !missing(group2.col) ) # colors were explicitly provided
+            if ( !missing(group2.col) ) {
+                ## colors were explicitly provided
                 orig.cols <- group2.col[names(sgroups)]
-
+            }
             for ( sg in 1:length(sgroups) ) {
                 wells <- sgroups[[sg]]
                 wells <- wells[wells%in%pwells] # filter for present wells
@@ -1953,10 +1954,13 @@ viewGroups <- function(data, groups, groups2,
                 ## COLOR SELECTION group 2
                 g2.col <- col.orig
                 ## group2 colors
-                if ( !missing(group2.col) )
+                ## TODO: line-types by data, if group2.col is used!
+                if ( !missing(group2.col) ) {
                     g2.col <- group2.col[sid]
-                ##cat(paste(sg, g2.col, "\n"))
-
+                    ##lty.mean <- i
+                    ##cat(paste(sg, g2.col, "\n"))
+                }
+                
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
 
@@ -1983,7 +1987,11 @@ viewGroups <- function(data, groups, groups2,
                     }
                     if ( show.mean )
                         lines(x=x,mn,col=ifelse(emphasize.mean,1,g2.col),
-                              lwd=lwd.mean,lty=ifelse(g2.legend,sg,lty.mean))
+                              lwd=lwd.mean,
+                              lty=ifelse(g2.legend,
+                                  ifelse(!missing(group2.col),
+                                         i,sg),
+                                  lty.mean))
                 }
 
                 ## add axes for first two values
