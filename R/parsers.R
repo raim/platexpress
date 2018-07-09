@@ -599,7 +599,12 @@ readBMGPlate <- function(files, data.ids,
         if ( verb )
           cat(paste("Parsing file", file , "\n"))
         dat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
-                        skip=skip,sep=sep)
+                        skip=skip, sep=sep)
+
+        ## TODO: scan to parse header
+        ## for rownames "Well" or "Well Row", "Well Col"
+        ## and "Content"; and then scan again with adjusted skip
+        ## -> started in function readbmg
 
         ## last row in BMG files is usually empty, remove
         if ( sum(dat[nrow(dat),]=="")==ncol(dat) )
@@ -713,11 +718,11 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
     ## parse header and data separately, to obtain
     ## clean numeric data
     hdat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
-                    skip=skip,sep=sep, dec=dec)
+                     skip=skip,sep=sep, dec=dec)
     hdat <- hdat[1:2,]
     dat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
                     skip=skip+2,sep=sep,dec=dec)
-    
+
     ## last column in BMG2 files is usually empty, remove
     if ( sum(is.na(dat[,ncol(dat)]))==nrow(dat) ) {
       dat <- dat[,2:ncol(dat)-1,]
@@ -768,4 +773,27 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
   data$dataIDs <- names(data)
   
   data
+}
+
+readbmg <- function(files, time.format=" %H h %M min", dec=",") {
+
+    data <- list()
+    ## 1) PARSE ALL DATA FILES and collect the individual measurements
+    for ( i in 1:length(files) ) {
+        file <- files[i]
+        ##id <- names(files)[i]
+        if ( verb )
+            cat(paste("Parsing file", file , "\n"))
+
+        ## 1) parse header
+        dat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
+                        sep=sep, skip=5)
+
+        widx <- grep("Well",dat[,1])
+        cidx <- grep("Well Col",dat[,1])
+        ridx <- grep("Well Row",dat[,1])
+        iidx <- grep("Content", dat[,1])
+
+    }
+    
 }
