@@ -775,7 +775,7 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
   data
 }
 
-readbmg <- function(files, time.format=" %H h %M min", dec=",") {
+readbmg <- function(files, time.format=" %H h %M min", sep=";", dec=",", verb=TRUE) {
 
     data <- list()
     ## 1) PARSE ALL DATA FILES and collect the individual measurements
