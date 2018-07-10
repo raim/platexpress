@@ -1988,10 +1988,7 @@ viewGroups <- function(data, groups, groups2,
                     if ( show.mean )
                         lines(x=x,mn,col=ifelse(emphasize.mean,1,g2.col),
                               lwd=lwd.mean,
-                              lty=ifelse(g2.legend,
-                                  ifelse(!missing(group2.col),
-                                         i,sg),
-                                  lty.mean))
+                              lty=ifelse(!missing(group2.col),i,sg))
                 }
 
                 ## add axes for first two values
@@ -2008,9 +2005,11 @@ viewGroups <- function(data, groups, groups2,
             if ( global.x & missing(group2.col) )
                 legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
                        col=1,bty="n")
-            else
-                legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
-                       col=orig.cols,bg="#FFFFFFAA",box.lwd=NA) # TODO: use g2cols
+            else {
+              lty <- ifelse(!missing(group2.col),1:length(ptypes),1:length(sgroups))
+              legend(g2.legpos,names(sgroups),lty=lty,
+                     col=orig.cols,bg="#FFFFFFAA",box.lwd=NA) # TODO: use g2cols
+            }
         else
             legend(g2.legpos,id, bty="n")
         if ( xaxis ) axis(1)
@@ -2019,9 +2018,16 @@ viewGroups <- function(data, groups, groups2,
         mtext(xlab, 1, par("mgp")[1])
     }
     ## add legend to last plot
-    if ( g1.legend )
-        legend(g1.legpos,ptypes,lty=1,col=pcols[ptypes],bg="#FFFFFFAA")
-
+    if ( g1.legend ) {
+      if ( !missing(group2.col) ) {
+        lty <- 1:length(ptypes)
+        col <- 1
+      } else {
+        lty <- 1
+        col <- pcols[ptypes]
+      }
+      legend(g1.legpos,ptypes,lty=lty,col=col,bg="#FFFFFFAA")
+    }
     ## reset par!
     par(orig.par)
 
