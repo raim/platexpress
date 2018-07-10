@@ -400,9 +400,29 @@ rmData <- function(data, ID) {
 #' @param type the type of the data to be returned (default "data"),
 #' the data list also contains original values for some of the processing
 #' steps
+#' @param xrng x-axis range or single point; similar to cutData, but
+#' use interpolation for single values!
+#' @param xid ID of the x-axis data to use
+#' @param verb print messages
 #' @export
-getData <- function(data, ID, type="data") {
-    data[[ID]][[type]] # just return the current data or old versions
+getData <- function(data, ID, type="data", xrng, xid, verb=TRUE) {
+  if ( missing(xrng) )
+    return(data[[ID]][[type]]) # just return the current data or old versions
+  else {
+    #stop("x-axis range not implemented yet")
+    if ( missing(xid) )
+      xid <- data$xids[1]
+    xdat <- data[[xid]]
+    if ( length(xrng)==2 ) {
+      if ( verb ) cat(paste("cutting data to x within", paste(xrng,collapse=":"), "\n"))
+      filter <- xdat >= xrng[1] & xdat <= xrng[2]
+      return(data[[ID]][[type]][filter,]) 
+    } else if ( length(xrng)==1 ) {
+      if ( verb ) cat(paste("interpolating to", xrng, "\n"))
+      return(apply(data[[ID]][[type]], 2, function(y) 
+        ifelse(sum(!is.na(y))<2, NA, approx(x=xdat, y=y, xout=xrng)$y)))
+    }
+  }
 }
 
 
@@ -793,9 +813,13 @@ doseResponse <- function(map, wells, val,
 #' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
 #' @param groups a grouping of wells, see \code{\link{getGroups}}
 #' @param rng x-axis range or a single point, for the latter the closest
-#' point will be selected
+#' point will be selected or, if option \code{interpolate=TRUE} the
+#' value at \code{rng} will be interpolated using R base function 
+#' \code{\link[stats:approx]{approx}}
 #' @param xid the x-axis ID, if multiple x-axes are present
 #' @param yid the y-axis data to be grouped
+#' @param interpolate interpolate data at \code{rng} (if a single value, 
+#' see argument \code{rng})
 #' @param plot if TRUE a box-plot or bar-plot will be plotted
 #' @param type either "box" (default) or "bar" for box-plot or bar-plot
 #' @param etype type of statistics to be used for error bars in the bar-plot,
@@ -807,16 +831,23 @@ doseResponse <- function(map, wells, val,
 #' on the x-axis) or mean values (if argument\code{rng} was a range).
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-boxData <- function(data, rng, groups, xid, yid="OD", plot=TRUE, type="box", etype="ci") {
+boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRUE, type="box", etype="ci") {
 
     if ( missing(xid) )
         xid <- data$xids[1]
     ## cut data to selected range (closest point if length(rng)==1)
-    cdat <- cutData(data, xid=xid, xrng=rng)
-
-    ## get the actual point if only one points was chosen
-    if ( length(rng)==1) rng <- signif(unique(range(cdat[[xid]])),4)
-
+    if ( length(rng)==2 ) {
+      cdat <- cutData(data, xid=xid, xrng=rng)
+    } else {  
+      if ( !interpolate ) {
+        cdat <- cutData(data, xid=xid, xrng=rng)
+        ## get the actual point if only one points was chosen
+        if ( length(rng)==1) rng <- signif(unique(range(cdat[[xid]])),4)
+      } else { # interpolate using getData!
+        cdat <- data
+        cdat[[yid]]$data <- t(as.matrix(getData(data, ID=yid, xrng=rng, xid=xid, verb=TRUE)))
+      }
+    }    
     bdat <- rep(list(NA),length(groups))
     names(bdat) <- names(groups)
     for ( sg in 1:length(groups) )
@@ -1936,7 +1967,7 @@ viewGroups <- function(data, groups, groups2,
                 ## TODO: do we get NAs or empty vals from ci?
                 if ( is.null(dim(x)) & length(wells)>1 ) {
                     mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
-		    if ( show.ci95 )
+                    if ( show.ci95 )
                         ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
                 }
                 ## PLOT

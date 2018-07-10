@@ -4,20 +4,25 @@
 \alias{boxData}
 \title{Box-Plots of Data Ranges}
 \usage{
-boxData(data, rng, groups, xid, yid = "OD", plot = TRUE, type = "box",
-  etype = "ci")
+boxData(data, rng, groups, xid, yid = "OD", interpolate = TRUE,
+  plot = TRUE, type = "box", etype = "ci")
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
 
 \item{rng}{x-axis range or a single point, for the latter the closest
-point will be selected}
+point will be selected or, if option \code{interpolate=TRUE} the
+value at \code{rng} will be interpolated using R base function 
+\code{\link[stats:approx]{approx}}}
 
 \item{groups}{a grouping of wells, see \code{\link{getGroups}}}
 
 \item{xid}{the x-axis ID, if multiple x-axes are present}
 
 \item{yid}{the y-axis data to be grouped}
+
+\item{interpolate}{interpolate data at \code{rng} (if a single value, 
+see argument \code{rng})}
 
 \item{plot}{if TRUE a box-plot or bar-plot will be plotted}
 

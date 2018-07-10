@@ -4,7 +4,7 @@
 \alias{getData}
 \title{Get Data}
 \usage{
-getData(data, ID, type = "data")
+getData(data, ID, type = "data", xrng, xid, verb = TRUE)
 }
 \arguments{
 \item{data}{the current platexpress data set}
@@ -14,6 +14,13 @@ getData(data, ID, type = "data")
 \item{type}{the type of the data to be returned (default "data"),
 the data list also contains original values for some of the processing
 steps}
+
+\item{xrng}{x-axis range or single point; similar to cutData, but
+use interpolation for single values!}
+
+\item{xid}{ID of the x-axis data to use}
+
+\item{verb}{print messages}
 }
 \description{
 Returns a specific data set as data matrix
