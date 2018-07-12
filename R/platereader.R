@@ -1146,6 +1146,9 @@ adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=
     if ( missing(yids) ) # only use requested data
         yids <- data$dataIDs # use all
 
+    if ( verb )
+      cat(paste("adjusting base", paste(yids, collapse=";"),"\n"))
+
     for ( yid in yids ) {
 
         ## each well separately?
@@ -1163,8 +1166,8 @@ adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=
             xrng <- xlim[1]:xlim[2]
 
             if ( verb )
-              cat(paste(paste(bin,collapse=";"),
-                        "adding", min(dat[xrng,],na.rm=TRUE), "\n"))
+              cat(paste("\t\t",length(bin), #paste(bin,collapse=";"),
+                        "wells, adding", min(dat[xrng,],na.rm=TRUE), "\n"))
 
             ## TODO: smarter? only if any value is <0?
             dat <- dat - min(dat[xrng,],na.rm=TRUE) + base
