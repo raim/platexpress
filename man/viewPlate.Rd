@@ -6,7 +6,8 @@
 \usage{
 viewPlate(data, wells, wcols, rows = toupper(letters[1:8]), cols = 1:12,
   xid, xscale = FALSE, xlim, yids, dtype = "data", pcols, yscale = TRUE,
-  ylims, ylim, log = "", legpos = "topleft", add.legend = TRUE)
+  ylims, ylim, log = "", axes, yaxis = "", legpos = "topleft",
+  add.legend = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by
@@ -47,6 +48,12 @@ all plotted wells; if FALSE each well be locally scaled}
 
 \item{log}{plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
+
+\item{axes}{axes numbers to draw, integers from 1 to 4 indicate the side
+to plot (argument \code{side} in function \code{\link[graphics:axis]{axis}});
+multiple y-axis values (multiple yids) are handled in argument\code{yaxis}}
+
+\item{yaxis}{the ID of maximally two data types for which y-axes are to be plotted}
 
 \item{legpos}{position of the well IDs on the plots}
 

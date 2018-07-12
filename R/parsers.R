@@ -25,8 +25,8 @@ mergePlates <- function(data=list(), layouts=list()) {
 ## strings.
 ## TODO: repair this in example:
 #' Read Plate Layout Map
-#' 
-#' Parses a plate design file in CSV format. Rows and 
+#'
+#' Parses a plate design file in CSV format. Rows and
 #' columns should be named as in the corresponding plate reader data files.
 #' @param file text file containing the plate layout.
 #' @param sep column separator, as in \code{\link[utils:read.table]{read.table}}
@@ -55,7 +55,7 @@ mergePlates <- function(data=list(), layouts=list()) {
 #' plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-readPlateMap.old <- function(file, sep="\t", 
+readPlateMap.old <- function(file, sep="\t",
                              fsep="\n", fields, asep, afields,
                              blank.id="blank",
                              nrows=8, formatted=FALSE, header=TRUE) {
@@ -77,7 +77,7 @@ readPlateMap.old <- function(file, sep="\t",
         }
         return(dat)
     }
-    
+
     ## plate map by columns and rows
     ## TODO: get rid of nrows and check fields instead?
     if ( length(grep("\\.xlsx?$", file)) ) {
@@ -102,7 +102,7 @@ readPlateMap.old <- function(file, sep="\t",
     nvals <- max(unlist(lapply(vals,length)))
 
     values <- matrix("",nrow=length(vals),ncol=nvals)
-    for ( i in 1:nvals ) 
+    for ( i in 1:nvals )
       values[,i] <- as.character(unlist(lapply(vals, function(x) trimws(x[i]))))
 
     if ( missing(fields) )
@@ -110,7 +110,7 @@ readPlateMap.old <- function(file, sep="\t",
     else colnames(values) <- fields
 
     plate <- cbind(well=plate,values)
-    
+
     blanks <- apply(plate,1, function(x) any(x==blank.id))
     plate[which(plate==blank.id)] <- NA
 
@@ -124,10 +124,10 @@ readPlateMap.old <- function(file, sep="\t",
         plate <- replaceAmounts(plate, col=afields, sep=asep, replace=TRUE)
         plate <- amountColors(plate)
     }
-    
+
     ## use wells as rownames!
     rownames(plate) <- plate$well
-    
+
     #class(plate) <- "platemap"
     return(plate)
 }
@@ -147,8 +147,8 @@ readPlateMap.old <- function(file, sep="\t",
 ## strings.
 ## TODO: repair this in example:
 #' Read Plate Layout Map
-#' 
-#' Parses a plate design file in CSV format. Rows and 
+#'
+#' Parses a plate design file in CSV format. Rows and
 #' columns should be named as in the corresponding plate reader data files.
 #' TODO: causes empty groups in getGroups; because separate causes empty
 #' strings in first field instead of NA
@@ -179,11 +179,11 @@ readPlateMap.old <- function(file, sep="\t",
 #' plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-readPlateMap <- function(file, sep="\t", 
+readPlateMap <- function(file, sep="\t",
                           fsep="\n", fields, asep, afields,
                           blank.id="blank",
                           nrows=8, formatted=FALSE, header=TRUE) {
-    
+
     ## already in well format?
     if ( formatted ) {
         if ( length(grep("\\.xlsx?$", file)) ) {
@@ -200,19 +200,19 @@ readPlateMap <- function(file, sep="\t",
           #          "please add colors manually")
           for ( i in 1:length(afields) ) {
             afield <- afields[i]
-            amnt.name <- ifelse(i>1,paste0(afield,"amount"),"amount")
+            amnt.name <- ifelse(i>1,paste0(afield,".amount"),"amount")
             vdat <- tidyr::separate(vdat, col = afield,
                                     into = c(afield, amnt.name),
                                     sep = asep)
             vdat[[amnt.name]] <- as.numeric(vdat[[amnt.name]])
-            vdat <- amountColors(vdat, 
+            vdat <- amountColors(vdat,
                                  substance=afield,
                                  amount=amnt.name,
                                  color=sub("amount","color",amnt.name))
           }
         }
     }
-    
+
     ## plate map by columns and rows
     ## TODO: get rid of nrows and check fields instead?
     if ( length(grep("\\.xlsx?$", file)) ) {
@@ -227,12 +227,12 @@ readPlateMap <- function(file, sep="\t",
     }
     if ( !header )
         colnames(dat) <- 1:ncol(dat)
-    
+
     ## generate well names from row and column names
     wells <- paste(rep(rownames(dat),ncol(dat)),
                    rep(sub("X","",colnames(dat)),each=nrow(dat)),sep="")
 
-    ## convert to 1D 
+    ## convert to 1D
     vdat <- data.frame(well=wells,field=unlist(dat))
     ## get blanks, to add later
     blank.idx <- grep(blank.id, vdat$field)
@@ -244,12 +244,12 @@ readPlateMap <- function(file, sep="\t",
       #          "please add colors manually")
       for ( i in 1:length(afields) ) {
         afield <- afields[i]
-        amnt.name <- ifelse(i>1,paste0(afield,"amount"),"amount")
+        amnt.name <- ifelse(i>1,paste0(afield,".amount"),"amount")
         vdat <- tidyr::separate(vdat, col = afield,
                                 into = c(afield, amnt.name),
                                 sep = asep)
         vdat[[amnt.name]] <- as.numeric(vdat[[amnt.name]])
-        vdat <- amountColors(vdat, 
+        vdat <- amountColors(vdat,
                              substance=afield,
                              amount=amnt.name,
                              color=sub("amount","color",amnt.name))
@@ -263,7 +263,7 @@ readPlateMap <- function(file, sep="\t",
     ## add blanks
     vdat$blank <- FALSE
     vdat$blank[blank.idx] <- TRUE
-    
+
     ## don't - use well column throughout!
     ##rownames(vdat) <- wells
     #class(vdat) <- "platemap"
@@ -271,7 +271,7 @@ readPlateMap <- function(file, sep="\t",
 }
 
 #' Numeric Amounts
-#' 
+#'
 #' replaces amount strings of the form \code{substance:amount} in a column of
 #' the plate layout map by two columns, separating substance and the amount
 #' into a string and a numeric column.
@@ -282,7 +282,7 @@ readPlateMap <- function(file, sep="\t",
 #' @seealso \code{\link{parseAmounts}}, \code{\link{readPlateMap}}
 #' @export
 replaceAmounts <- function(map, col, sep=":", replace=TRUE) {
-    for ( cl in col ) 
+    for ( cl in col )
         map <- cbind.data.frame(map, parseAmounts(map[,cl], sep=sep))
     if ( replace ) {
         if ( typeof(col)=="character" )
@@ -308,7 +308,7 @@ parseAmounts <- function(str, sep=":") {
 
 #' Add Amount Colors
 #'
-#' add a color palette to the plate layout map, with colors along the range 
+#' add a color palette to the plate layout map, with colors along the range
 #' of added amounts of a given substance. Substance and amount columns are eg.
 #' auto-generated by \code{\link{readPlateMap}} with options \code{asep}
 #' and \code{afields}.
@@ -343,17 +343,17 @@ amountColors <- function(map, substance="substance",amount="amount", color="colo
 
 ## TODO: repair this in example
 #' Read Plate Data
-#' 
+#'
 #' Parses platereader data files in CSV format, as exported by
-#' the plate reader software. Header IDs in the data file should match with 
+#' the plate reader software. Header IDs in the data file should match with
 #' IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined parsing
 #' functions exist for a couple of plate-readers. If your format is
-#' not implement, you can manually create simple data tables and use 
+#' not implement, you can manually create simple data tables and use
 #' the function \code{\link{readSimplePlate}}
 #' @param files list of one or more data files
 #' @param type pre-defined formats, as exported from platereaders; currently
-#' for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars 
-#' vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export 
+#' for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars
+#' vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export
 #' protocols!
 #' @param interpolate if true a master time, the average time between distinct
 #' measurements of one timepoint, is calculated and all values are interpolated
@@ -371,8 +371,8 @@ amountColors <- function(map, substance="substance",amount="amount", color="colo
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @examples
 #' data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-#' raw <- readPlateData(files=data.file, type="Synergy", 
-#'                      data.ids=c("600","YFP_50:500,535"), 
+#' raw <- readPlateData(files=data.file, type="Synergy",
+#'                      data.ids=c("600","YFP_50:500,535"),
 #'                      dec=",", time.format="%H:%M:%S")
 #' @export
 readPlateData <- function(files, type, data.ids, verb=TRUE,
@@ -385,12 +385,12 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
       data <- readBMG2Plate(files=files, data.ids=data.ids,
                             verb=verb, ...)
     else if ( type=="Synergy" )
-      data <- readSynergyPlate(files=files, data.ids=data.ids, 
+      data <- readSynergyPlate(files=files, data.ids=data.ids,
                                verb=verb, ...)
-    else if ( type=="simple" ) # single data item in simple spreadsheet 
+    else if ( type=="simple" ) # single data item in simple spreadsheet
       data <- readSimplePlate(files=files, data.ids=data.ids,
                               verb=verb, ...)
-      
+
     ## NOW PREPARE DATA
     ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
     ## interpolate data: this adds a master time and temperature
@@ -407,9 +407,9 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
 }
 
 #' Read Simple Plate Data Tables
-#' 
+#'
 #' Read in simple platereader data with only one data type, time
-#' in the first column and data for all wells in the following columns, 
+#' in the first column and data for all wells in the following columns,
 #' where the column header must correspond to wells
 #' in \code{\link{readPlateMap}}.
 #' @param skip lines to skip before parsing data
@@ -427,7 +427,7 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
       skip <- 0
     if ( missing(data.ids) )
       data.ids <- "data"
- 
+
     if ( verb  )
       cat(paste("\tloading data", data.ids, "\n"))
 
@@ -454,7 +454,7 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
 }
 
 #' Read Synergy Mx Plate Data
-#' 
+#'
 #' Parses date exported from the Excel file that can be exported
 #' from the Biotek Synergy Mx platereader. A parameter that often changes
 #' is \code{skip}, the number of lines before the data starts,
@@ -487,7 +487,7 @@ readSynergyPlate <- function(files, data.ids,
 
     indat <- read.csv(files, header=FALSE,stringsAsFactors=FALSE,
                       sep=sep, dec=dec, skip=skip)
-    
+
     ## data IDs are in column 1, followed by data matrices starting
     ## in column 2; skip internal result calculation
     yidx <- c(which(indat[,1]!="" & indat[,1]!="Results"))
@@ -496,7 +496,7 @@ readSynergyPlate <- function(files, data.ids,
     dataIDs <- indat[yidx,1]
     yidx <- c(yidx, which(indat[,1]=="Results")) # add "Results" index
     names(yidx) <- c(dataIDs,"end")
-    
+
     if ( !missing(data.ids) )
       dataIDs <- dataIDs[dataIDs%in%data.ids]
 
@@ -506,7 +506,7 @@ readSynergyPlate <- function(files, data.ids,
 
         if ( verb  )
           cat(paste("\tloading data", dataID, "\n"))
-        
+
         ## get DATA:
         ## rows: the header is 2 rows after the ID, data starts 3 rows after
         ## and ends 2 rows before next
@@ -543,7 +543,7 @@ readSynergyPlate <- function(files, data.ids,
         ## -> either NA values in time or in all wells
         present <- (!is.na(time) &
                     ncol(dat) > apply(dat,1,function(x) sum(is.na(x))))
-        
+
         dat  <- dat[ present,]
         temp <- temp[present]
         time <- time[present]
@@ -553,10 +553,10 @@ readSynergyPlate <- function(files, data.ids,
     ## since time here comes formatted, the current data is
     ## added -> subtract minimal time
     t0 <- min(unlist(lapply(data, function(x) x$time)),na.rm=TRUE)
-    for ( i in 1:length(data) ) 
+    for ( i in 1:length(data) )
       data[[i]]$time <- data[[i]]$time - t0
-    
-    ## SET DATA ID 
+
+    ## SET DATA ID
     data$dataIDs <- names(data)
 
     data
@@ -569,7 +569,7 @@ readSynergyPlate <- function(files, data.ids,
 ## TODO: correct times for reading delay in platereader
 ##       - perhaps newer versions can give exact time for each
 #' Read BMG Optima/MARS vR3.01 R2 Plate Data
-#' 
+#'
 #' Parses date from a CSV file that can be exported
 #' from the MARS (vR3.01 R2) analysis software of BMG plate readers. Different
 #' measurements (eg. OD and fluorescence) are exported separately
@@ -585,12 +585,12 @@ readSynergyPlate <- function(files, data.ids,
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @seealso \code{\link{readPlateData}}, \code{\link{readBMG2Plate}}
 #' @export
-readBMGPlate <- function(files, data.ids, 
+readBMGPlate <- function(files, data.ids,
                          skip, sep=";", dec=".", verb=TRUE) {
 
     if ( missing(skip) )
       skip <- 5
-    
+
     data <- list()
     ## 1) PARSE ALL DATA FILES and collect the individual measurements
     for ( i in 1:length(files) ) {
@@ -623,7 +623,7 @@ readBMGPlate <- function(files, data.ids,
 
         ## remove first three rows from which info has been parsed
         dat <- dat[4:nrow(dat),]
-        
+
         ## GET ALL DATA
 
         ## data type identified by first column
@@ -641,7 +641,7 @@ readBMGPlate <- function(files, data.ids,
               cat(paste("\tloading data", dtyp, "\n"))
             tdat <- dat[dtype==dtyp,]
             dlst[[dtyp]] <- list(time=tdat[,1],
-                                 data=tdat[,2:ncol(tdat)])            
+                                 data=tdat[,2:ncol(tdat)])
         }
 
         ## handle temperature
@@ -665,7 +665,7 @@ readBMGPlate <- function(files, data.ids,
             ## TODO: check whether times are ok, but so far, BMG/Mars
             ## don't give different times
         }
-        
+
         ## rm from data list
         dlst <- dlst[names(dlst)!="Temperature"]
         ## .. and add to each other data (if it was present
@@ -680,14 +680,14 @@ readBMGPlate <- function(files, data.ids,
     ## should already look similar; each entry containing separate
     ## time and temperature vectors
 
-    ## SET DATA ID 
+    ## SET DATA ID
     data$dataIDs <- names(data)
 
     data
 }
 
 #' Read BMG Optima/MARS vXXX Plate Data
-#' 
+#'
 #' Parses date from a CSV file that can be exported
 #' from the MARS (vXXX) analysis software of BMG plate readers. Different
 #' measurements (eg. OD and fluorescence). Data exported from an earlier
@@ -704,9 +704,9 @@ readBMGPlate <- function(files, data.ids,
 #' @export
 readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
                           skip=6, sep=";", dec=",", verb=TRUE) {
-  
 
-  
+
+
   data <- list()
   ## 1) PARSE ALL DATA FILES and collect the individual measurements
   for ( i in 1:length(files) ) {
@@ -714,7 +714,7 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
     #id <- names(files)[i]
     if ( verb )
       cat(paste("Parsing file", file , "\n"))
-    
+
     ## parse header and data separately, to obtain
     ## clean numeric data
     hdat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
@@ -728,20 +728,20 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
       dat <- dat[,2:ncol(dat)-1,]
       hdat <- hdat[,2:ncol(hdat)-1,]
     }
-      
-    
+
+
     ## convert well info from column 1 to column names
     rownames(dat) <- sub("([A-Z])0","\\1",(dat[,1]))
     ## rm column 1 (well ID) and column 2 (sample ID, not used here)
     dat <- dat[,-(1:2)]
     hdat <- hdat[,-(1:2)]
-    
+
     ## GET ALL DATA
-    
+
     ## split data into  merged measurements, using header in row 1
     dtype <- trimws(sub("\\)","",sub("Raw Data \\(", "", hdat[1,])))
     types <- unique(dtype)
-    
+
     ## collect all data
     types <- unique(dtype)
     dlst <- rep(list(NA),length(types))
@@ -751,27 +751,27 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
         cat(paste("\tloading data", dtyp, "\n"))
       tdat <- dat[,dtype==dtyp]
       htdat <- hdat[,dtype==dtyp]
-      
+
       ## parse times in row 2
       hours <- as.numeric(sub(" h.*","",htdat[2,]))
       minutes <- as.numeric(sub(" min","",sub(".*h","",htdat[2,])))
       minutes[is.na(minutes)] <- 0
       times <- hours*3600 + minutes*60 # time in seconds
-      
+
       dlst[[dtyp]] <- list(time=times,
-                           data=t(as.matrix(tdat)))            
+                           data=t(as.matrix(tdat)))
     }
     ## append data
     data <- append(data,dlst)
   }
-  
+
   ## NOTE: at this stage, data between different plate-readers
   ## should already look similar; each entry containing separate
   ## time and temperature vectors
-  
-  ## SET DATA ID 
+
+  ## SET DATA ID
   data$dataIDs <- names(data)
-  
+
   data
 }
 
@@ -795,5 +795,5 @@ readbmg <- function(files, time.format=" %H h %M min", sep=";", dec=",", verb=TR
         iidx <- grep("Content", dat[,1])
 
     }
-    
+
 }

@@ -42,7 +42,7 @@ a table of well content descriptors, where the first column 'wells'
         maps the plate map to the data files.
 }
 \description{
-Parses a plate design file in CSV format. Rows and 
+Parses a plate design file in CSV format. Rows and
 columns should be named as in the corresponding plate reader data files.
 TODO: causes empty groups in getGroups; because separate causes empty
 strings in first field instead of NA

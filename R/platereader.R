@@ -13,7 +13,7 @@
 #'@section Dependencies: The package uses mostly functionality from R base,
 #' (graphics, grDevices, stats) but more functionality is available when
 #' \code{\link[grofit:grofit]{grofit}} is installed.
-#'@importFrom stats median sd qt approx spline filter predict coef
+#'@importFrom stats median sd qt approx spline filter predict coef na.omit
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
 #' abline lines points polygon box axis par text title mtext stripchart
 #'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off
@@ -416,14 +416,14 @@ getData <- function(data, ID, type="data", xrng, xid, verb=TRUE) {
     if ( length(xrng)==2 ) {
       if ( verb ) cat(paste("cutting data to x within", paste(xrng,collapse=":"), "\n"))
       filter <- xdat >= xrng[1] & xdat <= xrng[2]
-      return(data[[ID]][[type]][filter,]) 
+      return(data[[ID]][[type]][filter,])
     } else if ( length(xrng)==1 ) {
       if ( verb ) cat(paste("interpolating to", xrng, "\n"))
       if ( xrng > max(xdat, na.rm=TRUE) )
         stop("requested value: ",xrng,
              " is outside of data range (",paste(range(xdat),collapse=":"),
              "); sorry, can't extrapolate")
-      return(apply(data[[ID]][[type]], 2, function(y) 
+      return(apply(data[[ID]][[type]], 2, function(y)
         ifelse(sum(!is.na(y))<2, NA, approx(x=xdat, y=y, xout=xrng)$y)))
     }
   }
@@ -818,11 +818,11 @@ doseResponse <- function(map, wells, val,
 #' @param groups a grouping of wells, see \code{\link{getGroups}}
 #' @param rng x-axis range or a single point, for the latter the closest
 #' point will be selected or, if option \code{interpolate=TRUE} the
-#' value at \code{rng} will be interpolated using R base function 
+#' value at \code{rng} will be interpolated using R base function
 #' \code{\link[stats:approx]{approx}}
 #' @param xid the x-axis ID, if multiple x-axes are present
 #' @param yid the y-axis data to be grouped
-#' @param interpolate interpolate data at \code{rng} (if a single value, 
+#' @param interpolate interpolate data at \code{rng} (if a single value,
 #' see argument \code{rng})
 #' @param plot if TRUE a box-plot or bar-plot will be plotted
 #' @param type either "box" (default) or "bar" for box-plot or bar-plot
@@ -842,7 +842,7 @@ boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRU
     ## cut data to selected range (closest point if length(rng)==1)
     if ( length(rng)==2 ) {
       cdat <- cutData(data, xid=xid, xrng=rng)
-    } else {  
+    } else {
       if ( !interpolate ) {
         cdat <- cutData(data, xid=xid, xrng=rng)
         ## get the actual point if only one points was chosen
@@ -851,7 +851,7 @@ boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRU
         cdat <- data
         cdat[[yid]]$data <- t(as.matrix(getData(data, ID=yid, xrng=rng, xid=xid, verb=TRUE)))
       }
-    }    
+    }
     bdat <- rep(list(NA),length(groups))
     names(bdat) <- names(groups)
     for ( sg in 1:length(groups) )
@@ -1410,6 +1410,10 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
 #' @param ylim one y-axis limit range that will be used for all plotted data
 #' @param log plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
+#' @param axes axes numbers to draw, integers from 1 to 4 indicate the side
+#' to plot (argument \code{side} in function \code{\link[graphics:axis]{axis}});
+#' multiple y-axis values (multiple yids) are handled in argument\code{yaxis}
+#' @param yaxis the ID of maximally two data types for which y-axes are to be plotted
 #' @param legpos position of the well IDs on the plots
 #' @param add.legend add a legend for the plotted data types (see
 #' argument \code{yids}) in the last plotted well
@@ -1424,8 +1428,8 @@ interpolatePlateData <- function(data, xid, yids, n, xout) {
 viewPlate <- function(data, wells, wcols,
                       rows=toupper(letters[1:8]),cols=1:12,
                       xid, xscale=FALSE,xlim,
-                      yids, dtype="data", pcols, yscale=TRUE,ylims,ylim,log="",
-                      legpos="topleft",add.legend=TRUE) {
+                      yids, dtype="data", pcols, yscale=TRUE, ylims, ylim,
+                      log="", axes, yaxis="", legpos="topleft", add.legend=TRUE) {
 
     ## which wells to plot?
     if ( missing(wells) ) {
@@ -1523,6 +1527,12 @@ viewPlate <- function(data, wells, wcols,
         names(ylims) <- ptypes
     }
 
+    # y-axis: take first two data sets as y-axis it was requested
+    if ( !missing(axes) )
+      if ( any(c(2,4) %in% axes) )
+        if ( missing(yaxis) )
+          yaxis <- na.omit(ptypes[1:sum(c(2,4) %in% axes)])
+
     ## plot plate
     orig.par <- par(c("mfcol","mai")) # store parameters
     par(mfcol=c(length(rows),length(cols)),mai=rep(0,4))
@@ -1559,6 +1569,17 @@ viewPlate <- function(data, wells, wcols,
               else if ( !yscale & !xscale )
                 plot(x,y,axes=FALSE,
                      type="l",log=log,col=pcols[ptyp])
+              ## plot axes
+              if ( !missing(axes) )
+                for ( ax in axes ) {
+                  if ( ax%in%c(1,3))
+                    axis(ax)
+                  else if ( ax%in%c(2,4) )
+                    if ( ptyp%in%yaxis )
+                      axis(c(2,4)[which(yaxis==ptyp)],
+                           col.ticks = pcols[ptyp], col.axis=pcols[ptyp],
+                           tcl=-par("tcl"), mgp=c(0,-1.5,0))
+                }
               if ( k==1 ) {
                   box()
                   legend(legpos,well,text.col=wcols[well],bty="n")
@@ -1995,7 +2016,7 @@ viewGroups <- function(data, groups, groups2,
                     ##lty.mean <- i
                     ##cat(paste(sg, g2.col, "\n"))
                 }
-                
+
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
 

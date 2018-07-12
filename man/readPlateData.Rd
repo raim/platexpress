@@ -11,8 +11,8 @@ readPlateData(files, type, data.ids, verb = TRUE, interpolate = TRUE,
 \item{files}{list of one or more data files}
 
 \item{type}{pre-defined formats, as exported from platereaders; currently
-for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars 
-vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export 
+for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars
+vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export
 protocols!}
 
 \item{data.ids}{an optional sub-selection of data types in the input file,
@@ -35,10 +35,10 @@ a list of distinct measurement time-courses from one plate
 }
 \description{
 Parses platereader data files in CSV format, as exported by
-the plate reader software. Header IDs in the data file should match with 
+the plate reader software. Header IDs in the data file should match with
 IDs in the plate map, see \code{\link{readPlateMap}}. Pre-defined parsing
 functions exist for a couple of plate-readers. If your format is
-not implement, you can manually create simple data tables and use 
+not implement, you can manually create simple data tables and use
 the function \code{\link{readSimplePlate}}
 }
 \note{
@@ -46,8 +46,8 @@ The original data is all interpolated to a common/average 'master' time
 }
 \examples{
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(files=data.file, type="Synergy", 
-                     data.ids=c("600","YFP_50:500,535"), 
+raw <- readPlateData(files=data.file, type="Synergy",
+                     data.ids=c("600","YFP_50:500,535"),
                      dec=",", time.format="\%H:\%M:\%S")
 }
 \seealso{

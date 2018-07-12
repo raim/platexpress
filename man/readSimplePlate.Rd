@@ -23,7 +23,7 @@ as a list of strings}
 }
 \description{
 Read in simple platereader data with only one data type, time
-in the first column and data for all wells in the following columns, 
+in the first column and data for all wells in the following columns,
 where the column header must correspond to wells
 in \code{\link{readPlateMap}}.
 }
