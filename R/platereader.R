@@ -277,7 +277,7 @@ prettyData <- function(data, yids, colors) {
     xids <- data$xids
 
     if ( any(is.na(match(yids,names(data)))))
-      stop("IDs (yids) not found in data", paste(yids,sep=";"))
+      stop("IDs (yids) not found in data: ", paste(yids,sep=";"))
 
     ## re-order: xids first and IDs last
     data$dataIDs <- yids
@@ -419,6 +419,10 @@ getData <- function(data, ID, type="data", xrng, xid, verb=TRUE) {
       return(data[[ID]][[type]][filter,]) 
     } else if ( length(xrng)==1 ) {
       if ( verb ) cat(paste("interpolating to", xrng, "\n"))
+      if ( xrng > max(xdat, na.rm=TRUE) )
+        stop("requested value: ",xrng,
+             " is outside of data range (",paste(range(xdat),collapse=":"),
+             "); sorry, can't extrapolate")
       return(apply(data[[ID]][[type]], 2, function(y) 
         ifelse(sum(!is.na(y))<2, NA, approx(x=xdat, y=y, xout=xrng)$y)))
     }
