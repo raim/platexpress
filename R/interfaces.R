@@ -15,19 +15,25 @@
 #' Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
 #' plate data and layout, using established settings. Please see
 #' the documentation of package \code{\link[grofit:grofit]{grofit}}
-#' for details of the fitting procedure. This high-level wrapper used
+#' for details of the fitting procedure. This high-level wrapper uses
 #' \code{platexpress} functions \code{\link{data2grofit}},
 #' \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
-#' data, set parameters and call \code{\link[grofit:grofit]{grofit}},
-#' and then maps results (lag phase lambda, growth rate mu and capacity A)
-#' to the \code{plate} layout map, and \code{\link{addModel}} to add modelled
-#' prediction of the fitted data to the plate \code{data} object.
-#' The function returns a list containing the new \code{data} and \code{plate}
+#' data, to set parameters and to call \code{\link[grofit:grofit]{grofit}},
+#' and then uses \code{\link{grofitResults}} to map results (lag phase lambda,
+#' growth rate mu and capacity A) to the \code{plate} layout map, and
+#' \code{\link{addModel}} to add modelled prediction of the fitted data to the
+#' plate \code{data} object. All calculations
+#' are executed by the original functions of \code{\link[grofit:grofit]{grofit}}.
+#'
+#' The function returns a list containing the new \code{data} and \code{parameters}
 #' objects, as well as the original \code{grofit} result object.
+#' NOTE that the latter contains a lot more information on fit quality and
+#' run statistics. All run parameters of \code{\link[grofit:gcFit]{gcFit}}
+#' can be set via option \code{control}.
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
 #' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
-#' annotation
+#' annotation, and results will be returned in the same order of wells
 #' @param yid data ID of the data to be converted; default
 #' is to take the first of \code{data$dataIDs}
 #' @param amount name of a column in \code{plate} that provides a numeric
@@ -48,33 +54,37 @@
 #' if \code{control} is passed directly
 #' @param plot set to TRUE for plots even without \code{interactive} use
 #' @param interactive set to TRUE for interactive growth curve fitting
+#' @param verb print messages
 #' @param ... further arguments to \code{\link{grofit.2.control}}
 #'@export
 callGrofit <- function(data, plate, yid, amount,
                        fields=c("strain","medium","substance"),
                        control, model.type=c("richards","gompertz.exp","gompertz"),
-                       nboot.gc=100, plot=TRUE, interactive=FALSE, ...) {
+                       nboot.gc=100, plot=TRUE, interactive=FALSE, verb=TRUE, ...) {
 
-  ## generate input data, plate annotation
+  ## take the first data, if none was passed
+  if ( missing(yid) ) {
+    yid <- data$dataIDs[1]
+    if ( verb )
+      cat(paste("auto-selected data:", yid, "\n"))
+  }
+
+  ## generate input data, incl. plate annotation
   if ( missing(plate) )
-    gdat <- data2grofit(data)
+    gdat <- data2grofit(data, yid=yid, verb=verb)
   else {
     ## if a plate map is available, use this for annotation!
-
-    ## take the first data, if none was passed
-    if ( missing(yid) )
-      yid <- data$dataIDs[1]
 
     ## allow for full capabilities of grofit results: add dose
     if ( missing(amount) )
       gdat <- data2grofit(data, plate=plate, yid=yid,
                           wells=plate$well[!plate$blank],
-                          eid=fields, ...)
+                          eid=fields, verb=verb, ...)
     else
       gdat <- data2grofit(data, plate=plate, yid=yid,
                           wells=plate$well[!plate$blank],
                           dose=plate[[amount]][!plate$blank],
-                          eid=fields, ...)
+                          eid=fields, verb=verb, ...)
   }
   ## set grofit paraameters
   if ( missing(control) )
@@ -90,17 +100,16 @@ callGrofit <- function(data, plate, yid, amount,
 
   ## get grofit results
   params <- grofitResults(odfit)
-  colnames(params) <- paste0(yid,"_",colnames(params))
+  #colnames(params) <- paste0(yid,"_",colnames(params))
 
   ## ... add to layout data
   if ( !missing(plate) )
-    plate <- cbind.data.frame(plate, params[as.character(plate[,"well"]),])
-  else plate <- params
+    params <- params[as.character(plate[,"well"]),]
 
   ## add modelled data!
   data <- addModel(data, odfit, ID=paste0(yid,"_model"), col="#0000FF")
 
-  res <- list(data=data, plate=plate, fit=odfit)
+  res <- list(data=data, parameters=params, fit=odfit)
 
   res
 }
@@ -125,20 +134,24 @@ callGrofit <- function(data, plate, yid, amount,
 #' @param dose vector of doses in each well, used as the third column of
 #'  \code{\link[grofit:grofit]{grofit}} data annotation, where it can be used for
 #' dose-response calculations
+#' @param verb print messages
 #' @details Returns a simple list with two entries \code{time} and \code{data},
 #' as required for \code{\link[grofit:grofit]{grofit}}.
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose) {
+data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose, verb=TRUE) {
 
-    if ( missing(yid) )
+    if ( missing(yid) ) {
         yid <- data$dataIDs[1]
+        if ( verb )
+          cat(paste("auto-selected data:", yid, "\n"))
+    }
     dat <- data[[yid]]$data
     if ( missing(wells) )
         wells <- colnames(dat)
     else wells <- as.character(wells)
 
-    dat <- dat[,wells]
+    dat <- data.frame(dat[,wells])
 
     ## expand time to full matrix
     ## TODO: use internal time and non-interpolated data?
@@ -185,16 +198,16 @@ data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose) 
         dose <- rep(0,ncol(dat))
 
     ## construct grofit data
-    grdat <- data.frame(annotation,
-                        dose,
-                        t(dat))
+    grdat <- data.frame(annotation, dose, t(dat))
     list(time=time, data=grdat)
 }
 
 #' parse \code{\link[grofit:grofit]{grofit}} results
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
-#' of the main model parameters, for each well
+#' of the main model parameters, for each well, for both the
+#' "best" model found by `grofit` as well the `spline` and `bootstrap`
+#' fits.
 #' @param fit grofit object, the result of a call to
 #' \code{\link[grofit:gcFit]{gcFit}}
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
@@ -203,22 +216,14 @@ data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose) 
 grofitResults <- function(fit) {
     ## TODO: addModel, using
     ## this data to add modelled data to the plate data object
-    params <- fit$gcTable[,c("lambda.model","mu.model","A.model","used.model")]
+    params <- fit$gcTable[,c("lambda.model","mu.model","A.model","used.model",
+                             "lambda.spline","mu.spline","A.spline",
+                             "lambda.bt","mu.bt","A.bt")]
     colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
     rownames(params) <- as.character(fit$gcTable[,"TestId"])
-    data.frame(params)
+    data.frame(well=rownames(params), params)
 }
 
-#' Convenience function to quickly extract growth parameters
-#' from a \code{\link[grofit:grofit]{grofit}} results list.
-#' @param fit grofit object, the result of a call to
-#' \code{\link[grofit:gcFit]{gcFit}}
-#' or the \code{platexpress} version \code{\link{gcFit.2}}
-#' @param p list of parameters to obtain from the table \code{fits$gcTable}
-#' @export
-grofitGetParameters <- function(fit, p=c("TestId","AddId","lambda.model","mu.model","A.model","used.model")) {
-  fit$gcTable[,p]
-}
 
 #' add grofit models to plate data object
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
@@ -630,7 +635,7 @@ data2growthrates <- function(data, yid) {
 #' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
 #' @export
 growthratesResults <- function(fit) {
-  res <- as.matrix(growthrates::results(fit))
+  res <- data.frame(growthrates::results(fit), stringsAsFactors = FALSE)
   ## replace names to match names in other packages
   ## lambda, mu and A
   nms <- colnames(res)

@@ -4,7 +4,8 @@
 \alias{data2grofit}
 \title{interface to package \code{\link[grofit:grofit]{grofit}}}
 \usage{
-data2grofit(data, yid, min.time, max.time, wells, plate, eid, dose)
+data2grofit(data, yid, min.time, max.time, wells, plate, eid, dose,
+  verb = TRUE)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
@@ -29,6 +30,8 @@ annotation}
 \item{dose}{vector of doses in each well, used as the third column of
  \code{\link[grofit:grofit]{grofit}} data annotation, where it can be used for
 dose-response calculations}
+
+\item{verb}{print messages}
 }
 \description{
 \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to

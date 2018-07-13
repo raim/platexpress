@@ -13,7 +13,9 @@ or the \code{platexpress} version \code{\link{gcFit.2}}}
 }
 \description{
 parses the output of \code{\link{gcFit.2}} into a table
-of the main model parameters, for each well
+of the main model parameters, for each well, for both the
+"best" model found by `grofit` as well the `spline` and `bootstrap`
+fits.
 }
 \seealso{
 \code{\link{data2grofit}}, \code{\link{growthratesResults}}

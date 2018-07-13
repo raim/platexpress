@@ -6,14 +6,15 @@
 \usage{
 callGrofit(data, plate, yid, amount, fields = c("strain", "medium",
   "substance"), control, model.type = c("richards", "gompertz.exp",
-  "gompertz"), nboot.gc = 100, plot = TRUE, interactive = FALSE, ...)
+  "gompertz"), nboot.gc = 100, plot = TRUE, interactive = FALSE,
+  verb = TRUE, ...)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
 \item{plate}{plate layout map, see \code{\link{readPlateMap}}, columns
 of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
-annotation}
+annotation, and results will be returned in the same order of wells}
 
 \item{yid}{data ID of the data to be converted; default
 is to take the first of \code{data$dataIDs}}
@@ -43,19 +44,28 @@ if \code{control} is passed directly}
 
 \item{interactive}{set to TRUE for interactive growth curve fitting}
 
+\item{verb}{print messages}
+
 \item{...}{further arguments to \code{\link{grofit.2.control}}}
 }
 \description{
 Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
 plate data and layout, using established settings. Please see
 the documentation of package \code{\link[grofit:grofit]{grofit}}
-for details of the fitting procedure. This high-level wrapper used
+for details of the fitting procedure. This high-level wrapper uses
 \code{platexpress} functions \code{\link{data2grofit}},
 \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
-data, set parameters and call \code{\link[grofit:grofit]{grofit}},
-and then maps results (lag phase lambda, growth rate mu and capacity A)
-to the \code{plate} layout map, and \code{\link{addModel}} to add modelled
-prediction of the fitted data to the plate \code{data} object.
-The function returns a list containing the new \code{data} and \code{plate}
+data, to set parameters and to call \code{\link[grofit:grofit]{grofit}},
+and then uses \code{\link{grofitResults}} to map results (lag phase lambda,
+growth rate mu and capacity A) to the \code{plate} layout map, and
+\code{\link{addModel}} to add modelled prediction of the fitted data to the
+plate \code{data} object. All calculations
+are executed by the original functions of \code{\link[grofit:grofit]{grofit}}.
+}
+\details{
+The function returns a list containing the new \code{data} and \code{parameters}
 objects, as well as the original \code{grofit} result object.
+NOTE that the latter contains a lot more information on fit quality and
+run statistics. All run parameters of \code{\link[grofit:gcFit]{gcFit}}
+can be set via option \code{control}.
 }
