@@ -631,15 +631,24 @@ data2growthrates <- function(data, yid) {
 #' of the main model parameters, for each well
 #' @param fit growthrates object, the result of a call to
 #' \code{\link[grofit:gcFit]{gcFit}}
+#' @param scale.richards if the \code{beta} parameter from Richard's model is present,
+#' multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
 #' @export
-growthratesResults <- function(fit) {
+growthratesResults <- function(fit, scale.richards=TRUE) {
   res <- data.frame(growthrates::results(fit), stringsAsFactors = FALSE)
   ## replace names to match names in other packages
   ## lambda, mu and A
   nms <- colnames(res)
   nms <- sub("K","A",sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms))))
   colnames(res) <- nms
+
+  if ( scale.richards & "beta" %in% nms ) {
+    ## NOTE/TODO: scaling mu from richards?
+    res[,"mumax"] <- res[,"mu"]
+    res[,"mu"] <- res[,"mu"] * res[,"beta"]
+  }
+
   data.frame(res)
 }

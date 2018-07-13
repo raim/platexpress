@@ -4,11 +4,14 @@
 \alias{growthratesResults}
 \title{parse results \code{\link[growthrates:growthrates]{growthrates}}}
 \usage{
-growthratesResults(fit)
+growthratesResults(fit, scale.richards = TRUE)
 }
 \arguments{
 \item{fit}{growthrates object, the result of a call to
-\code{\link[grofit:gcFit]{gcFit}}
+\code{\link[grofit:gcFit]{gcFit}}}
+
+\item{scale.richards}{if the \code{beta} parameter from Richard's model is present,
+multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})
 or the \code{platexpress} version \code{\link{gcFit.2}}}
 }
 \description{
