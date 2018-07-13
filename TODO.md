@@ -5,9 +5,7 @@
 to modern R formats (tidyr, etc.) and use with growthrates
 * viewGroups: integrate group colors and lty selection
  [or move all to ggplot) 
-* boxData: interpolate instead of just cutting closest point
 * integrate smoothing functions for BMG2
-* amount parsing: add missing .
 
 ## LIBRARY
 ### fix example data to reflect current use
