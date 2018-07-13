@@ -630,11 +630,11 @@ data2growthrates <- function(data, yid) {
 #' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
 #' @export
 growthratesResults <- function(fit) {
-  res <- as.matrix(growthrates::coef(fit))
+  res <- as.matrix(growthrates::results(fit))
   ## replace names to match names in other packages
   ## lambda, mu and A
   nms <- colnames(res)
-  nms <- sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms)))
+  nms <- sub("K","A",sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms))))
   colnames(res) <- nms
   data.frame(res)
 }
