@@ -14,7 +14,7 @@ A few data conversion routines allow to interface other R
 packages for analysis of microbial growth such as
 [grofit](https://cran.r-project.org/web/packages/grofit/index.html) and
 [growthrates](https://cran.r-project.org/web/packages/growthrates/index.html),
-and display their esults within `platexpress`.
+and plot results within `platexpress`.
 
 Partial interfaces to 
 [cellGrowth](https://bioconductor.org/packages/release/bioc/html/cellGrowth.html) exist, 
