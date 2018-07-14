@@ -2,19 +2,23 @@
 % Please edit documentation in R/interfaces.R
 \name{grpredict}
 \alias{grpredict}
-\title{predict hack for  \pkg{growthrates} fits}
+\title{`predict' hack for  \pkg{growthrates} fits}
 \usage{
 grpredict(fit, time)
 }
 \arguments{
-\item{fit}{result from \pkg{growthrates} fitting functions}
+\item{fit}{fit object from \pkg{growthrates} fitting functions, either
+a single fit (`fit_' functions) or a list of fits from batch functions
+(`all_' functions)}
 
 \item{time}{the time points at which growth data is to be predicted}
 }
 \description{
 \pkg{growthrates} provides several
-functions to fit growth rates, but the result objects have currently
+functions to fit growth rates, but their result objects have currently
 slighly different structures/interfaces. To obtain relevant data from
 \code{\link[growthrates:fit_easylinear]{fit_easylinear}} and
-\code{\link[growthrates:fit_spline]{fit_spline}}.
+\code{\link[growthrates:fit_spline]{fit_spline}} the fitted
+functions and parameters have to be directly used instead of just
+calling \code{\link[growthrates:predict]{predict}} methods.
 }

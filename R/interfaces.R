@@ -231,14 +231,10 @@ grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.mod
 }
 
 
-#' add grofit models to plate data object
-#' @param data a platexpress data set, see \code{\link{readPlateData}}
-#' @param fit grofit object, the result of a call to \code{\link{gcFit.2}}
-#' @param ID ID for the new data set
-#' @param ... arguments to \code{\link{addData}}
-#' @export
-addModel <- function(data, fit, ID="model", ...) {
 
+## adds predict data from grofit to plate data; called from addModel
+addGrofitModel <- function(data, fit, ID="model", ... ) {
+    
     testid <- "TestId" # this requires wells being used as TestId in grofit
 
     ## copy first existing data set
@@ -251,14 +247,15 @@ addModel <- function(data, fit, ID="model", ...) {
         id <- colnames(newdat)[i]
         idx <- which(as.character(fit$gcTable[,testid])==id)
         if ( !length(idx) ) next
-        #cat(paste(id, fit$gcTable[idx,testid],fit$gcFittedModels[[idx]]$gcID[1],"\n"))
         if ( !fit$gcFittedModels[[idx]]$fitFlag ) next
         newdat[,i] <- stats::predict(fit$gcFittedModels[[idx]]$nls,
                                      newdata=data.frame(time=data$Time))
         models[i] <- fit$gcFittedModels[[idx]]$model
     }
+    ## TODO: use models info somehow?
     ## add and return
-    addData(data, ID, newdat, processing="grofit prediction", ...)
+    addData(data=data, ID=ID, dat= newdat,
+            processing="grofit prediction", ...)
 }
 
 #' wrapper of grofit function \code{\link[grofit:grofit.control]{grofit.control}}
@@ -606,7 +603,7 @@ fitCellGrowths.2 = function(data, yid, xid, wells, ...) {
     fits
 }
 
-### growthrates interface
+### growthrates INTERFACE
 
 ## TODO: wrapper to call all_easylinearfits etc?
 
@@ -659,14 +656,18 @@ growthratesResults <- function(fit, scale.richards=TRUE) {
   data.frame(res)
 }
 
-#' predict hack for  \pkg{growthrates} fits
+#' `predict' hack for  \pkg{growthrates} fits
 #'
 #' \pkg{growthrates} provides several
-#' functions to fit growth rates, but the result objects have currently
+#' functions to fit growth rates, but their result objects have currently
 #' slighly different structures/interfaces. To obtain relevant data from
 #' \code{\link[growthrates:fit_easylinear]{fit_easylinear}} and
-#' \code{\link[growthrates:fit_spline]{fit_spline}}.
-#' @param fit result from \pkg{growthrates} fitting functions
+#' \code{\link[growthrates:fit_spline]{fit_spline}} the fitted
+#' functions and parameters have to be directly used instead of just
+#' calling \code{\link[growthrates:predict]{predict}} methods.
+#' @param fit fit object from \pkg{growthrates} fitting functions, either
+#' a single fit (`fit_' functions) or a list of fits from batch functions
+#' (`all_' functions)
 #' @param time the time points at which growth data is to be predicted
 #' @export
 grpredict <- function(fit, time) {
@@ -674,13 +675,18 @@ grpredict <- function(fit, time) {
     ## NOTE: predict not implemented for easylinear and returning
     ## the full spline fit for smooth.spline
 
+    ## call recursively for lists of fits
+    if ( length(grep("^multiple_",class(fit)))==1 ) 
+        return(lapply(fit@fits, grpredict, time=time))
+
     if ( class(fit)=="easylinear_fit" ) {
 
         xy <- fit@FUN(time, fit@par)[,1:2] 
         ## NOTE: easylinear requires to add the lag phase
         xy[,1] <- xy[,1] + coef(fit)["lag"]
-        ## interpolate to requested time
-        xy <- approx(x=xy[,1], y=xy[,2], xout=time)
+        ## interpolate to requested time and convert to matrix
+        xy <- matrix(unlist(approx(x=xy[,1], y=xy[,2], xout=time)),
+                            ncol=2, byrow=FALSE)
 
     } else if ( class(fit)=="smooth.spline_fit" ) {
 
@@ -688,7 +694,56 @@ grpredict <- function(fit, time) {
         xy <- fit@FUN(time, fit@par)[,1:2] 
         
     } else {
-        xy <- growthrates::predict(fit, newdata=list(time=time))
+        xy <- growthrates::predict(fit, newdata=list(time=time))[,1:2]
     }
     xy
+}
+
+
+## adds predict data from growthrates to plate data; called from addModel
+addGrowthratesModel <- function(data, fit, ID="model", ... ) {
+
+    ## global time and new data matrix
+    time <- data[[data$xids[1]]]
+
+    ## get results
+    lst <- grpredict(fit, time=time)
+
+    ## convert to matrix
+    lst <- lapply(lst, function(x) x[,2])
+    newdat <- matrix(unlist(lst), ncol = length(lst), byrow = FALSE)
+    colnames(newdat) <- names(lst)
+
+    ## add and return
+    addData(data=data, ID=ID, dat= newdat,
+            processing=paste("growthrates",class(fit),"prediction"), ...)
+
+} 
+
+
+### COMMON INTERFACES for growthrates/grofit packages
+
+## TODO: more common functions for all packages
+## use function with() to pass specific arguments
+## * convertData with arguments grofit or growthrates
+## * fitResults to get results
+
+#' Add \pkg{grofit}/\pkg{growthrates} fits to plate data object
+#'
+#' 
+#' @param data a platexpress data set, see \code{\link{readPlateData}}
+#' @param fit result object from calls to batch model fitting functions
+#' from \pkg{grofit} or \pkg{growthrates}, ie. result of a call to
+#' \code{\link{gcFit.2}} or any of \pkg{growthrates} batch functions (`all_')
+#' @param ID ID for the new data set
+#' @param ... arguments to \code{\link{addData}} (eg. \code{col} for
+#' color selection)
+#' @export
+addModel <- function(data, fit, ID="model", ...) {
+
+    if ( class(fit)=="gcFit" )
+        return(addGrofitModel(data=data, fit=fit, ID=ID, ...))
+    else if ( length(grep("^multiple_",class(fit)))==1 )
+        return(addGrowthratesModel(data=data, fit=fit, ID=ID, ...))
+
 }
