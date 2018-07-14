@@ -1578,11 +1578,18 @@ viewPlate <- function(data, wells, wcols,
                   if ( ax%in%c(1,3))
                     axis(ax)
                   else if ( ax%in%c(2,4) )
-                    if ( ptyp%in%yaxis )
-                      axis(c(2,4)[which(yaxis==ptyp)],
-                           col.ticks = pcols[ptyp], col.axis=pcols[ptyp],
-                           tcl=-par("tcl"), mgp=c(0,-1.5,0))
+                      if ( ptyp%in%yaxis ) {
+                          ## TODO: clean this mess!
+                          if ( sum(c(2,4)%in%axes)==1 )
+                              axs <- c(2,4)[which(c(2,4)%in%axes)]
+                          else
+                              axs <- c(2,4)[which(yaxis==ptyp)]
+                          axis(axs,
+                               col.ticks = pcols[ptyp], col.axis=pcols[ptyp],
+                               tcl=-par("tcl"), mgp=c(0,-1.5,0))
+                      }
                 }
+              
               if ( k==1 ) {
                   box()
                   legend(legpos,well,text.col=wcols[well],bty="n")
