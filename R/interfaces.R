@@ -655,3 +655,37 @@ growthratesResults <- function(fit, scale.richards=TRUE) {
 
   data.frame(res)
 }
+
+#' predict hack for  \pkg{growthrates} fits
+#'
+#' \pkg{growthrates} provides several
+#' functions to fit growth rates, but the result objects have currently
+#' slighly different structures/interfaces. To obtain relevant data from
+#' \code{\link[growthrates:fit_easylinear]{fit_easylinear}} and
+#' \code{\link[growthrates:fit_spline]{fit_spline}}.
+#' @param fit result from \pkg{growthrates} fitting functions
+#' @param time the time points at which growth data is to be predicted
+#' @export
+grpredict <- function(fit, time) {
+    
+    ## NOTE: predict not implemented for easylinear and returning
+    ## the full spline fit for smooth.spline
+
+    if ( class(fit)=="easylinear_fit" ) {
+
+        xy <- fit@FUN(time, fit@par)[,1:2] 
+        ## NOTE: easylinear requires to add the lag phase
+        xy[,1] <- xy[,1] + coef(fit)["lag"]
+        ## interpolate to requested time
+        xy <- approx(x=xy[,1], y=xy[,2], xout=time)
+
+    } else if ( class(fit)=="smooth.spline_fit" ) {
+
+        ## NOTE: smooth.spline predict returns full spline fit as log(y)
+        xy <- fit@FUN(time, fit@par)[,1:2] 
+        
+    } else {
+        xy <- growthrates::predict(fit, newdata=list(time=time))
+    }
+    xy
+}
