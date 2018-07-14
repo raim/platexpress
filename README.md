@@ -60,7 +60,7 @@ experiments. Here, we take the example file that ships with the
 
 ```R
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
-plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
+plate <- readPlateMap(file = plate.file, blank.id = "blank",fsep = "\n", fields = c("strain","samples"))
 ```
 
 ... and parse the data, as exported from platereader "Synergy Mx" 
@@ -68,7 +68,7 @@ software in the shipped example file:
 
 ```R
 data.file <- system.file("extdata", "AP12.csv", package = "platexpress")
-raw <- readPlateData(file=data.file, type="Synergy", data.ids=c("600","YFP_50:500,535"), time.format="%H:%M:%S", time.conversion=1/3600)
+raw <- readPlateData(file = data.file, type = "Synergy", data.ids = c("600","YFP_50:500,535"), time.format = "%H:%M:%S", time.conversion = 1/3600)
 ```
 
 Here we include some specifics for this data set. First, we need to
@@ -101,8 +101,8 @@ viewPlate(raw)
 be safe, let's also skip it from the plate layout map.
 
 ```R
-raw <- skipWells(raw, skip="A9")
-plate <- skipWells(plate, skip="A9")
+raw <- skipWells(raw, skip = "A9")
+plate <- skipWells(plate, skip = "A9")
 ```
 
 ... correct for blank well measurements (defined in the plate layout
@@ -111,15 +111,15 @@ rows (A, B and C) and columns (1-9):
 
 ```R
 data <- correctBlanks(data=raw, plate=plate)
-viewPlate(data, rows=c("A","B","C"),cols=1:9)
+viewPlate(data, rows = c("A","B","C"), cols = 1:9)
 ```
 
 Now the raw data processing is done, so let's assign more informative IDs 
 and select nicer colors, as R RGB strings:
 
 ```R
-data <- prettyData(data=raw,yids=c(OD="600",YFP="YFP_50:500,535"), 
-                   colors=c(OD="#000000",YFP=wavelength2RGB(690)))
+data <- prettyData(data = raw,yids = c(OD="600",YFP="YFP_50:500,535"), 
+                   colors= c(OD="#000000",YFP=wavelength2RGB(690)))
 ```
 
 Note that helper functions `showSpectrum()` and `findWavelength(1)`
@@ -137,15 +137,22 @@ the thick line is the mean, and optionally, you can keep also
 the original data in the plot (by choosing a lwd.orig > 0):
 
 ```R
-groups <- getGroups(plate, by="strain")
-viewGroups(data,groups=groups,lwd.orig=0,nrow=1)
+groups <- getGroups(plate, by = "strain")
+viewGroups(data, groups = groups, lwd.orig = 0, nrow = 1)
 ```
 or view all in one
 ```R
-viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
+viewGroups(data, groups2 = groups, lwd.orig = 0, nrow = 1)
 ```
 
 ### 4) Advanced analyses
+
+#### Fit Growth Rate Models
+
+TODO:
+
+* grofit and growthrates interfaces
+
 
 #### Correct For Lag Phase
 
@@ -163,8 +170,8 @@ generating an R vector with the well ID as names.
 ```R
 lag <- rep(3, length(groups$EVC))
 names(lag) <- groups$EVC
-data <- shiftData(data, lag=lag)
-viewGroups(data,groups2=groups,lwd.orig=0,nrow=1)
+data <- shiftData(data, lag = lag)
+viewGroups(data, groups2 = groups, lwd.orig = 0, nrow = 1)
 ```
 Great! Now the OD curves are aligned, and they seem to be very similar,
 allowing a direct comparison of fluorescence over time.
@@ -172,17 +179,22 @@ allowing a direct comparison of fluorescence over time.
 #### Generate Box- or Barplots 
 
 For some applications you may want to boil data down to core messages. 
-Diverse further functions allow to further summarize and visualize results, 
+Various functions allow to further summarize and visualize results, 
 e.g., 
 
 ```R
-boxData(data,rng=7,groups=groups,yid="YFP")
-boxData(data,rng=7,groups=groups,yid="YFP",type="bar")
+boxData(data, rng = 7, groups = groups, yid = "YFP")
+boxData(data, rng = 7, groups = groups, yid = "YFP", type = "bar")
 ```
 
 gives you boxplots or barplots (with standard errors or 95% confidence
 intervals as errors bars) of the selected data at 7 h (or the time-point
-closest to 7h).
+closest to 7h with option `interpolate=FALSE`).
+
+TODO:
+
+* dose-response curves from platemap annotation
+
 
 #### Retrieve and Process Data
 
@@ -193,8 +205,8 @@ You can `getData` and `addData`, e.g., to calculate YFP/OD:
 ```R
 yfp <- getData(data, "YFP")
 od <- getData(data, "OD")
-data <- addData(data, dat=yfp/od, ID="YFP/OD", col=wavelength2RGB(459))
-viewGroups(data,groups2=groups,lwd.orig=0,yids=c("OD","YFP/OD"))
+data <- addData(data, dat = yfp/od, ID = "YFP/OD", col = wavelength2RGB(459))
+viewGroups(data, groups2 = groups, lwd.orig = 0, yids = c("OD","YFP/OD"))
 ```
 
 #### Interpolate to new x-axis
@@ -207,12 +219,12 @@ can interpolate data to a common value. This generates a new data
 structure, and the two should not be mixed up:
 
 ```R
-od.data <- interpolatePlateData(data, xid="OD")
-viewGroups(od.data,groups2=groups,yids=c("YFP","YFP/OD"))
+od.data <- interpolatePlateData(data, xid = "OD")
+viewGroups(od.data, groups2 = groups, yids = c("YFP","YFP/OD"))
 ```
 
 And now we are ready for nice compact result figure:
 
 ```R
-boxData(od.data,rng=0.7,groups=groups,yid="YFP/OD",type="bar")
+boxData(od.data, rng = 0.7, groups = groups, yid = "YFP/OD", type = "bar")
 ```
