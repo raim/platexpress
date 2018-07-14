@@ -925,10 +925,14 @@ boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRU
 #' @export
 skipWells <- function(data, skip) {
 
+    ## TODO: use classes
+    
     if ( "dataIDs" %in% names(data) ) ## rm from data
       for ( id in data$dataIDs ) {
           wells <- colnames(data[[id]]$data)
-          data[[id]]$data <- data[[id]]$data[,-which(wells%in%skip),drop=FALSE]
+          if ( any(wells%in%skip) )
+              data[[id]]$data <- data[[id]]$data[,-which(wells%in%skip),
+                                                 drop=FALSE]
       }
     else if ( !is.null(dim(data)) ) ## rm from plate layout map
         ##data[match(skip,data[,"well"]),2:ncol(data)] <- NA

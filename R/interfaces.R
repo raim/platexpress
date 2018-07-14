@@ -234,7 +234,7 @@ grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.mod
 
 ## adds predict data from grofit to plate data; called from addModel
 addGrofitModel <- function(data, fit, ID="model", ... ) {
-    
+
     testid <- "TestId" # this requires wells being used as TestId in grofit
 
     ## copy first existing data set
@@ -671,19 +671,19 @@ growthratesResults <- function(fit, scale.richards=TRUE) {
 #' @param time the time points at which growth data is to be predicted
 #' @export
 grpredict <- function(fit, time) {
-    
+
     ## NOTE: predict not implemented for easylinear and returning
     ## the full spline fit for smooth.spline
 
     ## call recursively for lists of fits
-    if ( length(grep("^multiple_",class(fit)))==1 ) 
+    if ( length(grep("^multiple_",class(fit)))==1 )
         return(lapply(fit@fits, grpredict, time=time))
 
     if ( class(fit)=="easylinear_fit" ) {
 
-        xy <- fit@FUN(time, fit@par)[,1:2] 
+        xy <- fit@FUN(time, fit@par)[,1:2]
         ## NOTE: easylinear requires to add the lag phase
-        xy[,1] <- xy[,1] + coef(fit)["lag"]
+        xy[,1] <- xy[,1] + growthrates::coef(fit)["lag"]
         ## interpolate to requested time and convert to matrix
         xy <- matrix(unlist(approx(x=xy[,1], y=xy[,2], xout=time)),
                             ncol=2, byrow=FALSE)
@@ -691,8 +691,8 @@ grpredict <- function(fit, time) {
     } else if ( class(fit)=="smooth.spline_fit" ) {
 
         ## NOTE: smooth.spline predict returns full spline fit as log(y)
-        xy <- fit@FUN(time, fit@par)[,1:2] 
-        
+        xy <- fit@FUN(time, fit@par)[,1:2]
+
     } else {
         xy <- growthrates::predict(fit, newdata=list(time=time))[,1:2]
     }
@@ -718,7 +718,7 @@ addGrowthratesModel <- function(data, fit, ID="model", ... ) {
     addData(data=data, ID=ID, dat= newdat,
             processing=paste("growthrates",class(fit),"prediction"), ...)
 
-} 
+}
 
 
 ### COMMON INTERFACES for growthrates/grofit packages
@@ -730,7 +730,7 @@ addGrowthratesModel <- function(data, fit, ID="model", ... ) {
 
 #' Add \pkg{grofit}/\pkg{growthrates} fits to plate data object
 #'
-#' 
+#'
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param fit result object from calls to batch model fitting functions
 #' from \pkg{grofit} or \pkg{growthrates}, ie. result of a call to
