@@ -11,7 +11,7 @@ doseResponse.box(map, wells, val, amount = "amount",
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some
 calculated value in column \code{val},
-eg. results from \code{\link[grofit:grofit]{grofit}}}
+eg. results from \pkg{grofit} or \pkg{growthrates}}
 
 \item{wells}{a list of well IDs to be used in the plot}
 

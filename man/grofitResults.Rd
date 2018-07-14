@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{grofitResults}
 \alias{grofitResults}
-\title{parse \code{\link[grofit:grofit]{grofit}} results}
+\title{parse \pkg{grofit} results}
 \usage{
 grofitResults(fit, p = c("lambda.model", "mu.model", "A.model", "used.model",
   "lambda.spline", "mu.spline", "A.spline", "lambda.bt", "mu.bt", "A.bt"))

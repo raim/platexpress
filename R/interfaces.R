@@ -10,20 +10,20 @@
 ## fit <- gcFit.2(grdat$time, grdat$data)
 
 ### HIGH-LEVEL WRAPPER FOR GROFIT
-#' high-level wrapper for \code{\link[grofit:grofit]{grofit}}
+#' high-level wrapper for \pkg{grofit}
 #'
-#' Calls \code{\link[grofit:grofit]{grofit}} directly from \code{platexpress}
+#' Calls \pkg{grofit} directly from \code{platexpress}
 #' plate data and layout, using established settings. Please see
-#' the documentation of package \code{\link[grofit:grofit]{grofit}}
+#' the documentation of package \pkg{grofit}
 #' for details of the fitting procedure. This high-level wrapper uses
 #' \code{platexpress} functions \code{\link{data2grofit}},
 #' \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
-#' data, to set parameters and to call \code{\link[grofit:grofit]{grofit}},
+#' data, to set parameters and to call \pkg{grofit},
 #' and then uses \code{\link{grofitResults}} to map results (lag phase lambda,
 #' growth rate mu and capacity A) to the \code{plate} layout map, and
 #' \code{\link{addModel}} to add modelled prediction of the fitted data to the
 #' plate \code{data} object. All calculations
-#' are executed by the original functions of \code{\link[grofit:grofit]{grofit}}.
+#' are executed by the original functions of \pkg{grofit}.
 #'
 #' The function returns a list containing the new \code{data} and \code{parameters}
 #' objects, as well as the original \code{grofit} result object.
@@ -32,14 +32,14 @@
 #' can be set via option \code{control}.
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
-#' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+#' of this map can be converted to \pkg{grofit} data
 #' annotation, and results will be returned in the same order of wells
 #' @param yid data ID of the data to be converted; default
 #' is to take the first of \code{data$dataIDs}
 #' @param amount name of a column in \code{plate} that provides a numeric
 #' 'amount', to be used as a 'dose' annotation in grofit
 #' @param fields column IDs in the plate layout map to be used for
-#' \code{\link[grofit:grofit]{grofit}} data annotation; if \code{plate} is not
+#' \pkg{grofit} data annotation; if \code{plate} is not
 #' missing at least 1 column is required
 #' @param control an object of class \code{grofit.control} with an additional
 #' parameter \code{plot}, as provided by the \code{platexpress} function
@@ -118,10 +118,10 @@ callGrofit <- function(data, plate, yid, amount,
 }
 
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
-#' interface to package \code{\link[grofit:grofit]{grofit}}
+#' interface to package \pkg{grofit}
 #'
 #' \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
-#' \code{\link[grofit:grofit]{grofit}} data format
+#' \pkg{grofit} data format
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param yid data ID of the data to be converted for grofit, from \code{data$dataIDs}
 #' @param min.time minimal time of the data to be used
@@ -129,17 +129,17 @@ callGrofit <- function(data, plate, yid, amount,
 #' @param wells column IDs of the data set to use, if missing all wells
 #' are used
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
-#' of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+#' of this map can be converted to \pkg{grofit} data
 #' annotation
 #' @param eid column IDs in the plate layout map to be used for
-#' \code{\link[grofit:grofit]{grofit}} data annotation; if missing but
+#' \pkg{grofit} data annotation; if missing but
 #' \code{plate} is present, the columns 2 and 3 are used
 #' @param dose vector of doses in each well, used as the third column of
-#'  \code{\link[grofit:grofit]{grofit}} data annotation, where it can be used for
+#'  \pkg{grofit} data annotation, where it can be used for
 #' dose-response calculations
 #' @param verb print messages
 #' @details Returns a simple list with two entries \code{time} and \code{data},
-#' as required for \code{\link[grofit:grofit]{grofit}}.
+#' as required for \pkg{grofit}.
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose, verb=TRUE) {
@@ -205,7 +205,7 @@ data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose, 
     list(time=time, data=grdat)
 }
 
-#' parse \code{\link[grofit:grofit]{grofit}} results
+#' parse \pkg{grofit} results
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well, for both the
@@ -279,9 +279,9 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 #' hack of grofit function \code{\link[grofit:gcFit]{gcFit}} to allow plotting
 #' even when option \code{interative==FALSE}
 #' @param time a matrix of measurment times for each well as required by
-#' \code{\link[grofit:grofit]{grofit}}, provided by \code{\link{data2grofit}}
+#' \pkg{grofit}, provided by \code{\link{data2grofit}}
 #' @param data the data as produced by \code{\link{data2grofit}}
-#' @param control the \code{\link[grofit:grofit]{grofit}} control structure, see
+#' @param control the \pkg{grofit} control structure, see
 #' \code{\link[grofit:grofit]{grofit.control}}, but with an additional
 #' argument "plot" (TRUE or FALSE), allowing to plot individual fits
 #' even if interactive is set to FALSE.
@@ -610,10 +610,10 @@ fitCellGrowths.2 = function(data, yid, xid, wells, ...) {
 
 ## TODO: wrapper to call all_easylinearfits etc?
 
-#' interface to package \code{\link[growthrates:growthrates]{growthrates}}
+#' interface to package \pkg{growthrates}
 #'
 #' converts \code{platexpress} data for
-#' use with \code{\link[growthrates:growthrates]{growthrates}}
+#' use with \pkg{growthrates}
 #' @param data platexpress data set, see \code{\link{readPlateData}}
 #' @param yid data ID of the data to be converted for growthrates, from
 #' \code{data$dataIDs}
@@ -631,7 +631,7 @@ data2growthrates <- function(data, yid) {
   df
 }
 
-#' parse results \code{\link[growthrates:growthrates]{growthrates}}
+#' parse fitted parameters from package \pkg{growthrates}
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well

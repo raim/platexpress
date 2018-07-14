@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{growthratesResults}
 \alias{growthratesResults}
-\title{parse results \code{\link[growthrates:growthrates]{growthrates}}}
+\title{parse fitted parameters from package \pkg{growthrates}}
 \usage{
 growthratesResults(fit, scale.richards = TRUE)
 }

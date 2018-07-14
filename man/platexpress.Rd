@@ -10,13 +10,13 @@ The platexpress package provides a quick & easy interface to
 inspect microbial growth & gene expression data as measured in typical
 platereaders ("96-well plates") or other parallel growth systems.
 Interfaces to existing packages allow growth model fitting
-(currently only \code{\link[grofit:grofit]{grofit}}, and
+(currently \pkg{grofit}, \pkg{growthrates}, and
 partially/untested \code{\link[cellGrowth:fitCellGrowth]{cellGrowth}}.)
 }
 \section{Dependencies}{
  The package uses mostly functionality from R base,
 (graphics, grDevices, stats) but more functionality is available when
-\code{\link[grofit:grofit]{grofit}} is installed.
+\pkg{grofit} or \pkg{growthrates} are installed.
 }
 
 \author{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{data2grofit}
 \alias{data2grofit}
-\title{interface to package \code{\link[grofit:grofit]{grofit}}}
+\title{interface to package \pkg{grofit}}
 \usage{
 data2grofit(data, yid, min.time, max.time, wells, plate, eid, dose,
   verb = TRUE)
@@ -20,26 +20,26 @@ data2grofit(data, yid, min.time, max.time, wells, plate, eid, dose,
 are used}
 
 \item{plate}{plate layout map, see \code{\link{readPlateMap}}, columns
-of this map can be converted to \code{\link[grofit:grofit]{grofit}} data
+of this map can be converted to \pkg{grofit} data
 annotation}
 
 \item{eid}{column IDs in the plate layout map to be used for
-\code{\link[grofit:grofit]{grofit}} data annotation; if missing but
+\pkg{grofit} data annotation; if missing but
 \code{plate} is present, the columns 2 and 3 are used}
 
 \item{dose}{vector of doses in each well, used as the third column of
- \code{\link[grofit:grofit]{grofit}} data annotation, where it can be used for
+ \pkg{grofit} data annotation, where it can be used for
 dose-response calculations}
 
 \item{verb}{print messages}
 }
 \description{
 \code{\link{data2grofit}} : converts \code{\link{platexpress}} data to
-\code{\link[grofit:grofit]{grofit}} data format
+\pkg{grofit} data format
 }
 \details{
 Returns a simple list with two entries \code{time} and \code{data},
-as required for \code{\link[grofit:grofit]{grofit}}.
+as required for \pkg{grofit}.
 }
 \author{
 Rainer Machne \email{raim@tbi.univie.ac.at}

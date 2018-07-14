@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{data2growthrates}
 \alias{data2growthrates}
-\title{interface to package \code{\link[growthrates:growthrates]{growthrates}}}
+\title{interface to package \pkg{growthrates}}
 \usage{
 data2growthrates(data, yid)
 }
@@ -14,7 +14,7 @@ data2growthrates(data, yid)
 }
 \description{
 converts \code{platexpress} data for
-use with \code{\link[growthrates:growthrates]{growthrates}}
+use with \pkg{growthrates}
 }
 \seealso{
 \code{\link{growthratesResults}}, \code{\link{data2grofit}}

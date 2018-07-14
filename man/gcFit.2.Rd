@@ -9,11 +9,11 @@ gcFit.2(time, data, control = grofit.2.control())
 }
 \arguments{
 \item{time}{a matrix of measurment times for each well as required by
-\code{\link[grofit:grofit]{grofit}}, provided by \code{\link{data2grofit}}}
+\pkg{grofit}, provided by \code{\link{data2grofit}}}
 
 \item{data}{the data as produced by \code{\link{data2grofit}}}
 
-\item{control}{the \code{\link[grofit:grofit]{grofit}} control structure, see
+\item{control}{the \pkg{grofit} control structure, see
 \code{\link[grofit:grofit]{grofit.control}}, but with an additional
 argument "plot" (TRUE or FALSE), allowing to plot individual fits
 even if interactive is set to FALSE.}

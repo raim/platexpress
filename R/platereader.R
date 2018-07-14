@@ -4,7 +4,7 @@
 #' inspect microbial growth & gene expression data as measured in typical
 #' platereaders ("96-well plates") or other parallel growth systems.
 #' Interfaces to existing packages allow growth model fitting
-#' (currently only \code{\link[grofit:grofit]{grofit}}, and
+#' (currently \pkg{grofit}, \pkg{growthrates}, and
 #' partially/untested \code{\link[cellGrowth:fitCellGrowth]{cellGrowth}}.)
 #'
 #'@author Rainer Machne
@@ -12,7 +12,7 @@
 #'@name platexpress
 #'@section Dependencies: The package uses mostly functionality from R base,
 #' (graphics, grDevices, stats) but more functionality is available when
-#' \code{\link[grofit:grofit]{grofit}} is installed.
+#' \pkg{grofit} or \pkg{growthrates} are installed.
 #'@importFrom stats median sd qt approx spline filter predict coef na.omit
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
 #' abline lines points polygon box axis par text title mtext stripchart
@@ -541,7 +541,7 @@ cutData <- function(data, xrng, xid, yid, yrng) {
 #' function \code{\link{doseResponse}}.
 #' @param map a plate layout map with columns \code{amount} and some
 #' calculated value in column \code{val},
-#' eg. results from \code{\link[grofit:grofit]{grofit}}
+#' eg. results from \pkg{grofit} or \pkg{growthrates}
 #' @param wells a list of well IDs to be used in the plot
 #' @param val the name of a column in \code{map} containing numeric values
 #' that should be plotted on y-axis
@@ -635,7 +635,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
 #' and error bar ranges.
 #' @param map a plate layout map with columns \code{amount} and some
 #' calculated value in column \code{val},
-#' eg. results from \code{\link[grofit:grofit]{grofit}}
+#' eg. results from \pkg{grofit} or \pkg{growthrates}
 #' @param wells a list of well IDs to be used in the plot
 #' @param val the name of a column in \code{map} containing numeric values
 #' that should be plotted on y-axis
