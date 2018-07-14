@@ -207,18 +207,21 @@ data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose, 
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well, for both the
 #' "best" model found by `grofit` as well the `spline` and `bootstrap`
-#' fits.
+#' fits. Parameter names are streamlined, ie. the ".model" suffix is removed.
 #' @param fit grofit object, the result of a call to
 #' \code{\link[grofit:gcFit]{gcFit}}
 #' or the \code{platexpress} version \code{\link{gcFit.2}}
+#' @param p the parameters to retrieve from \code{fit$gcTable},
+#' the main results table of \code{\link[grofit:gcFit]{gcFit}}
 #' @seealso \code{\link{data2grofit}}, \code{\link{growthratesResults}}
 #' @export
-grofitResults <- function(fit) {
+grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.model",
+                                   "lambda.spline","mu.spline","A.spline",
+                                   "lambda.bt","mu.bt","A.bt")) {
     ## TODO: addModel, using
     ## this data to add modelled data to the plate data object
-    params <- fit$gcTable[,c("lambda.model","mu.model","A.model","used.model",
-                             "lambda.spline","mu.spline","A.spline",
-                             "lambda.bt","mu.bt","A.bt")]
+    ## by calling the appropriate grofit function obtained from used.model
+    params <- fit$gcTable[,p]
     colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
     rownames(params) <- as.character(fit$gcTable[,"TestId"])
     data.frame(well=rownames(params), params)

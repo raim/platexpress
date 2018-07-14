@@ -4,18 +4,22 @@
 \alias{grofitResults}
 \title{parse \code{\link[grofit:grofit]{grofit}} results}
 \usage{
-grofitResults(fit)
+grofitResults(fit, p = c("lambda.model", "mu.model", "A.model", "used.model",
+  "lambda.spline", "mu.spline", "A.spline", "lambda.bt", "mu.bt", "A.bt"))
 }
 \arguments{
 \item{fit}{grofit object, the result of a call to
 \code{\link[grofit:gcFit]{gcFit}}
 or the \code{platexpress} version \code{\link{gcFit.2}}}
+
+\item{p}{the parameters to retrieve from \code{fit$gcTable},
+the main results table of \code{\link[grofit:gcFit]{gcFit}}}
 }
 \description{
 parses the output of \code{\link{gcFit.2}} into a table
 of the main model parameters, for each well, for both the
 "best" model found by `grofit` as well the `spline` and `bootstrap`
-fits.
+fits. Parameter names are streamlined, ie. the ".model" suffix is removed.
 }
 \seealso{
 \code{\link{data2grofit}}, \code{\link{growthratesResults}}
