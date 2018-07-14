@@ -5,9 +5,9 @@
 \title{high-level wrapper for \code{\link[grofit:grofit]{grofit}}}
 \usage{
 callGrofit(data, plate, yid, amount, fields = c("strain", "medium",
-  "substance"), control, model.type = c("richards", "gompertz.exp",
-  "gompertz"), nboot.gc = 100, plot = TRUE, interactive = FALSE,
-  verb = TRUE, ...)
+  "substance"), control, model.type = c("richards", "logistic",
+  "gompertz.exp", "gompertz"), nboot.gc = 100, plot = TRUE,
+  interactive = FALSE, verb = TRUE, col = "#0000FF", ...)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
@@ -45,6 +45,8 @@ if \code{control} is passed directly}
 \item{interactive}{set to TRUE for interactive growth curve fitting}
 
 \item{verb}{print messages}
+
+\item{col}{color of the model data in the plate data object}
 
 \item{...}{further arguments to \code{\link{grofit.2.control}}}
 }

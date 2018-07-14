@@ -54,13 +54,16 @@
 #' if \code{control} is passed directly
 #' @param plot set to TRUE for plots even without \code{interactive} use
 #' @param interactive set to TRUE for interactive growth curve fitting
+#' @param col color of the model data in the plate data object
 #' @param verb print messages
 #' @param ... further arguments to \code{\link{grofit.2.control}}
 #'@export
 callGrofit <- function(data, plate, yid, amount,
                        fields=c("strain","medium","substance"),
-                       control, model.type=c("richards","gompertz.exp","gompertz"),
-                       nboot.gc=100, plot=TRUE, interactive=FALSE, verb=TRUE, ...) {
+                       control, model.type=c("richards","logistic",
+                                             "gompertz.exp","gompertz"),
+                       nboot.gc=100, plot=TRUE, interactive=FALSE, verb=TRUE,
+                       col="#0000FF", ...) {
 
   ## take the first data, if none was passed
   if ( missing(yid) ) {
@@ -107,7 +110,7 @@ callGrofit <- function(data, plate, yid, amount,
     params <- params[as.character(plate[,"well"]),]
 
   ## add modelled data!
-  data <- addModel(data, odfit, ID=paste0(yid,"_model"), col="#0000FF")
+  data <- addModel(data, odfit, ID=paste0(yid,"_model"), col=col)
 
   res <- list(data=data, parameters=params, fit=odfit)
 
