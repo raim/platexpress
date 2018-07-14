@@ -2,20 +2,22 @@
 % Please edit documentation in R/interfaces.R
 \name{addModel}
 \alias{addModel}
-\title{add \pkg{grofit} models to plate data object}
+\title{Add \pkg{grofit}/\pkg{growthrates} fits to plate data object}
 \usage{
 addModel(data, fit, ID = "model", ...)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
-\item{fit}{grofit object, the result of a call to \code{\link{gcFit.2}}
-or any of \pkg{growthrates} batch functions (`all_')}
+\item{fit}{result object from calls to batch model fitting functions
+from \pkg{grofit} or \pkg{growthrates}, ie. result of a call to
+\code{\link{gcFit.2}} or any of \pkg{growthrates} batch functions (`all_')}
 
 \item{ID}{ID for the new data set}
 
-\item{...}{arguments to \code{\link{addData}}}
+\item{...}{arguments to \code{\link{addData}} (eg. \code{col} for
+color selection)}
 }
 \description{
-add \pkg{grofit} models to plate data object
+Add \pkg{grofit}/\pkg{growthrates} fits to plate data object
 }
