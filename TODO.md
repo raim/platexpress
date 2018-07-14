@@ -5,7 +5,7 @@
 to modern R formats (tidyr, etc.) and use with growthrates
 * viewGroups: integrate group colors and lty selection
  [or move all to ggplot) 
-* integrate smoothing functions for BMG2
+* integrate smoothing functions 
 
 ## LIBRARY
 ### fix example data to reflect current use
@@ -41,13 +41,14 @@ viewPlate and viewGroups
 ### use groupStats in viewGroups
 ### add interfaces to growthrater and cellGrowth
 ### add function alignLag, using grofit to find lags, and subtracting
-### difference to the longest lag
+    difference to the longest lag
 ### add function fitData, where OD is fitted by grofit and all others by
 cellGrowth; and fitted data are added as data$OD$fit and model parameters
 added
-### add dynamic models, see e.g. BGFit
+### add dynamic models, eg. growthrates and BGFit
 
-## Others
+
+## Other Packages
 
 The bioconductor cellGrowth features non-parametric models and automatic
 bandwith selection. 
