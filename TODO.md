@@ -6,6 +6,7 @@ to modern R formats (tidyr, etc.) and use with growthrates
 * viewGroups: integrate group colors and lty selection
  [or move all to ggplot) 
 * integrate smoothing functions 
+* common interface for both growthrates and grofit
 
 ## LIBRARY
 ### fix example data to reflect current use
