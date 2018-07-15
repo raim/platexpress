@@ -747,3 +747,29 @@ addModel <- function(data, fit, ID="model", ...) {
         return(addGrowthratesModel(data=data, fit=fit, ID=ID, ...))
 
 }
+
+#' merge results to plate layout map
+#'
+#' a wrapper around R base function \code{\link[base:merge]{merge}}
+#' for merging results per well into a \pkg{platexpress} layout map.
+#' Usage is the same as for \code{\link[base:merge]{merge}} with
+#' some defaults changed.
+#' @param x a plate layout map or any data frame with a "well" column
+#' specified by argument \code{by}
+#' @param y results: any data frame with a "well" column
+#' specified by argument \code{by}, see \code{\link[base:merge]{merge}}
+#' @param ID prefix added to to the merged \code{y} data
+#' @param by column name(s) by which to merge, 
+#' @param all.x keep all rows of \code{x}, see \code{\link[base:merge]{merge}}
+#' @param sort sort the results on the \code{by} column? See
+#' \code{\link[base:merge]{merge}}
+#' @param ... further arguments to \code{\link[base:merge]{merge}}
+#' @export
+mergeResults <- function(x, y, ID, by = "well", 
+                         all.x=TRUE, sort=FALSE, ...) {
+
+    if ( !missing(ID) )
+        colnames(y)[2:ncol(y)] <- paste0(ID, "_",colnames(y)[2:ncol(y)])
+    merge(x=x, y=y, by="well", all.x=all.x, sort=sort, ...)
+
+}
