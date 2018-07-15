@@ -416,7 +416,7 @@ getData <- function(data, ID, type="data", xrng, xid, verb=TRUE) {
     if ( length(xrng)==2 ) {
       if ( verb ) cat(paste("cutting data to x within", paste(xrng,collapse=":"), "\n"))
       filter <- xdat >= xrng[1] & xdat <= xrng[2]
-      return(data[[ID]][[type]][filter,])
+      return(data[[ID]][[type]][filter,,drop=FALSE])
     } else if ( length(xrng)==1 ) {
       if ( verb ) cat(paste("interpolating to", xrng, "\n"))
       if ( xrng > max(xdat, na.rm=TRUE) )
