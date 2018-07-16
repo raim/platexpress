@@ -4,13 +4,20 @@
 \alias{data2growthrates}
 \title{interface to package \pkg{growthrates}}
 \usage{
-data2growthrates(data, yid)
+data2growthrates(data, yid, wells, plate)
 }
 \arguments{
 \item{data}{platexpress data set, see \code{\link{readPlateData}}}
 
 \item{yid}{data ID of the data to be converted for growthrates, from
 \code{data$dataIDs}}
+
+\item{wells}{column IDs of the data set to use, if missing all wells
+are used}
+
+\item{plate}{plate layout map, see \code{\link{readPlateMap}}, to skip
+blanks wells
+annotation}
 }
 \description{
 converts \code{platexpress} data for

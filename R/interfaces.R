@@ -614,17 +614,30 @@ fitCellGrowths.2 = function(data, yid, xid, wells, ...) {
 #' @param data platexpress data set, see \code{\link{readPlateData}}
 #' @param yid data ID of the data to be converted for growthrates, from
 #' \code{data$dataIDs}
+#' @param wells column IDs of the data set to use, if missing all wells
+#' are used
+#' @param plate plate layout map, see \code{\link{readPlateMap}}, to skip
+#' blanks wells
+#' annotation
 #' @seealso \code{\link{growthratesResults}}, \code{\link{data2grofit}}
 #' @export
-data2growthrates <- function(data, yid) {
+data2growthrates <- function(data, yid, wells, plate) {
 
-  ## TODO: use blank and amount columns in plate layout to filter
+    if ( missing(wells) )
+        wells <- colnames(data[[yid]]$data)
+    ## filter by plate & rm blanks
+    if ( !missing(plate) ) {
+        wells <- wells[wells%in%plate[,"well"]]
+        wells <- wells[!plate[match(wells, plate[,"well"]),"blank"]]
+    }
 
-  value <- c(data[[yid]]$data)
-  time <- rep(data$Time, ncol(data[[yid]]$data))
-  well <- rep(colnames(data[[yid]]$data), each=nrow(data[[yid]]$data))
+    dat <- data[[yid]]$data[,wells,drop=FALSE]
+
+  value <- c(dat)
+  time <- rep(data$Time, ncol(dat))
+  well <- rep(colnames(dat), each=nrow(dat))
   df <- data.frame(time=time, value=value,
-                   well=factor(well, levels=colnames(data[[yid]]$data)))
+                   well=factor(well, levels=colnames(dat)))
   df
 }
 
@@ -706,13 +719,18 @@ addGrowthratesModel <- function(data, fit, ID="model", ... ) {
     ## global time and new data matrix
     time <- data[[data$xids[1]]]
 
+    ## newdat matrix, just copy first data set
+    newdat <- data[[data$dataIDs[1]]]$data
+    newdat[] <- NA
+
     ## get results
     lst <- grpredict(fit, time=time)
 
     ## convert to matrix
     lst <- lapply(lst, function(x) x[,2])
-    newdat <- matrix(unlist(lst), ncol = length(lst), byrow = FALSE)
-    colnames(newdat) <- names(lst)
+    newdat[,names(lst)] <- matrix(unlist(lst),
+                                  ncol = length(lst), byrow = FALSE)
+
 
     ## add and return
     addData(data=data, ID=ID, dat= newdat,
