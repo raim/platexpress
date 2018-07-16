@@ -707,7 +707,7 @@ grpredict <- function(fit, time) {
         xy <- fit@FUN(time, fit@par)[,1:2]
 
     } else {
-        xy <- growthrates::predict(fit, newdata=list(time=time))[,1:2]
+        xy <- growthrates::predict(fit, newdata=list(time=time))[,c("time","y")]
     }
     xy
 }
