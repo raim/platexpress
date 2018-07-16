@@ -1453,8 +1453,9 @@ viewPlate <- function(data, wells, wcols,
     }
 
     ## filter for present wells
-    pwells <- unique(c(sapply(data$dataIDs,
-                              function(id) colnames(data[[id]][[dtype]]))))
+    pwells <- unique(unlist(sapply(data$dataIDs,
+                                   function(id)
+                                       colnames(data[[id]][[dtype]]))))
     if ( sum(!wells%in%pwells)>0 ) {
         #warning("wells ", wells[!wells%in%pwells]," not present, skipped!")
         wells <- wells[wells%in%pwells]
