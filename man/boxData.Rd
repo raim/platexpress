@@ -13,7 +13,7 @@ boxData(data, rng, groups, xid, yid = "OD", interpolate = TRUE,
 \item{rng}{x-axis range or a single point, for the latter the closest
 point will be selected or, if option \code{interpolate=TRUE} the
 value at \code{rng} will be interpolated using R base function
-\code{\link[stats:approx]{approx}}}
+\code{\link[stats:approxfun]{approx}}}
 
 \item{groups}{a grouping of wells, see \code{\link{getGroups}}}
 

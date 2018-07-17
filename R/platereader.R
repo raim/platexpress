@@ -819,7 +819,7 @@ doseResponse <- function(map, wells, val,
 #' @param rng x-axis range or a single point, for the latter the closest
 #' point will be selected or, if option \code{interpolate=TRUE} the
 #' value at \code{rng} will be interpolated using R base function
-#' \code{\link[stats:approx]{approx}}
+#' \code{\link[stats:approxfun]{approx}}
 #' @param xid the x-axis ID, if multiple x-axes are present
 #' @param yid the y-axis data to be grouped
 #' @param interpolate interpolate data at \code{rng} (if a single value,
@@ -1236,7 +1236,7 @@ listAverage <- function(lst, id) {
 #' Interpolate to Common Timepoints
 #'
 #' interpolates all time-series of a plate to an average
-#' master time, using the R base function \code{\link[stats:spline]{spline}}.
+#' master time, using the R base function \code{\link[stats:splinefun]{spline}}.
 #' An average time is calculated for each measurement point and all values
 #' are interpolated to these new time points. This is automatically done when
 #' parsing the raw data with \code{\link{readPlateData}}, unless
@@ -1307,7 +1307,7 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
 #' data set. This is used to change the x-axis of a data set, e.g.,
 #' the measured OD values can become the new x-axis and all fluorescence
 #' values will be interpolated to common OD vlues, using the
-#' R base function \code{\link[stats:spline]{spline}}, the same way
+#' R base function \code{\link[stats:splinefun]{spline}}, the same way
 #' as in \code{\link{interpolatePlateTimes}}.
 #' @param data the list of measurement data as provided by
 #' \code{\link{readPlateData}}

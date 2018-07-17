@@ -26,7 +26,7 @@ interpolate one dataset to common points of another
 data set. This is used to change the x-axis of a data set, e.g.,
 the measured OD values can become the new x-axis and all fluorescence
 values will be interpolated to common OD vlues, using the
-R base function \code{\link[stats:spline]{spline}}, the same way
+R base function \code{\link[stats:splinefun]{spline}}, the same way
 as in \code{\link{interpolatePlateTimes}}.
 }
 \author{
