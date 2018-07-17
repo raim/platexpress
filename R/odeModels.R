@@ -82,7 +82,7 @@ grow_monod <- function(time, parms, ...) {
     ## assign parameters and solve differential equations
     init    <- parms[c("s", "y")]
     parms <- parms[c("phi", "sin", "mumax", "K", "Y")]
-    out <- deSolve::ode(init, time, ode_monod, parms = parms)
+    out <- deSolve::ode(init, time, platexpress::ode_monod, parms = parms)
 }
 ## attach names of parameters as attributes
 attr(grow_monod, "fname") <- c("grow_monod")
@@ -97,20 +97,28 @@ class(grow_monod) <- c("growthmodel", "function")
 #'   \itemize{
 #'      \item \code{y} initial biomass concentration (cell number),
 #'      \item \code{s} initial substrate concentration
-#'      \item \code{mumax} maximum growth rate (1/time),
-#'      \item \code{K} saturation or half-maximal growth constant
-#'      \item \code{Y} the yield factor (fraction of substrate converted to biomass
+#'      \item \code{atp} initial ATP concentration (fraction of ATP+ADP=1)
 #'      \item \code{phi} culture dilution rate
 #'      \item \code{sin} substrate concentration in medium influx
+#'      \item \code{mumax_ab} maximum growth rate (1/time),
+#'      \item \code{mumax_cd} maximum catabolic rate (1/time),
+#'      \item \code{mumax_m} maintenance rate concentration/time
+#'      \item \code{n_ab} anabolic ATP stoichiometry (n ATP / C-mol substrate)
+#'      \item \code{n_cd} catabolic ATP stoichiometry (n ATP / C-mol substrate)
+#'      \item \code{Kaab} anabolic ATP saturation or half-maximal rate constant
+#'      \item \code{Ksab} anabolic substrate saturation or half-maximal rate constant
+#'      \item \code{Kacd} catabolic ATP saturation or half-maximal rate constant
+#'      \item \code{Kscd} catabolic substrate saturation or half-maximal rate constant
+#'      \item \code{Cc} and \code{Vc} cellular carbon content and volumes
 #'   }
 #' @param \dots placeholder for additional parameters (for user-extended versions of this function)
 #'
 #' @return
 #'
-#' For \code{ode_anacata}: matrix containing the simulation outputs.
+#' For \code{ode_anacat}: matrix containing the simulation outputs.
 #' The return value of has also class \code{deSolve}.
 #'
-#' For \code{grow_anacata}: vector of dependent variable (\code{y}) and
+#' For \code{grow_anacat}: vector of dependent variable (\code{y}) and
 #'   its log-transformed values (\code{log_y}):
 #'
 #' \itemize{
@@ -119,8 +127,8 @@ class(grow_monod) <- c("growthmodel", "function")
 ## \item \code{log_y} natural log of total cell concentration
 #' }
 #'
-#' @details Function \code{ode_anacata} is the system of differential equations,
-#' whereas \code{grow_anacata} runs a numerical simulation over time.
+#' @details Function \code{ode_anacat} is the system of differential equations,
+#' whereas \code{grow_anacat} runs a numerical simulation over time.
 #'
 #' @family growth models
 #' @rdname grow_anacat
@@ -134,14 +142,12 @@ ode_anacat <- function (time, init, parms, ...) {
         mu_m <- mumax_m
         ds <- phi*(sin-s) - (mu_ab + mu_cd)*y 
         dy <- (mu_ab-phi)*y
-        datp = (n_cd*mu_cd - n_ab*mu_ab - mu_m) *Cc/Vc - mu_atp*atp
+        datp = (n_cd*mu_cd - n_ab*mu_ab - mu_m) *Cc/Vc - mu_ab*atp
         list(c(ds, dy, datp))#, log_y=unname(log(y))))
     })
     
 }
 
-
-#' Simple anacat growth model
 #' @family growth models
 #' @rdname grow_anacat
 #' @export
@@ -159,7 +165,7 @@ grow_anacat <- function(time, parms, ...) {
                      "mumax_ab", "Kaab", "Ksab", "n_ab",
                      "mumax_cd", "Kacd", "Kscd", "n_cd",
                      "mumax_m", "Cc", "Vc")]
-    out <- deSolve::ode(init, time, ode_anacat, parms = parms)
+    out <- deSolve::ode(init, time, platexpress::ode_anacat, parms = parms)
 }
 ## attach names of parameters as attributes
 attr(grow_anacat, "fname") <- c("grow_anacat")
@@ -169,3 +175,96 @@ attr(grow_anacat, "pnames") <- c("s", "y", "atp",
                                  "mumax_cd", "Kacd", "Kscd",
                                  "mumax_m", "Cc", "Vc")
 class(grow_anacat) <- c("growthmodel", "function")
+
+
+#' Regulated Anabolism vs. Catabolism Growth Model
+#' @param time actual time (for the ode) resp. vector of simulation time steps.
+#' @param init named vector with the initial state of the system
+#' @param parms parameters of the anabolism vs. catabolism growth model
+#'   \itemize{
+#'      \item \code{y} initial biomass concentration (cell number),
+#'      \item \code{s} initial substrate concentration
+#'      \item \code{atp} initial ATP concentration (fraction of ATP+ADP=1)
+#'      \item \code{phi} culture dilution rate
+#'      \item \code{sin} substrate concentration in medium influx
+#'      \item \code{mumax_ab} maximum growth rate (1/time),
+#'      \item \code{mumax_cd} maximum catabolic rate (1/time),
+#'      \item \code{mumax_m} maintenance rate concentration/time
+#'      \item \code{n_ab} anabolic ATP stoichiometry (n ATP / C-mol substrate)
+#'      \item \code{n_cd} catabolic ATP stoichiometry (n ATP / C-mol substrate)
+#'      \item \code{Kaab} anabolic ATP saturation or half-maximal rate constant
+#'      \item \code{Ksab} anabolic substrate saturation or half-maximal rate constant
+#'      \item \code{Kacd} catabolic ATP saturation or half-maximal rate constant
+#'      \item \code{Kscd} catabolic substrate saturation or half-maximal rate constant
+#'      \item \code{Cc} and \code{Vc} cellular carbon content and volumes
+#'   }
+#' @param \dots placeholder for additional parameters (for user-extended versions of this function)
+#'
+#' @return
+#'
+#' For \code{ode_anacatr}: matrix containing the simulation outputs.
+#' The return value of has also class \code{deSolve}.
+#'
+#' For \code{grow_anacatr}: vector of dependent variable (\code{y}) and
+#'   its log-transformed values (\code{log_y}):
+#'
+#' \itemize{
+#' \item \code{time} time of the simulation
+#' \item \code{y} cell concentration
+## \item \code{log_y} natural log of total cell concentration
+#' }
+#'
+#' @details Function \code{ode_anacatr} is the system of differential equations,
+#' whereas \code{grow_anacatr} runs a numerical simulation over time.
+#'
+#' @family growth models
+#' @rdname grow_anacatr
+#' @export 
+ode_anacatr <- function (time, init, parms, ...) {
+
+    with(as.list(c(parms, init)), {
+        adp <- 1 - atp
+        mu_ab <- mumax_ab * s/(s+Ksab) * atp/(atp+Kaab)
+        mu_cd <- mumax_cd * s/(s+Kscd) * adp/(adp+Kacd)
+        mu_m <- mumax_m
+        dpab <- kab * atp/(atp+Ktab) - dab * pab
+        dpcd <- kcd * adp/(adp+Ktcd) - dcd * pcd
+        ds <- phi*(sin-s) - (mu_ab + mu_cd)*y 
+        dy <- (mu_ab-phi)*y
+        datp = (n_cd*mu_cd - n_ab*mu_ab - mu_m) *Cc/Vc - mu_ab*atp
+        list(c(ds, dy, datp, dpab, dpcd))#, log_y=unname(log(y))))
+    })
+    
+}
+
+#' @family growth models
+#' @rdname grow_anacatr
+#' @export
+grow_anacatr <- function(time, parms, ...) {
+
+    ## TODO: define output variables to fit
+    ## OD .. from cells/OD, dry weight per cell, and C/cell
+    ## cCc: 47% of dryweight is C 
+    ## http://bionumbers.hms.harvard.edu/bionumber.aspx?id=100649&ver=4
+    ## cpod: 5e8 cells/OD
+    
+    ## assign parameters and solve differential equations
+    init    <- parms[c("s", "y", "atp","pab","pcd")]
+    parms <- parms[c("phi", "sin",
+                     "kab", "Ktab", "dab",
+                     "kcd", "Ktcd", "dcd",
+                     "mumax_ab", "Kaab", "Ksab", "n_ab",
+                     "mumax_cd", "Kacd", "Kscd", "n_cd",
+                     "mumax_m", "Cc", "Vc")]
+    out <- deSolve::ode(init, time, platexpress::ode_anacatr, parms = parms)
+}
+## attach names of parameters as attributes
+attr(grow_anacatr, "fname") <- c("grow_anacatr")
+attr(grow_anacatr, "pnames") <- c("s", "y", "atp","pab","pcd",
+                                 "kab", "Ktab", "dab",
+                                 "kcd", "Ktcd", "dcd",
+                                 "phi", "sin",
+                                 "mumax_ab", "Kaab", "Ksab",
+                                 "mumax_cd", "Kacd", "Kscd",
+                                 "mumax_m", "Cc", "Vc")
+class(grow_anacatr) <- c("growthmodel", "function")

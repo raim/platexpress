@@ -72,7 +72,9 @@ plot(o)
 Monod, J (1950). La technique de la culture continue, th\'eorie et applications. Annales de Institute Pasteur Paris 79(4), 390--410.
 }
 \seealso{
-Other growth models: \code{\link{ode_anacat}}
+Other growth models: \code{\link{ode_anacatr}},
+  \code{\link{ode_anacat}}
 
-Other growth models: \code{\link{ode_anacat}}
+Other growth models: \code{\link{ode_anacatr}},
+  \code{\link{ode_anacat}}
 }
