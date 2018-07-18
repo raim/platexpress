@@ -136,7 +136,7 @@ class(grow_monod) <- c("growthmodel", "function")
 ode_anacat <- function (time, init, parms, ...) {
 
     with(as.list(c(parms, init)), {
-        adp <- 1 - atp
+        adp <- axp - atp 
         mu_ab <- mumax_ab * s/(s+Ksab) * atp/(atp+Kaab)
         mu_cd <- mumax_cd * s/(s+Kscd) * adp/(adp+Kacd)
         mu_m <- mumax_m
@@ -164,7 +164,7 @@ grow_anacat <- function(time, parms, ...) {
     parms <- parms[c("phi", "sin",
                      "mumax_ab", "Kaab", "Ksab", "n_ab",
                      "mumax_cd", "Kacd", "Kscd", "n_cd",
-                     "mumax_m", "Cc", "Vc")]
+                     "mumax_m", "Cc", "Vc", "axp")]
     out <- deSolve::ode(init, time, platexpress::ode_anacat, parms = parms)
 }
 ## attach names of parameters as attributes
@@ -173,7 +173,7 @@ attr(grow_anacat, "pnames") <- c("s", "y", "atp",
                                  "phi", "sin",
                                  "mumax_ab", "Kaab", "Ksab",
                                  "mumax_cd", "Kacd", "Kscd",
-                                 "mumax_m", "Cc", "Vc")
+                                 "mumax_m", "Cc", "Vc", "axp")
 class(grow_anacat) <- c("growthmodel", "function")
 
 
@@ -223,15 +223,20 @@ class(grow_anacat) <- c("growthmodel", "function")
 ode_anacatr <- function (time, init, parms, ...) {
 
     with(as.list(c(parms, init)), {
-        adp <- 1 - atp
-        mu_ab <- mumax_ab * s/(s+Ksab) * atp/(atp+Kaab)
-        mu_cd <- mumax_cd * s/(s+Kscd) * adp/(adp+Kacd)
-        mu_m <- mumax_m
-        dpab <- kab * atp/(atp+Ktab) - dab * pab
-        dpcd <- kcd * adp/(adp+Ktcd) - dcd * pcd
-        ds <- phi*(sin-s) - (mu_ab + mu_cd)*y 
-        dy <- (mu_ab-phi)*y
-        datp = (n_cd*mu_cd - n_ab*mu_ab - mu_m) *Cc/Vc - mu_ab*atp
+
+        adp <- axp - atp
+
+        mu_ab <- mumax_ab * pab * s/(s+Ksab) * atp/(atp+Kaab)
+        mu_cd <- mumax_cd * pcd * s/(s+Kscd) * adp/(adp+Kacd)
+        mu_m  <- mumax_m
+
+        dpab  <- (kab * atp/(atp+Ktab) - dab * pab)*Cc/Vc -mu_ab*pab
+        dpcd  <- (kcd * adp/(adp+Ktcd) - dcd * pcd)*Cc/Vc -mu_ab*pcd
+        
+        ds    <- phi*(sin-s) - (mu_ab + mu_cd)*y 
+        dy    <- (mu_ab-phi)*y
+        datp  <- (n_cd*mu_cd - n_ab*mu_ab - mu_m)*Cc/Vc - mu_ab*atp
+        
         list(c(ds, dy, datp, dpab, dpcd))#, log_y=unname(log(y))))
     })
     
@@ -255,7 +260,7 @@ grow_anacatr <- function(time, parms, ...) {
                      "kcd", "Ktcd", "dcd",
                      "mumax_ab", "Kaab", "Ksab", "n_ab",
                      "mumax_cd", "Kacd", "Kscd", "n_cd",
-                     "mumax_m", "Cc", "Vc")]
+                     "mumax_m", "Cc", "Vc", "axp")]
     out <- deSolve::ode(init, time, platexpress::ode_anacatr, parms = parms)
 }
 ## attach names of parameters as attributes
@@ -266,5 +271,5 @@ attr(grow_anacatr, "pnames") <- c("s", "y", "atp","pab","pcd",
                                  "phi", "sin",
                                  "mumax_ab", "Kaab", "Ksab",
                                  "mumax_cd", "Kacd", "Kscd",
-                                 "mumax_m", "Cc", "Vc")
+                                 "mumax_m", "Cc", "Vc", "axp")
 class(grow_anacatr) <- c("growthmodel", "function")
