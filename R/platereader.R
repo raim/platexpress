@@ -609,7 +609,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
     cl <- cl[as.character(unique(sort(x1)))]
     graphics::boxplot(y1~x1, border=cl,
                       xlab=subid,ylab=val,ylim=ylim, #xlim=xlim,
-                      na.action="na.pass",xaxt=xaxt)
+                      na.action="na.pass",xaxt=xaxt, outline=FALSE)
     graphics::stripchart(y1~x1,add=T, vertical=TRUE,col=cl,
                          method="jitter", pch=1,cex=1,
                          na.action="na.pass")
