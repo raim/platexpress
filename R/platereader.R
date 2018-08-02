@@ -1808,7 +1808,11 @@ groupColors <- function(map, group, color="color") {
 #' automatically; NOTE: to change the ordering of the plots
 #' you can change the ordering of the input \code{groups}/
 #' @param mai set the outer margins around plot areas, see ?par
-#' @param mgp set the position of axis title, tick marks and tick lengths
+#' @param xmgp x-axis \code{mgp} settings: margin line in \code{mex} units
+#' of axis title, tick labels and axis line; used only if \code{no.par==FALSE}
+#' @param ymgp y-axis \code{mgp} settings: margin line in \code{mex} units
+#' of axis title, tick labels and axis line
+#' @param ytcl y-axis \code{tcl} settings: tick length and direction
 #' @param xaxis plot x-axis if TRUE
 #' @param yaxis the data types for which axes are to be plotted, corresponds
 #' to the order in argument \code{yids} and as plotted in the legend
@@ -1836,7 +1840,8 @@ viewGroups <- function(data, groups, groups2,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
                        g2.legpos="topleft", g2.legend=TRUE,
                        embed=FALSE, no.par=FALSE,
-                       mai=c(0.5,0,0,0), mgp=c(1.5,.5,0),
+                       mai=c(0.5,0,0,0), xmgp=c(1.5,.5,0),
+                       ymgp=c(0,-1,-.05), ytcl=.25,
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
                        g1.legpos="topright", g1.legend=TRUE, verb=TRUE) {
 
@@ -1941,7 +1946,7 @@ viewGroups <- function(data, groups, groups2,
     }
     if ( !no.par ) {
         orig.par <- append(orig.par, par(c("mai","mgp")))
-        par(mai=mai,mgp=mgp)
+        par(mai=mai,mgp=xmgp)
     }
     for ( g in 1:length(groups) ) {
 
@@ -2063,13 +2068,11 @@ viewGroups <- function(data, groups, groups2,
                 }
 
                 ## add axes for first two values
-                if ( yaxis[1]==i & sg==1 )
-                    axis(2, tcl=.25, mgp=c(0,-1,-.05),
-                         col=ifelse(global.x,col.orig,1),
-                         col.axis=ifelse(global.x,col.orig,1))
-                if ( yaxis[2]==i & sg==1 ) axis(4, tcl=.25, mgp=c(0,-1,-.05),
-                            col=ifelse(global.x,col.orig,1),
-                            col.axis=ifelse(global.x,col.orig,1))
+                acol <- ifelse(global.x & missing(group2.col),col.orig,1)
+                if ( yaxis[1]==i & sg==1 ) 
+                    axis(2, tcl=ytcl, mgp=ymgp, col=acol, col.axis=acol)
+                if ( yaxis[2]==i & sg==1 ) 
+                    axis(4, tcl=ytcl, mgp=ymgp, col=acol, col.axis=acol)
             }
         }
         if ( length(sgroups)>1 & g2.legend )
@@ -2077,9 +2080,11 @@ viewGroups <- function(data, groups, groups2,
                 legend(g2.legpos,names(sgroups),lty=1:length(sgroups),
                        col=1,bty="n")
             else {
-              lty <- ifelse(!missing(group2.col),1:length(ptypes),1:length(sgroups))
-              legend(g2.legpos,names(sgroups),lty=lty,
-                     col=orig.cols,bg="#FFFFFFAA",box.lwd=NA) # TODO: use g2cols
+                lty <- ifelse(!missing(group2.col),
+                              1:length(ptypes),
+                              1:length(sgroups))
+                legend(g2.legpos,names(sgroups),lty=lty,
+                       col=orig.cols,bg="#FFFFFFAA",box.lwd=NA) # TODO: use g2cols
             }
         else
             legend(g2.legpos,id, bty="n")

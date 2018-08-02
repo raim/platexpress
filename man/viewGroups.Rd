@@ -9,9 +9,10 @@ viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
   show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
   lty.orig = 1, lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2,
   g2.legpos = "topleft", g2.legend = TRUE, embed = FALSE,
-  no.par = FALSE, mai = c(0.5, 0, 0, 0), mgp = c(1.5, 0.5, 0), nrow = 1,
-  xaxis = TRUE, yaxis = c(1, 2), g1.legpos = "topright",
-  g1.legend = TRUE, verb = TRUE)
+  no.par = FALSE, mai = c(0.5, 0, 0, 0), xmgp = c(1.5, 0.5, 0),
+  ymgp = c(0, -1, -0.05), ytcl = 0.25, nrow = 1, xaxis = TRUE,
+  yaxis = c(1, 2), g1.legpos = "topright", g1.legend = TRUE,
+  verb = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by
@@ -89,7 +90,13 @@ mai, mgp), useful to style your own plots, also see argument \code{embed}}
 
 \item{mai}{set the outer margins around plot areas, see ?par}
 
-\item{mgp}{set the position of axis title, tick marks and tick lengths}
+\item{xmgp}{x-axis \code{mgp} settings: margin line in \code{mex} units
+of axis title, tick labels and axis line; used only if \code{no.par==FALSE}}
+
+\item{ymgp}{y-axis \code{mgp} settings: margin line in \code{mex} units
+of axis title, tick labels and axis line}
+
+\item{ytcl}{y-axis \code{tcl} settings: tick length and direction}
 
 \item{nrow}{number of plot rows, number of columns will be selected
 automatically; NOTE: to change the ordering of the plots
