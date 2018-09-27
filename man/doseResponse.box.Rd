@@ -6,7 +6,7 @@
 \usage{
 doseResponse.box(map, wells, val, amount = "amount",
   substance = "substance", color = "color", na.y = 0, ylim,
-  xnum = FALSE)
+  xnum = FALSE, xlab, ylab)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some
@@ -39,6 +39,12 @@ column \code{val}; set to NA to supress plotting}
 \item{ylim}{limits of the y-axis}
 
 \item{xnum}{use numerical x-axis instead of default categorical}
+
+\item{xlab}{alternative label for the x-axis, default is to use argument
+\code{substance}, or if this is a column in \code{map}, the substance
+indicated there}
+
+\item{ylab}{alternative label for the y-axis, default is to use argument \code{val}}
 }
 \description{
 Plots a continuous value for each well as a function

@@ -561,12 +561,23 @@ cutData <- function(data, xrng, xid, yid, yrng) {
 #' column \code{val}; set to NA to supress plotting
 #' @param ylim limits of the y-axis
 #' @param xnum use numerical x-axis instead of default categorical
+#' @param xlab alternative label for the x-axis, default is to use argument
+#' \code{substance}, or if this is a column in \code{map}, the substance
+#' indicated there
+#' @param ylab alternative label for the y-axis, default is to use argument \code{val}
 #' @export
-doseResponse.box <- function(map, wells, val, amount="amount", substance="substance",
-                             color="color", na.y=0, ylim, xnum=FALSE) {
+doseResponse.box <- function(map, wells, val, amount="amount",
+                             substance="substance",
+                             color="color", na.y=0, ylim, xnum=FALSE,
+                             xlab, ylab) {
 
-  if( missing(wells) ) wells <- map[,"well"]
+    if( missing(wells) ) wells <- map[,"well"]
 
+    if ( missing(xlab) )
+        xlab <- substance
+    if ( missing(ylab) )
+        ylab <- val
+    
     wells <- match(wells,map[,"well"])
 
     y <- map[wells,val]
@@ -608,7 +619,7 @@ doseResponse.box <- function(map, wells, val, amount="amount", substance="substa
     }
     cl <- cl[as.character(unique(sort(x1)))]
     graphics::boxplot(y1~x1, border=cl,
-                      xlab=subid,ylab=val,ylim=ylim, #xlim=xlim,
+                      xlab=xlab,ylab=ylab,ylim=ylim, #xlim=xlim,
                       na.action="na.pass",xaxt=xaxt, outline=FALSE)
     graphics::stripchart(y1~x1,add=T, vertical=TRUE,col=cl,
                          method="jitter", pch=1,cex=1,
