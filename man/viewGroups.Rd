@@ -5,8 +5,8 @@
 \title{View Group Averages}
 \usage{
 viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
-  dtype = "data", pcols, group2.col, yscale = TRUE, ylims, ylim, log = "",
-  show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
+  dtype = "data", ylab, pcols, group2.col, yscale = TRUE, ylims, ylim,
+  log = "", show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
   lty.orig = 1, lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2,
   g2.legpos = "topleft", g2.legend = TRUE, embed = FALSE,
   no.par = FALSE, mai = c(0.5, 0, 0, 0), xmgp = c(1.5, 0.5, 0),
@@ -42,6 +42,8 @@ be plotted}
 \item{dtype}{type of the data to be plotted, default is the main 'data', but
 e.g. 'orig' allows to plot the original data w/o processing (e.g.
 interpolation, blank correction, etc.)}
+
+\item{ylab}{custom y-axis label}
 
 \item{pcols}{a named list of RGB colors to be used the plotted data types;
 the color vector must have names according to the data IDs}

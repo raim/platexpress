@@ -1789,6 +1789,7 @@ groupColors <- function(map, group, color="color") {
 #' specifies a subset of the data as x-axis
 #' @param xlim plot range of the x-axis
 #' @param xlab custom x-axis label
+#' @param ylab custom y-axis label
 #' @param pcols a named list of RGB colors to be used the plotted data types;
 #' the color vector must have names according to the data IDs
 #' @param group2.col a named list of RGB colors for group2 (which are shown
@@ -1845,7 +1846,7 @@ groupColors <- function(map, group, color="color") {
 #' @export
 viewGroups <- function(data, groups, groups2,
                        xid, xscale=FALSE, xlim, xlab,
-                       yids, dtype="data",pcols,group2.col,
+                       yids, dtype="data", ylab, pcols,group2.col,
                        yscale=TRUE,ylims,ylim, log="",
                        show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
                        lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
@@ -1958,6 +1959,9 @@ viewGroups <- function(data, groups, groups2,
     if ( !no.par ) {
         orig.par <- append(orig.par, par(c("mai","mgp")))
         par(mai=mai,mgp=xmgp)
+    } else { ## THIS OVERRIDES options ymgp and ytcl with external
+        ytcl <- par("tcl")
+        ymgp <- par("mgp")
     }
     for ( g in 1:length(groups) ) {
 
@@ -2097,12 +2101,15 @@ viewGroups <- function(data, groups, groups2,
                 legend(g2.legpos,names(sgroups),lty=lty,
                        col=orig.cols,bg="#FFFFFFAA",box.lwd=NA) # TODO: use g2cols
             }
-        else
+        else if ( g2.legend )
             legend(g2.legpos,id, bty="n")
         if ( xaxis ) axis(1)
         if ( missing(xlab) )
           xlab <- xid
         mtext(xlab, 1, par("mgp")[1])
+        if ( !missing(ylab) )
+            mtext(ylab, 2, par("mgp")[1])
+  
     }
     ## add legend to last plot
     if ( g1.legend ) {
