@@ -291,6 +291,8 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 #' @export
 gcFit.2 <- function (time, data, control = grofit.2.control())  {
 
+    require(grofit)
+    
     if (methods::is(control) != "grofit.control")
         stop("control must be of class grofit.control!")
     if ((dim(time)[1]) != (dim(data)[1]))
@@ -645,11 +647,11 @@ data2growthrates <- function(data, yid, wells, plate) {
 #'
 #' parses the output of \code{\link{gcFit.2}} into a table
 #' of the main model parameters, for each well
-#' @param fit growthrates object, the result of a call to
-#' \code{\link[grofit:gcFit]{gcFit}}
+#' @param fit growthrates object, the result of a call to fit functions
+#' from package \code{\link[growthrates]{growthrates}}, such as
+#' \code{\link[growthrates:all_easylinear]{all_easylinear}}
 #' @param scale.richards if the \code{beta} parameter from Richard's model is present,
 #' multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})
-#' or the \code{platexpress} version \code{\link{gcFit.2}}
 #' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
 #' @export
 growthratesResults <- function(fit, scale.richards=TRUE) {
@@ -664,6 +666,7 @@ growthratesResults <- function(fit, scale.richards=TRUE) {
     ## NOTE/TODO: scaling mu from richards?
     res[,"mumax"] <- res[,"mu"]
     res[,"mu"] <- res[,"mu"] * res[,"beta"]
+    ## TODO: also scale gompertz?
   }
 
   data.frame(res)
