@@ -7,12 +7,12 @@
 growthratesResults(fit, scale.richards = TRUE)
 }
 \arguments{
-\item{fit}{growthrates object, the result of a call to
-\code{\link[grofit:gcFit]{gcFit}}}
+\item{fit}{growthrates object, the result of a call to fit functions
+from package \code{\link[growthrates]{growthrates}}, such as
+\code{\link[growthrates:all_easylinear]{all_easylinear}}}
 
 \item{scale.richards}{if the \code{beta} parameter from Richard's model is present,
-multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})
-or the \code{platexpress} version \code{\link{gcFit.2}}}
+multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})}
 }
 \description{
 parses the output of \code{\link{gcFit.2}} into a table
