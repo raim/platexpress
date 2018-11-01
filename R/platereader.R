@@ -2055,6 +2055,12 @@ viewGroups <- function(data, groups, groups2,
                 ## override color to allow lwd.orig=0 to work for PDF as well
                 tmp <- ifelse(lwd.orig==0,NA, col.orig)
 
+                if ( log=="y"&ylims[[ptyp]][1]<=0 ) {
+                    ylims[[ptyp]][1] <- .01
+                    warning("ylim <= 0 for ", ptyp, ". Raised to ",
+                            ylims[[ptyp]][1], " for log='y'")
+                }
+                
                 matplot(x,dat,type="l",lty=lty.orig,lwd=lwd.orig,axes=FALSE,
                         ylab=NA,xlab=NA,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,log=log)
@@ -2068,10 +2074,11 @@ viewGroups <- function(data, groups, groups2,
                         py <- py[!is.na(py)]
                         px <- c(px,px[1])
                         py <- c(py,py[1])
-                        if ( log=="y") {
+                        if ( log=="y" & any(py<0) ) {
                             py[py<0] <- ylims[[ptyp]][1]
                             warning("mean - 95% c.i. is below 0;",
-                                    "raised to ylim for log. y-axis polygon")
+                                    "raised to ylim for log. y-axis polygon: ",
+                                    min(py))
                         }
                         polygon(x=px,y=py,border=NA,
                                 col=paste(g2.col,"55",sep=""))
