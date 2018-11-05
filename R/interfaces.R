@@ -657,9 +657,9 @@ data2growthrates <- function(data, yid, wells, plate) {
 growthratesResults <- function(fit, scale.richards=TRUE) {
   res <- data.frame(growthrates::results(fit), stringsAsFactors = FALSE)
   ## replace names to match names in other packages
-  ## lambda, mu and A
+  ## lambda, mu; but keep K (A for some models, but K in Monod)
   nms <- colnames(res)
-  nms <- sub("K","A",sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms))))
+  nms <- sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms)))
   colnames(res) <- nms
 
   if ( scale.richards & "beta" %in% nms ) {
