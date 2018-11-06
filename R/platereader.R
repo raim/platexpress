@@ -333,6 +333,16 @@ getColors <- function(ptypes,type="R") {
 #' @seealso \code{\link{readPlateData}}
 #' @export
 addData <- function(data, ID, dat, col, processing,replace=FALSE) {
+    
+    ## copy into existing first data frame
+    ## only if colnames are available!
+    datf <- data[[data$dataIDs[1]]]$data
+    if ( all(colnames(dat)%in%colnames(datf))) {
+        datf[] <- NA
+        datf[,colnames(dat)] <- dat
+        dat <- datf
+    } 
+    
     ## replace existing
     if ( ID%in%data$dataIDs ) {
         if ( replace ) {
