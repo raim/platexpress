@@ -13,6 +13,7 @@ Imports:
     readxl, tidyr
 Suggests:
     dpseg,
+    segmented,
     grofit,
     growthrates,
     deSolve,

@@ -24,7 +24,8 @@ image_plate(data, yid, wells, well.norm = FALSE, q.cut = 0.99, ylab = "",
 
 \item{xlab}{x-axis label}
 
-\item{wcol}{color to use for well axis labels, eg. from plate layout map}
+\item{wcol}{well colors (named vector) for axis labels,
+eg. from plate layout map}
 
 \item{col}{color palette to use in heatmap}
 

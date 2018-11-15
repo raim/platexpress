@@ -2,7 +2,7 @@
 % Please edit documentation in R/phases.R
 \name{dpseg_plate}
 \alias{dpseg_plate}
-\title{Call  \code{\link[dpseg:dpseg]{dpseg}} for selected wells.}
+\title{Call \code{\link[dpseg:dpseg]{dpseg}} for selected wells.}
 \usage{
 dpseg_plate(data, yid = "OD", wells, log = TRUE, xid, verb = 0, ...)
 }
@@ -11,7 +11,7 @@ dpseg_plate(data, yid = "OD", wells, log = TRUE, xid, verb = 0, ...)
 
 \item{yid}{ID of the \code{platexpress} data to use}
 
-\item{wells}{subset or order of wells}
+\item{wells}{subset and plot order of wells}
 
 \item{log}{use ln of the data}
 
