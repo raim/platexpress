@@ -92,10 +92,9 @@ image_plate <- function(data, yid, wells, well.norm=FALSE, q.cut=.99,
 
 #' Call  \code{\link[dpseg:dpseg]{dpseg}} for selected wells.
 #'
-#' The algorithm in \code{\link[dpseg:dpseg]{dpseg}} splits
-#' curves into linear segments.
-#' If the passed data is a biomass measure (eg. OD),
-#' and option \code[log=TRUE} the slopes correspond to local
+#' The algorithm in \code{\link[dpseg:dpseg]{dpseg}} splits curves
+#' into linear segments.  If the passed data is a biomass measure
+#' (eg. OD), and option \code{log=TRUE} the slopes correspond to local
 #' growth rate (per time unit).
 #' @param data \code{platexpress} data object
 #' @param yid ID of the \code{platexpress} data to use

@@ -21,3 +21,9 @@ dpseg_plate(data, yid = "OD", wells, log = TRUE, xid, verb = 0, ...)
 
 \item{...}{arguments passed to \code{\link[dpseg:dpseg]{dpseg}}}
 }
+\description{
+The algorithm in \code{\link[dpseg:dpseg]{dpseg}} splits curves
+into linear segments.  If the passed data is a biomass measure
+(eg. OD), and option \code{log=TRUE} the slopes correspond to local
+growth rate (per time unit).
+}
