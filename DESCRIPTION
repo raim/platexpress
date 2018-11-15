@@ -12,6 +12,7 @@ Depends:
 Imports:
     readxl, tidyr
 Suggests:
+    dpseg,
     grofit,
     growthrates,
     deSolve,

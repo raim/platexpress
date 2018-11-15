@@ -1,6 +1,15 @@
 ## @importFrom grofit  grofit.control gcFitModel gcFitSpline gcBootspline
 ## @importFrom methods is
 
+#### GROWTH PHASE SEGMENTATION
+
+### SEGMENTED INTERFACE
+
+### DPSEG INTERFACE
+
+
+#### GROWTH MODEL FITS
+
 ### GROFIT INTERFACE
 
 ### This would require to depend on grofit
@@ -291,7 +300,7 @@ grofit.2.control <- function(interactive=FALSE, plot=TRUE, ...) {
 #' @export
 gcFit.2 <- function (time, data, control = grofit.2.control())  {
 
-    require(grofit)
+    requireNamespace(grofit)
     
     if (methods::is(control) != "grofit.control")
         stop("control must be of class grofit.control!")

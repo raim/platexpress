@@ -13,10 +13,10 @@
 #'@section Dependencies: The package uses mostly functionality from R base,
 #' (graphics, grDevices, stats) but more functionality is available when
 #' \pkg{grofit} or \pkg{growthrates} are installed.
-#'@importFrom stats median sd qt approx spline filter predict coef na.omit
+#'@importFrom stats median sd qt approx spline filter predict coef na.omit quantile
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
-#' abline lines points polygon box axis par text title mtext stripchart
-#'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off
+#' abline lines points polygon box axis par text title mtext stripchart image
+#'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off gray.colors
 #'@importFrom tidyr separate
 #'@importFrom readxl read_excel
 #'@importFrom utils read.csv read.table
@@ -1732,7 +1732,7 @@ groupStats <- function(data, groups, yids) {
     for ( yid in yids ) {
         SE <- matrix(NA,nrow=nrow(data[[yid]]$data),ncol=length(groups))
         colnames(SE) <- names(groups)
-        MN<-CI<-SE
+        MN<-CI<-SD<-SE
         for ( sg in 1:length(groups) ) {
             wells <- groups[[sg]]
             #wells <- wells[wells%in%pwells] # filter for present wells
@@ -1742,10 +1742,11 @@ groupStats <- function(data, groups, yids) {
             dat <- data[[yid]]$data[,wells]
             ## calculate stats only for common x!
             MN[,sg] <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
+            SD[,sg] <- apply(dat,1,function(x) sd(x,na.rm=TRUE))
             SE[,sg] <- apply(dat,1,function(x) se(x,na.rm=TRUE))
             CI[,sg] <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
         }
-        data[[yid]]$stats <- list(mean=MN,ci05=CI,se=SE)
+        data[[yid]]$stats <- list(mean=MN,sd=SD,se=SE,ci05=CI)
     }
     data
 }
