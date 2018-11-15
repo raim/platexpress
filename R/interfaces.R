@@ -4,9 +4,189 @@
 #### GROWTH PHASE SEGMENTATION
 
 ### SEGMENTED INTERFACE
+#' Call \code{\link[segmented]{segmented}} for selected wells.
+#'
+#' The package \code{\link[segmented]{segmented}} splits curves
+#' into linear segments, given a list of pre-defined breakpoints.
+#' If the passed data is a biomass measure
+#' (eg. OD), and option \code{log=TRUE} the slopes correspond to local
+#' growth rate (per time unit). Missing (NA) or non-finite
+#' y-values will be removed. \code{\link[segmented]{segmented}} has
+#' a random initialization and sometimes fails. The function will
+#' attempt \code{maxtry} of calls before giving up.
+#' @param data \code{platexpress} data object
+#' @param yid ID of the \code{platexpress} data to use
+#' @param wells subset and plot order of wells
+#' @param log use ln of the data
+#' @param xid x-axis data ID in \code{platexpress} data
+#' @param man apply a moving average \code{\link{ma}} with \code{n=man}
+#' @param maxtry maximum number of attempts to run
+#' \code{\link[segmented]{segmented}}
+#' @param psis named list of breakpoints for wells, generated from
+#' argument \code{psi} if missing
+#' @param psi vector of breakpoints (x-values) to be passed to
+#' \code{\link[segmented]{segmented}}, generated as equal spaced breakpoints
+#' from argument \code{npsi} if missing
+#' @param npsi number of equally spaced breakpoints, used if both
+#' \code{psis} and \code{psi} are missing
+#' @param plot plot each fit
+#' @param verb progress messages
+#' @param ... arguments passed to \code{\link[segmented]{segmented}}
+#' @export
+segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
+                            man=1, maxtry=5,
+                            psis, psi, npsi=5, plot=FALSE, verb=0, ...) {
+
+    if ( missing(xid) ) xid <- data$xids[1]
+    X <- data[[xid]]
+
+    Y <- data[[yid]]$data
+    if ( man>1 )
+        Y <- apply(Y, 2, ma, man)
+    if ( log ) Y <- log(Y)
+
+    if ( missing(wells) )
+        wells <- colnames(Y)
+
+    if ( missing(psis) ) {
+        if ( missing(psi) ) 
+            psi <-  seq(min(X),max(X),length.out=npsi+2)[1:npsi+1]
+        psis <- rep(list(psi), length(wells))
+        names(psis) <- wells
+    }
+
+    segments <- list()
+    for ( well in wells ) {
+        if ( verb>0 )
+            cat(paste("calculating segments for well", well, "\t"))
+
+        y <- Y[,well]
+        x <- X[!is.na(y)]
+        y <- y[!is.na(y)]
+        x <- x[is.finite(y)]
+        y <- y[is.finite(y)]
+
+        if ( plot ) {
+            plot(x,y, type="b",cex=.5,main=paste(well))
+        }
+
+        ## linear model
+        out.lm <- lm(y~x)
+        ## TODO: count and warn
+        test <- NA
+        class(test) <- "try-error"
+        mxtry <- maxtry
+        while( class(test)[1]=="try-error" & mxtry>0 ) {
+            test <- try(o <- segmented::segmented(out.lm,psi=psis[[well]]))
+            if ( mxtry<5 )
+                warning(well, ": segmented failed in attempt:",
+                        maxtry-mxtry+1, "of", maxtry)
+            mxtry <- mxtry -1
+        }
+        
+
+        if ( verb>0 ) cat("\n")
+        if ( maxtry==0 ) {
+            warning(well, ": segmented failed")
+            next
+        }
+        segments[[well]] <- o
+        if ( plot ) {
+            segmented::plot.segmented(o,add=TRUE, col=2, lwd=3,
+                                      shade=TRUE, rug=FALSE)
+            segmented::lines.segmented(o,col=1, lwd=1)
+            abline(v=confint(o)$x[,1])
+            Sys.sleep(.4)
+          }
+    }
+    class(segments) <- "segmented_list"
+    invisible(segments)
+}
 
 ### DPSEG INTERFACE
+#' Call \code{\link[dpseg:dpseg]{dpseg}} for selected wells.
+#'
+#' The algorithm in \code{\link[dpseg:dpseg]{dpseg}} splits curves
+#' into linear segments.  If the passed data is a biomass measure
+#' (eg. OD), and option \code{log=TRUE} the slopes correspond to local
+#' growth rate (per time unit).
+#' @param data \code{platexpress} data object
+#' @param yid ID of the \code{platexpress} data to use
+#' @param wells subset and plot order of wells
+#' @param xid x-axis data ID in \code{platexpress} data
+#' @param log use ln of the data
+#' @param verb progress messages
+#' @param ... arguments passed to \code{\link[dpseg:dpseg]{dpseg}}
+#' @export
+dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
 
+    if ( missing(xid) ) xid <- data$xids[1]
+    x <- data[[xid]]
+
+    Y <- data[[yid]]$data
+    if ( log ) Y <- log(Y)
+
+    if ( missing(wells) )
+        wells <- colnames(Y)
+
+    ## call dpseg - TODO: use parallel?
+    segments <- sapply(wells, function(well) {
+        if ( verb>0 )
+            cat(paste("calculating segmentation of", yid,
+                      "from well", well, "\n"))
+        list(dpseg::dpseg(x=x, y=Y[,well], verb=verb, ...))
+    })
+    names(segments) <- wells
+    class(segments) <- "dpseg_list"
+    invisible(segments)
+}
+
+#' Add results from  \code{\link{dpseg_plate}}
+#' to \code{platexpress} object.
+#'
+#' Calls the \code{\link[dpseg:predict.dpseg]{predict.dpseg}} method
+#' to reconstruct the piecewise linear growth curve, and adds it to the
+#' \code{platexpress} data object. Option \code{add.slopes}
+#' allows to add a time-course of growth rates (slopes
+#' of the linear segments) instead.
+#' @param data \code{platexpress} data object
+#' @param fit \code{\link[dpseg:dpseg]{dpseg}} object
+#' @param ID data ID for the new object
+#' @param add.slopes add slopes instead of reconstructed data
+#' @param ... arguments passed to \code{\link{addModel}}
+#'@export
+addModel_dpseg <- function(data, fit, ID="y", add.slopes=FALSE, ...) {
+
+    if ( add.slopes ) {
+        ## get breakpoints and slopes
+        segs <- lapply(fit, function(x) x$segments[,c("x1","x2")])
+        slps <- lapply(fit, function(x) x$segments[1:nrow(x$segments),"slope"])
+
+        x <- data[[data$xids[1]]]
+
+        ## add mus as xy data
+        mus <- sapply(1:length(segs), function(i) {
+            sg <- segs[[i]]
+            sl <- slps[[i]]
+            yo <- rep(sl, each=2)
+            xo <- c(sapply(1:nrow(sg), function(j)
+                seq(sg[j,1], sg[j,2], length.out=2)))
+            
+            approx(xo,yo, xout=x)$y
+        })
+        colnames(mus) <- names(fit)
+        ## add to platexpress data to plot!
+        invisible(addData(data, ID=paste(ID,sep="_"),
+                          dat=mus, ...))
+    } else {
+        ## add modelled data
+        OD_segs <- lapply(fit, function(o) predict(o)$y)
+        OD_segs <- do.call(cbind, OD_segs)
+        ## add to platexpress data to plot!
+        invisible(addData(data, ID=paste(ID,"dpseg",sep="_"),
+                          dat=exp(OD_segs), ...))
+    }
+}
 
 #### GROWTH MODEL FITS
 
@@ -230,9 +410,6 @@ data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose, 
 grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.model",
                                    "lambda.spline","mu.spline","A.spline",
                                    "lambda.bt","mu.bt","A.bt")) {
-    ## TODO: addModel, using
-    ## this data to add modelled data to the plate data object
-    ## by calling the appropriate grofit function obtained from used.model
     params <- fit$gcTable[,p]
     colnames(params) <-sub("used","model",sub(".model","",colnames(params)))
     rownames(params) <- as.character(fit$gcTable[,"TestId"])
@@ -242,7 +419,7 @@ grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.mod
 
 
 ## adds predict data from grofit to plate data; called from addModel
-addGrofitModel <- function(data, fit, ID="model", ... ) {
+addModel_gcFit <- function(data, fit, ID="model", ... ) {
 
     testid <- "TestId" # this requires wells being used as TestId in grofit
 
@@ -726,7 +903,7 @@ grpredict <- function(fit, time) {
 
 
 ## adds predict data from growthrates to plate data; called from addModel
-addGrowthratesModel <- function(data, fit, ID="model", ... ) {
+addModel_growthrates <- function(data, fit, ID="model", ... ) {
 
     ## global time and new data matrix
     time <- data[[data$xids[1]]]
@@ -772,11 +949,14 @@ addGrowthratesModel <- function(data, fit, ID="model", ... ) {
 addModel <- function(data, fit, ID="model", ...) {
 
     if ( class(fit)=="gcFit" )
-        return(addGrofitModel(data=data, fit=fit, ID=ID, ...))
+        return(addModel_gcFit(data=data, fit=fit, ID=ID, ...))
+    else if ( class(fit)=="dpseg_list" )
+        return(addModel_dpseg(data=data, fit=fit, ID=ID, ...))
     else if ( length(grep("^multiple_",class(fit)))==1 )
-        return(addGrowthratesModel(data=data, fit=fit, ID=ID, ...))
+        return(addModel_growthrates(data=data, fit=fit, ID=ID, ...))
 
 }
+
 
 #' merge results to plate layout map
 #'
