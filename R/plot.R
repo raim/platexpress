@@ -768,3 +768,384 @@ viewPlate <- function(data, wells, wcols,
     plotparams <- list(ylims=ylims, xid=xid, xlim=xlim,  colors=pcols)
 }
 
+#' Dose-Response Box-Plots
+#'
+#' Plots a continuous value for each well as a function
+#' of an \code{amount} of a \code{substance} and make boxplots
+#' for all replicates at a given amount. Note that this is deprecated,
+#' and plots with error bars can be generated instead by
+#' function \code{\link{doseResponse}}.
+#' @param map a plate layout map with columns \code{amount} and some
+#' calculated value in column \code{val},
+#' eg. results from \pkg{grofit} or \pkg{growthrates}
+#' @param wells a list of well IDs to be used in the plot
+#' @param val the name of a column in \code{map} containing numeric values
+#' that should be plotted on y-axis
+#' @param amount the name of a column in \code{map} providing numeric values
+#' that should be plotted on x-axis, typically a substance added to wells
+#' in multiple replicates; the default value "amount" is automatically
+#' generated from appropriate plate layout files by \code{link{readPlateMap}}
+#' @param substance the name of a column in \code{map} providing the names of
+#' the substance in \code{amount}, used as x-axis label; if it doesn't
+#' correspond to a column, its value is directly used as label
+#' @param color the name of a column in \code{map} providing colors
+#' for each well; NOTE, that wells with the same \code{amount} should have
+#' the same color, only the first color for a given \code{amount} is used;
+#' Colors are automatically assigned from a color ramp mapped to the
+#' numerical range of \code{amount} by \code{link{readPlateMap}}
+#' @param na.y value to be used to plot replicates with \code{NA} in
+#' column \code{val}; set to NA to supress plotting
+#' @param ylim limits of the y-axis
+#' @param xnum use numerical x-axis instead of default categorical
+#' @param xlab alternative label for the x-axis, default is to use argument
+#' \code{substance}, or if this is a column in \code{map}, the substance
+#' indicated there
+#' @param ylab alternative label for the y-axis, default is to use argument \code{val}
+#' @export
+doseResponse.box <- function(map, wells, val, amount="amount",
+                             substance="substance",
+                             color="color", na.y=0, ylim, xnum=FALSE,
+                             xlab, ylab) {
+
+    if( missing(wells) ) wells <- map[,"well"]
+
+    if ( missing(xlab) )
+        xlab <- substance
+    if ( missing(ylab) )
+        ylab <- val
+    
+    wells <- match(wells,map[,"well"])
+
+    y <- map[wells,val]
+    x <- map[wells,amount]
+
+    ## get unique colors for unique sorted x, as it will appear in
+    ## boxplots
+    ## UGLY, TODO: less ugly?
+    if ( color %in% colnames(map) ) {
+        cl <- map[wells,color]
+        cl <- cl[order(x)]
+        cl <- cl[which(!duplicated(sort(x)))]
+        names(cl) <- sort(x[!duplicated(x)])
+    } else cl <- 1
+
+    if ( missing(ylim) )
+        ylim <- range(y,na.rm=TRUE)
+
+    if ( substance %in%  colnames(map) )
+        subid <- map[wells,substance][1]
+    else subid <- substance
+
+    #xlim <- range(x)
+    #if ( is.na(na.y) ) # if na.y are not plotted limit xaxis
+    #  xlim <- range(x[!is.na(y)])
+
+    y1 <- y
+    x1 <- x
+
+    if ( is.na(na.y) ) {
+      y1 <- y1[!is.na(y)]
+      x1 <- x1[!is.na(y)]
+    }
+
+    xaxt="s"
+    if ( xnum ) {# attempt numerical x-axis
+      x1 <- factor(x1, levels = do.call(seq, as.list(range(x1))))
+      xaxt <- "n"
+    }
+    cl <- cl[as.character(unique(sort(x1)))]
+    graphics::boxplot(y1~x1, border=cl,
+                      xlab=xlab,ylab=ylab,ylim=ylim, #xlim=xlim,
+                      na.action="na.pass",xaxt=xaxt, outline=FALSE)
+    graphics::stripchart(y1~x1,add=T, vertical=TRUE,col=cl,
+                         method="jitter", pch=1,cex=1,
+                         na.action="na.pass")
+    if ( xnum ) # numerical xaxis
+      axis(1)
+
+    if ( xnum )
+      x <- factor(x, levels=do.call(seq, as.list(range(x))))
+
+    nay <- y
+    nay[is.na(y)] <- na.y
+    nay[!is.na(y)] <- NA
+    graphics::stripchart(nay~x,add=T, vertical=TRUE,col="red",
+                         method="jitter", pch=4,cex=1/2,
+                         na.action="na.pass")
+}
+
+#' Dose-Response Plots with Error Bars
+#'
+#' plots a continuous value for each well as a function
+#' of an \code{amount} of a \code{substance} and generates error bars
+#' for all replicates at a given amount; returns the plotted mean values
+#' and error bar ranges.
+#' @param map a plate layout map with columns \code{amount} and some
+#' calculated value in column \code{val},
+#' eg. results from \pkg{grofit} or \pkg{growthrates}
+#' @param wells a list of well IDs to be used in the plot
+#' @param val the name of a column in \code{map} containing numeric values
+#' that should be plotted on y-axis
+#' @param amount the name of a column in \code{map} providing numeric values
+#' that should be plotted on x-axis, typically a substance added to wells
+#' in multiple replicates; the default value "amount" is automatically
+#' generated from appropriate plate layout files by \code{link{readPlateMap}}
+#' @param substance the name of a column in \code{map} providing the names of
+#' the substance in \code{amount}, used as x-axis label; if it doesn't
+#' correspond to a column, its value is directly used as label
+#' @param col either a valid color representation or the name of a column in
+#' \code{map} providing colors for each well or a, if \code{wells} is a named
+#' list of wells, a named vector of colors with matching names. NOTE for the
+#' second case, that wells with the same \code{amount} should have the same color, only
+#' the first color for a given \code{amount} is used; such colors are automatically
+#' assigned from a color ramp mapped to the numerical range of \code{amount} by
+#' \code{\link{readPlateMap}}, see \code{\link{amountColors}};
+#' @param pch pch of the mean value points
+#' @param bartype type of the error bars, "range" for the full range
+#' of the data, where the average value will be the
+#' \code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval,
+#' "sd" for the standard deviation, or "se" for the standard error where
+#' the average value will be the \code{\link[base:mean]{mean}};
+#' TODO: implement boxplot-like quantiles
+#' @param barl length of the horizontal lines of error bars (argument \code{length}
+#' of function \code{\link{arrows}})
+#' @param all logical indicating whether to plot all data points additionally to
+#' error bars
+#' @param line logical indicating whether to plot a line connecting the mean
+#' values
+#' @param na.y value to be used to plot replicates with \code{NA} in
+#' column \code{val}; set to NA to supress plotting
+#' @param add add data to existing plot
+#' @param ylim limits of the y-axis
+#' @param xlim limits of the x-axis
+#' @param ylab alternative label for the y-axis, default is to use argument \code{val}
+#' @param xlab alternative label for the x-axis, default is to use argument
+#' \code{substance}, or if this is a column in \code{map}, the substance
+#' indicated there
+#' @param verb print progress messages
+#' @param ... arguments passed on to the main setup \code{\link{plot}}
+#' @export
+doseResponse <- function(map, wells, val,
+                         amount="amount", substance="substance",
+                         col="black", pch=1, bartype="range", barl=.05,
+                         all=FALSE, line=TRUE, na.y=0, add=FALSE,
+                         ylim, xlim, ylab, xlab, verb=TRUE, ...) {
+
+  if( missing(wells) ) wells <- map[,"well"]
+
+  ## call recursively with add option if wells is a grouping list!
+  ## NOTE: interpreting col as a group color list!
+  ## TODO: use classes
+  if ( typeof(wells)=="list" ) {
+
+    ## record call
+    mc <- match.call(expand.dots = FALSE)
+
+    ## set common xlims/ylims
+    if ( missing(xlim) )
+      mc[["xlim"]] <- range(map[map$well%in%unlist(wells),amount],na.rm=TRUE)
+    if ( missing(ylim) )
+      mc[["ylim"]] <- range(map[map$well%in%unlist(wells),val],na.rm=TRUE)
+
+    ymats <- list()
+    for ( i in 1:length(wells) ) {
+      mc[["wells"]] <- wells[[i]]
+      mc[["add"]] <- i>1
+      if ( names(wells)[i]%in%names(col) )
+        mc[["col"]] <- col[[names(wells)[i]]]
+      if ( verb )
+        cat(paste("plotting group",i, names(wells)[i],"in color",
+                  mc[["col"]],"\n"))
+      #scan()
+      ymat <- eval(mc)
+      ymats <- append(ymats,list(ymat))
+    }
+    names(ymats) <- names(wells)
+    ## TODO: legend?
+    return(invisible(ymats))
+  }
+
+  wells <- match(wells,map[,"well"])
+
+  y <- map[wells,val]
+  x <- map[wells,amount]
+
+  if ( substance %in%  colnames(map) )
+    subid <- map[wells,substance][1]
+  else subid <- substance
+  if ( missing(xlab) )
+    xlab <- subid
+  if ( missing(ylab) )
+    ylab <- val
+
+  y1 <- y
+  x1 <- x
+
+  y1 <- y1[!is.na(y)]
+  x1 <- x1[!is.na(y)]
+
+  ## AVERAGE FUNCTION
+  avgf <- base::mean # for ci95%, SD, SE
+  if ( bartype=="range" ) avgf <- stats::median
+
+  ## calculate ranges for duplicates at each x
+  xlevels <- sort(unique(x1))
+  ymat <- matrix(NA,nrow=length(xlevels),ncol=4)
+
+  ## COLOR SELECTION
+  ## TODO: organize coloring schemes
+  ## default, first color from plotted xlevel or direct coloring
+  ## get unique colors for unique sorted x, as it will appear in
+  ## boxplots
+  ## UGLY, TODO: less ugly?
+  if ( col %in% colnames(map) ) {
+    cl <- sapply(xlevels,function(x) map[map[,amount]==x,col][1])
+    names(cl) <- xlevels
+    linecol <- 1
+  } else {
+    cl <- rep(col,length(xlevels))
+    linecol <- col
+  }
+  ## TODO: why does this appear in recursive call at end?
+  if ( length(xlevels)==0 ) {
+    warning("NO XLEVELS FOUND")
+    return(NULL)
+  }
+  for ( i in 1:length(xlevels) ) {
+    xi <- xlevels[i]
+    yi <- y1[x1==xi]
+    ymat[i,2] <- avgf(yi,na.rm=TRUE) # average function (mean or median)
+    ## TODO: allow "quantiles" for boxplot-like plot
+    if ( bartype=="range" )
+      ymat[i,3:4] <- range(yi,na.rm=TRUE)
+    else if ( bartype=="sd" )
+      ymat[i,3:4] <- c(ymat[i,2] + c(-1,1)*sd(yi,na.rm=TRUE))
+    else if ( bartype=="se" )
+      ymat[i,3:4] <- c(ymat[i,2] + c(-1,1)*se(yi,na.rm=TRUE))
+    else if ( bartype=="ci95")
+      ymat[i,3:4] <- c(ymat[i,2] + c(-1,1)*ci95(yi,na.rm=TRUE))
+    else stop("bar type ", bartype, " unknown\n")
+    ymat[i,1] <- xi
+  }
+  colnames(ymat) <- c(amount,val,paste0(bartype,c(".min",".max")))
+  if ( missing(ylim) )
+    ylim <- range(c(ymat[,2:4],ifelse(all,y,NA)),na.rm=TRUE)
+  if ( missing(xlim) ) {
+    if ( !is.na(na.y))
+      xlim <- range(x,na.rm=TRUE)
+    else xlim <- range(x1,na.rm=TRUE)
+  }
+
+  ## plot
+  if ( !add )
+    plot(x1, y1, col=NA, xlab=xlab, ylab=ylab, ylim=ylim, xlim=xlim, ...)
+  if ( line )
+    lines(ymat[,1],ymat[,2],col=linecol)
+  for ( i in 1:nrow(ymat) ) {
+    if ( ymat[i,3]<ymat[i,4])
+      arrows(ymat[i,1], ymat[i,3], ymat[i,1], ymat[i,4], length=barl, angle=90, code=3, col=cl[i])
+    else
+      points(ymat[i,1], ymat[i,3],pch=3, col=cl[i])
+    if ( !line )
+      points(ymat[i,1],ymat[i,2], col=cl[i], pch=pch)
+    if ( all )
+      points(x1[x1==ymat[i,1]], y1[x1==ymat[i,1]], pch=20, cex=.5, , col=cl[i])
+  }
+  if ( !is.na(na.y) & sum(is.na(y)) )
+    points(x[is.na(y)], rep(na.y,sum(is.na(y))), col="red", pch=4, cex=.5)
+  invisible(cbind.data.frame(ymat,color=cl,stringsAsFactors=FALSE))
+}
+
+#' Box-Plots of Data Ranges
+#'
+#' returns data for group of wells in a given range of the x-axis;
+#' if only one value is given, the values closest to this x-axis points
+#' are returned; see "Value" for details.
+#' @param data \code{\link{platexpress}} data, see \code{\link{readPlateData}}
+#' @param groups a grouping of wells, see \code{\link{getGroups}}
+#' @param rng x-axis range or a single point, for the latter the closest
+#' point will be selected or, if option \code{interpolate=TRUE} the
+#' value at \code{rng} will be interpolated using R base function
+#' \code{\link[stats:approxfun]{approx}}
+#' @param xid the x-axis ID, if multiple x-axes are present
+#' @param yid the y-axis data to be grouped
+#' @param interpolate interpolate data at \code{rng} (if a single value,
+#' see argument \code{rng})
+#' @param plot if TRUE a box-plot or bar-plot will be plotted
+#' @param type either "box" (default) or "bar" for box-plot or bar-plot
+#' @param etype type of statistics to be used for error bars in the bar-plot,
+#' either "ci" (default) for the 95%-confidence interval or "se" for
+#' the standard error
+#' @return Returns an annotated \code{data.frame} of the values, with well
+#' and group IDs in the first two columns. The values in the third column are
+#' raw values (if argument \code{rng} was a single point
+#' on the x-axis) or mean values (if argument\code{rng} was a range).
+#' @author Rainer Machne \email{raim@tbi.univie.ac.at}
+#' @export
+boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRUE, type="box", etype="ci") {
+
+    if ( missing(xid) )
+        xid <- data$xids[1]
+    ## cut data to selected range (closest point if length(rng)==1)
+    if ( length(rng)==2 ) {
+      cdat <- cutData(data, xid=xid, xrng=rng)
+    } else {
+      if ( !interpolate ) {
+        cdat <- cutData(data, xid=xid, xrng=rng)
+        ## get the actual point if only one points was chosen
+        if ( length(rng)==1) rng <- signif(unique(range(cdat[[xid]])),4)
+      } else { # interpolate using getData!
+        cdat <- data
+        cdat[[yid]]$data <- t(as.matrix(getData(data, ID=yid, xrng=rng, xid=xid, verb=TRUE)))
+      }
+    }
+    bdat <- rep(list(NA),length(groups))
+    names(bdat) <- names(groups)
+    for ( sg in 1:length(groups) )
+        bdat[[sg]] <- cdat[[yid]]$data[,groups[[sg]],drop=FALSE]
+    ## get means for all groups
+    pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
+
+    if ( plot ) {
+        #par(mai=c(1,.75,.1,.1))
+        if ( type=="box" )
+            boxplot(pdat,ylab=yid,las=2)
+        else if ( type=="bar" ) {
+            mn <- unlist(lapply(pdat, mean,na.rm=TRUE))
+            if ( etype=="ci" ) # 95% confidence interval
+                ci <- unlist(lapply(pdat, ci95,na.rm=TRUE))
+            else if ( etype=="se" ) { # standard error sd/n^2
+                sd <- unlist(lapply(pdat, sd, na.rm=TRUE))
+                n2 <- sqrt(unlist(lapply(pdat, length)))
+                ci <-  sd / n2
+            }
+
+            x <- barplot(mn,ylim=c(0,max(mn+ci,na.rm=TRUE)),ylab=yid,las=2)
+            arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
+                   length=.05,lwd=1.5)
+        }
+        legend("topright",paste("at",xid, "=",paste(rng,collapse="-")),
+               bty="n",box.lwd=0)
+    }
+
+    ## if a range was chosen and not a single point,
+    ## report mean values
+    if ( length(rng)>1 ) {
+        bdat <- lapply(pdat,function(x) {
+            y<-matrix(x,nrow=1)
+            colnames(y) <- names(x)
+            y})
+    }
+    ## summarize results if only one value was requested!
+    tmp <- data.frame(well=unlist(lapply(bdat, function(x) colnames(x))),
+                      group=unlist(sapply(1:length(bdat),
+                        function(x) rep(names(bdat)[x],length(bdat[[x]])),
+                        simplify = FALSE)),
+                      data=unlist(bdat))
+    colnames(tmp)[3] <- paste(yid,paste(rng,collapse="-"),sep="@")
+    bdat <- tmp
+    rownames(bdat) <- NULL
+
+    result <- bdat
+}
+
