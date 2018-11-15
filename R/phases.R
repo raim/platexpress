@@ -205,13 +205,18 @@ dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
 #' into linear segments, given a list of pre-defined breakpoints.
 #' If the passed data is a biomass measure
 #' (eg. OD), and option \code{log=TRUE} the slopes correspond to local
-#' growth rate (per time unit).
+#' growth rate (per time unit). Missing (NA) or non-finite
+#' y-values will be removed. \code{\link[segmented]{segmented}} has
+#' a random initialization and sometimes fails. The function will
+#' attempt \code{maxtry} of calls before giving up.
 #' @param data \code{platexpress} data object
 #' @param yid ID of the \code{platexpress} data to use
 #' @param wells subset and plot order of wells
 #' @param log use ln of the data
 #' @param xid x-axis data ID in \code{platexpress} data
 #' @param man apply a moving average \code{\link{ma}} with \code{n=man}
+#' @param maxtry maximum number of attempts to run
+#' \code{\link[segmented]{segmented}}
 #' @param psis named list of breakpoints for wells, generated from
 #' argument \code{psi} if missing
 #' @param psi vector of breakpoints (x-values) to be passed to
@@ -224,7 +229,8 @@ dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
 #' @param ... arguments passed to \code{\link[segmented]{segmented}}
 #' @export
 segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
-                            man=1, psis, psi, npsi=5, plot=FALSE, verb=0, ...) {
+                            man=1, maxtry=5,
+                            psis, psi, npsi=5, plot=FALSE, verb=0, ...) {
 
     if ( missing(xid) ) xid <- data$xids[1]
     X <- data[[xid]]
@@ -239,7 +245,7 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
 
     if ( missing(psis) ) {
         if ( missing(psi) ) 
-            psi <-  seq(min(x),max(x),length.out=npsi)[2:(npsi-1)]
+            psi <-  seq(min(X),max(X),length.out=npsi+2)[1:npsi+1]
         psis <- rep(list(psi), length(wells))
         names(psis) <- wells
     }
@@ -264,12 +270,13 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
         ## TODO: count and warn
         test <- NA
         class(test) <- "try-error"
-        maxtry <- 5
-        while( class(test)[1]=="try-error" & maxtry>0 ) {
+        mxtry <- maxtry
+        while( class(test)[1]=="try-error" & mxtry>0 ) {
             test <- try(o <- segmented::segmented(out.lm,psi=psis[[well]]))
-            if ( maxtry<5 )
-                warning(well, ": segmented failed trying again: ",maxtry)
-            maxtry <- maxtry -1
+            if ( mxtry<5 )
+                warning(well, ": segmented failed in attempt:",
+                        maxtry-mxtry+1, "of", maxtry)
+            mxtry <- mxtry -1
         }
         
 
@@ -280,7 +287,8 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
         }
         segments[[well]] <- o
         if ( plot ) {
-            segmented::plot.segmented(o,add=TRUE, col=2, lwd=3, shade=TRUE, rug=FALSE)
+            segmented::plot.segmented(o,add=TRUE, col=2, lwd=3,
+                                      shade=TRUE, rug=FALSE)
             segmented::lines.segmented(o,col=1, lwd=1)
             abline(v=confint(o)$x[,1])
             Sys.sleep(.4)

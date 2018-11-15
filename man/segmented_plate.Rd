@@ -4,8 +4,8 @@
 \alias{segmented_plate}
 \title{Call \code{\link[segmented]{segmented}} for selected wells.}
 \usage{
-segmented_plate(data, yid = "OD", wells, log = TRUE, xid, man = 1, psis,
-  psi, npsi = 5, plot = FALSE, verb = 0, ...)
+segmented_plate(data, yid = "OD", wells, log = TRUE, xid, man = 1,
+  maxtry = 5, psis, psi, npsi = 5, plot = FALSE, verb = 0, ...)
 }
 \arguments{
 \item{data}{\code{platexpress} data object}
@@ -19,6 +19,9 @@ segmented_plate(data, yid = "OD", wells, log = TRUE, xid, man = 1, psis,
 \item{xid}{x-axis data ID in \code{platexpress} data}
 
 \item{man}{apply a moving average \code{\link{ma}} with \code{n=man}}
+
+\item{maxtry}{maximum number of attempts to run
+\code{\link[segmented]{segmented}}}
 
 \item{psis}{named list of breakpoints for wells, generated from
 argument \code{psi} if missing}
@@ -41,5 +44,8 @@ The package \code{\link[segmented]{segmented}} splits curves
 into linear segments, given a list of pre-defined breakpoints.
 If the passed data is a biomass measure
 (eg. OD), and option \code{log=TRUE} the slopes correspond to local
-growth rate (per time unit).
+growth rate (per time unit). Missing (NA) or non-finite
+y-values will be removed. \code{\link[segmented]{segmented}} has
+a random initialization and sometimes fails. The function will
+attempt \code{maxtry} of calls before giving up.
 }
