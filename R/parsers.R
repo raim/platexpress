@@ -387,6 +387,9 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
     else if ( type=="Synergy" )
       data <- readSynergyPlate(files=files, data.ids=data.ids,
                                verb=verb, ...)
+    else if ( type=="BioLector" )
+      data <- readBioLectorPlate(files=files, data.ids=data.ids,
+                                 verb=verb, ...)
     else if ( type=="simple" ) # single data item in simple spreadsheet
       data <- readSimplePlate(files=files, data.ids=data.ids,
                               verb=verb, ...)
@@ -452,6 +455,9 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
 
     data
 }
+
+## TODO
+readBioLectorPlate <- function() {}
 
 #' Read Synergy Mx Plate Data
 #'
