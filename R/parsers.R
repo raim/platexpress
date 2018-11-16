@@ -457,7 +457,8 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
 }
 
 ## TODO
-readBioLectorPlate <- function() {}
+readBioLectorPlate <- function(files=files, data.ids=data.ids,
+                               verb=verb) {stop("NOT IMPLEMENTED")}
 
 #' Read Synergy Mx Plate Data
 #'
