@@ -61,7 +61,7 @@ data, to set parameters and to call \pkg{grofit}.
 }
 \details{
 The function returns a list of fits, as returnted by
-\code{platexpress}'s \code{\link[gcFit.2]{gcFit.2}}, a copy of
+\code{platexpress}'s \code{\link{gcFit.2}}, a copy of
 grofit's \code{\link[grofit:gcFit]{gcFit}} with modified
 plotting and interactive behaviour but otherwise identical.
 All run parameters of \code{\link[grofit:gcFit]{gcFit}}

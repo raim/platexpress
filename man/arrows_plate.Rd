@@ -4,8 +4,9 @@
 \alias{arrows_plate}
 \title{Draw arrows of growth phases.}
 \usage{
-arrows_plate(segments, wells, col = "#000000", wcol, xlim, maxmu, minmu,
-  lwd.max = 10, head.length = 0.02, add = TRUE, axis2 = !add, ...)
+arrows_plate(segments, wells, col = "#000000", ncol = "#F81894", wcol, xlim,
+  maxmu, minmu, lwd.max = 10, head.length = 0.02, add = TRUE,
+  axis2 = !add, ...)
 }
 \arguments{
 \item{segments}{a list of segmentations for each well as returned
@@ -13,7 +14,9 @@ by \code{\link{dpseg_plate}} or \code{\link{segmented_plate}}}
 
 \item{wells}{subset and plot order of wells}
 
-\item{col}{default color for arrows}
+\item{col}{default color for arrows from positive slope segments}
+
+\item{ncol}{default color for arrows from negative slope segments}
 
 \item{wcol}{well colors (named vector) for arrows and axis labels,
 eg. from plate layout map}

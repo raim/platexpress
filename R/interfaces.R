@@ -315,7 +315,7 @@ addModel.dpsegl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
 #' data, to set parameters and to call \pkg{grofit}.
 #'
 #' The function returns a list of fits, as returnted by
-#' \code{platexpress}'s \code{\link[gcFit.2]{gcFit.2}}, a copy of
+#' \code{platexpress}'s \code{\link{gcFit.2}}, a copy of
 #' grofit's \code{\link[grofit:gcFit]{gcFit}} with modified
 #' plotting and interactive behaviour but otherwise identical.
 #' All run parameters of \code{\link[grofit:gcFit]{gcFit}}
@@ -498,7 +498,10 @@ data2grofit <- function(data, yid, min.time, max.time, wells, plate, eid, dose, 
 #' the main results table of \code{\link[grofit:gcFit]{gcFit}}
 #' @seealso \code{\link{data2grofit}}, \code{\link{growthratesResults}}
 #' @export
-grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.model",
+### TODO: generic results.gcFit/.multiple_fits/.dpsegl/.segmented
+### for the latter this may involve alignment of growth phases?
+grofitResults <- function(fit, p=c("lambda.model","mu.model",
+                                   "A.model","used.model",
                                    "lambda.spline","mu.spline","A.spline",
                                    "lambda.bt","mu.bt","A.bt")) {
     params <- fit$gcTable[,p]
@@ -515,7 +518,7 @@ grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.mod
 #' Calls the \code{\link[stats:predict]{predict}} method
 #' for the growth curves fits returned
 #' by grofit's \code{\link[grofit:gcFit]{gcFit}} or via \code{platexpress}'s
-#' \code{\link[grofit:gcFit.2]{gcFit.2}} or
+#' \code{\link{gcFit.2}} or
 #' \code{\link{grofit_plate}}, and adds it to the
 #' \code{platexpress} data object.
 #' @param fit a \code{\link[grofit:gcFit]{gcFit}} object

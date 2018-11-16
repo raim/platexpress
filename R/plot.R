@@ -67,7 +67,8 @@ image_plate <- function(data, yid, wells, well.norm=FALSE, q.cut=.99,
 #' @param segments a list of segmentations for each well as returned
 #' by \code{\link{dpseg_plate}} or \code{\link{segmented_plate}}
 #' @param wells subset and plot order of wells
-#' @param col default color for arrows
+#' @param col default color for arrows from positive slope segments
+#' @param ncol default color for arrows from negative slope segments
 #' @param wcol well colors (named vector) for arrows and axis labels,
 #' eg. from plate layout map
 #' @param xlim correct left and right borders required for
@@ -81,7 +82,8 @@ image_plate <- function(data, yid, wells, well.norm=FALSE, q.cut=.99,
 #' @param axis2 add wells as y-axis tick labels
 #' @param ... arguments passed to \code{\link{arrows}}
 #' @export
-arrows_plate <- function(segments, wells, col="#000000", wcol, xlim,
+arrows_plate <- function(segments, wells,
+                         col="#000000", ncol="#F81894", wcol, xlim,
                          maxmu, minmu, lwd.max=10, head.length=0.02, 
                          add=TRUE, axis2=!add, ...) {
 
@@ -126,22 +128,23 @@ arrows_plate <- function(segments, wells, col="#000000", wcol, xlim,
     for ( i in 1:length(wells) ) {
         sg <- segs[[wells[i]]]
         sl <- slps[[wells[i]]]
+        ## growth phases: slope, direction as colors,lty,lwd
         ## dashed lines for negative mu
         lt <- as.numeric(sl<0) +1
-        ## colors and lwd scaled with mu, but cutoff
-        ## TODO: better control of scales and or alpha?
-        sl <- abs(sl)
-        sl[sl>maxmu] <- maxmu
-        sl[sl<minmu] <- minmu
-        ## line width
-        lw <- lwd.max*sl
         ## color
         cl <- rep(col, length(sg)-1)
+        cl[sl<0] <- ncol
         if ( !missing(wcol) )
             cl <- rep(wcol[wells[i]], length(sg)-1)
         ##if ( alpha.scale )
         ##alphas <- (sl-minmu.col)/(maxmu-minmu.col) 
         ##cl <- add_alphas(cl,alpha=alphas)
+        ## TODO: better control of scales and or alpha?
+        lwsl <- abs(sl)
+        lwsl[lwsl>maxmu] <- maxmu
+        lwsl[lwsl<minmu] <- minmu
+        ## line width
+        lw <- lwd.max*lwsl
         ## well coordinate
         arrows(y0=rep(length(wells)-i+1,length(sg)-1), #rep(i,length(sg)-1),
                x0=sg[2:length(sg)-1],

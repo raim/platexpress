@@ -20,7 +20,7 @@ to \code{platexpress} object.}
 Calls the \code{\link[stats:predict]{predict}} method
 for the growth curves fits returned
 by grofit's \code{\link[grofit:gcFit]{gcFit}} or via \code{platexpress}'s
-\code{\link[grofit:gcFit.2]{gcFit.2}} or
+\code{\link{gcFit.2}} or
 \code{\link{grofit_plate}}, and adds it to the
 \code{platexpress} data object.
 }
