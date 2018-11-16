@@ -312,18 +312,16 @@ addModel.dpsegl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
 #' for details of the fitting procedure. This high-level wrapper uses
 #' \code{platexpress} functions \code{\link{data2grofit}},
 #' \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
-#' data, to set parameters and to call \pkg{grofit},
-#' and then uses \code{\link{grofitResults}} to map results (lag phase lambda,
-#' growth rate mu and capacity A) to the \code{plate} layout map, and
-#' \code{\link{addModel}} to add modelled prediction of the fitted data to the
-#' plate \code{data} object. All calculations
-#' are executed by the original functions of \pkg{grofit}.
+#' data, to set parameters and to call \pkg{grofit}.
 #'
-#' The function returns a list containing the new \code{data} and \code{parameters}
-#' objects, as well as the original \code{grofit} result object.
-#' NOTE that the latter contains a lot more information on fit quality and
-#' run statistics. All run parameters of \code{\link[grofit:gcFit]{gcFit}}
-#' can be set via option \code{control}.
+#' The function returns a list of fits, as returnted by
+#' \code{platexpress}'s \code{\link[gcFit.2]{gcFit.2}}, a copy of
+#' grofit's \code{\link[grofit:gcFit]{gcFit}} with modified
+#' plotting and interactive behaviour but otherwise identical.
+#' All run parameters of \code{\link[grofit:gcFit]{gcFit}}
+#' can be set via option \code{control}, where \code{platexpress}'
+#' \code{\link{grofit.2.control}} add the differing plot and interactive
+#' settings.
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param plate plate layout map, see \code{\link{readPlateMap}}, columns
 #' of this map can be converted to \pkg{grofit} data
@@ -397,20 +395,6 @@ grofit_plate <- function(data, plate, yid, amount,
     odfit <- gcFit.2(gdat$time, gdat$data, control)
     invisible(odfit)
 
-  ### get grofit results
-  #params <- grofitResults(odfit)
-  ##colnames(params) <- paste0(yid,"_",colnames(params))
-  #
-  ### ... add to layout data
-  #if ( !missing(plate) )
-  #  params <- params[as.character(plate[,"well"]),]
-  #
-  ### add modelled data!
-  #data <- addModel(odfit, data, ID=paste0(yid,"_model"), col=col)
-  #
-  #res <- list(data=data, parameters=params, fit=odfit)
-  #
-  #res
 }
 
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
@@ -530,7 +514,8 @@ grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.mod
 #'
 #' Calls the \code{\link[stats:predict]{predict}} method
 #' for the growth curves fits returned
-#' by grofit's \code{\link[grofit:gcFit]{gcFit}} or via the interface
+#' by grofit's \code{\link[grofit:gcFit]{gcFit}} or via \code{platexpress}'s
+#' \code{\link[grofit:gcFit.2]{gcFit.2}} or
 #' \code{\link{grofit_plate}}, and adds it to the
 #' \code{platexpress} data object.
 #' @param fit a \code{\link[grofit:gcFit]{gcFit}} object
@@ -773,6 +758,10 @@ data2growthrates <- function(data, yid, wells, plate) {
                    well=factor(well, levels=colnames(dat)))
   df
 }
+
+## TODO: simple key word based switch
+## for growthrates functions?
+growthrates_plate <- function() {}
 
 #' parse fitted parameters from package \pkg{growthrates}
 #'

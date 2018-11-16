@@ -57,17 +57,15 @@ the documentation of package \pkg{grofit}
 for details of the fitting procedure. This high-level wrapper uses
 \code{platexpress} functions \code{\link{data2grofit}},
 \code{\link{grofit.2.control}}, \code{\link{gcFit.2}} to convert
-data, to set parameters and to call \pkg{grofit},
-and then uses \code{\link{grofitResults}} to map results (lag phase lambda,
-growth rate mu and capacity A) to the \code{plate} layout map, and
-\code{\link{addModel}} to add modelled prediction of the fitted data to the
-plate \code{data} object. All calculations
-are executed by the original functions of \pkg{grofit}.
+data, to set parameters and to call \pkg{grofit}.
 }
 \details{
-The function returns a list containing the new \code{data} and \code{parameters}
-objects, as well as the original \code{grofit} result object.
-NOTE that the latter contains a lot more information on fit quality and
-run statistics. All run parameters of \code{\link[grofit:gcFit]{gcFit}}
-can be set via option \code{control}.
+The function returns a list of fits, as returnted by
+\code{platexpress}'s \code{\link[gcFit.2]{gcFit.2}}, a copy of
+grofit's \code{\link[grofit:gcFit]{gcFit}} with modified
+plotting and interactive behaviour but otherwise identical.
+All run parameters of \code{\link[grofit:gcFit]{gcFit}}
+can be set via option \code{control}, where \code{platexpress}'
+\code{\link{grofit.2.control}} add the differing plot and interactive
+settings.
 }
