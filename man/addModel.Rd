@@ -2,7 +2,7 @@
 % Please edit documentation in R/interfaces.R
 \name{addModel}
 \alias{addModel}
-\title{Add \pkg{grofit}/\pkg{growthrates} fits to plate data object}
+\title{Add fits from various growth model interfaces to plate data object.}
 \usage{
 addModel(data, fit, ID = "model", ...)
 }
@@ -10,8 +10,9 @@ addModel(data, fit, ID = "model", ...)
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
 \item{fit}{result object from calls to batch model fitting functions
-from \pkg{grofit} or \pkg{growthrates}, ie. result of a call to
-\code{\link{gcFit.2}} or any of \pkg{growthrates} batch functions (`all_')}
+\code{\link{gcFit.2}}, any of \pkg{growthrates} batch functions (`all_'),
+or \code{platexpress} interfaces \code{\link{segmented_plate}}, and
+\code{\link{dpseg_plate}}.}
 
 \item{ID}{ID for the new data set}
 
@@ -19,5 +20,5 @@ from \pkg{grofit} or \pkg{growthrates}, ie. result of a call to
 color selection)}
 }
 \description{
-Add \pkg{grofit}/\pkg{growthrates} fits to plate data object
+TODO: depending on class of `fit`.
 }

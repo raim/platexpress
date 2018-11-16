@@ -3,6 +3,7 @@
 export(addData)
 export(addModel)
 export(addModel_dpseg)
+export(addModel_segmented)
 export(adjustBase)
 export(amountColors)
 export(arrows_plate)

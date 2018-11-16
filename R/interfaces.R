@@ -103,6 +103,54 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
     invisible(segments)
 }
 
+#' Add results from  \code{\link{segmented_plate}}
+#' to \code{platexpress} object.
+#'
+#' Calls the \code{\link[segmented:predict.segmented]{predict.segmented}} method
+#' to reconstruct the piecewise linear growth curve, and adds it to the
+#' \code{platexpress} data object. Option \code{add.slopes}
+#' allows to add a time-course of growth rates (slopes
+#' of the linear segments) instead.
+#' @param data \code{platexpress} data object
+#' @param fit list of \code{\link[segmented:segmented]{segmented}} objects
+#' @param ID data ID for the new object
+#' @param add.slopes add slopes instead of reconstructed data
+#' @param ... arguments passed to \code{\link{addModel}}
+#'@export
+addModel_segmented <- function(data, fit, ID="y", add.slopes=FALSE, ...) {
+
+    x <- data[[data$xids[1]]]
+
+    if ( add.slopes ) {
+        ## get breakpoints and slopes
+        segs <- lapply(fit, function(o) c(min(x),
+                                          segmented::confint.segmented(o)$x[,1],
+                                          max(x)))
+        slps <- lapply(fit, function(o) segmented::slope(o)$x[,1])
+
+
+        ## add mus as xy data
+        mus <- sapply(1:length(segs), function(i) {
+            sg <- segs[[i]]
+            sl <- slps[[i]]
+            yo <- rep(sl, each=10)
+            xo <- c(sapply(2:length(sg), function(j)
+                seq(sg[j-1]+1e-3, sg[j], length.out=10)))
+            approx(xo,yo, xout=x)$y
+        })
+        colnames(mus) <- names(fit)
+        ## add to platexpress data to plot!
+        invisible(addData(data, ID=paste(ID,sep="_"),
+                          dat=mus, ...))
+    } else {
+        ## add modelled data
+        OD_segs <- lapply(fit, function(o) predict(o,newdata=data.frame(x=x)))
+        OD_segs <- do.call(cbind, OD_segs)
+        ## add to platexpress data to plot!
+        invisible(addData(data, ID=paste(ID,sep="_"),dat=exp(OD_segs), ...))
+    }
+}
+
 ### DPSEG INTERFACE
 #' Call \code{\link[dpseg:dpseg]{dpseg}} for selected wells.
 #'
@@ -150,7 +198,7 @@ dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
 #' allows to add a time-course of growth rates (slopes
 #' of the linear segments) instead.
 #' @param data \code{platexpress} data object
-#' @param fit \code{\link[dpseg:dpseg]{dpseg}} object
+#' @param fit list of \code{\link[dpseg:dpseg]{dpseg}} objects
 #' @param ID data ID for the new object
 #' @param add.slopes add slopes instead of reconstructed data
 #' @param ... arguments passed to \code{\link{addModel}}
@@ -176,15 +224,13 @@ addModel_dpseg <- function(data, fit, ID="y", add.slopes=FALSE, ...) {
         })
         colnames(mus) <- names(fit)
         ## add to platexpress data to plot!
-        invisible(addData(data, ID=paste(ID,sep="_"),
-                          dat=mus, ...))
+        invisible(addData(data, ID=paste(ID,sep="_"), dat=mus, ...))
     } else {
         ## add modelled data
         OD_segs <- lapply(fit, function(o) predict(o)$y)
         OD_segs <- do.call(cbind, OD_segs)
         ## add to platexpress data to plot!
-        invisible(addData(data, ID=paste(ID,"dpseg",sep="_"),
-                          dat=exp(OD_segs), ...))
+        invisible(addData(data, ID=paste(ID,sep="_"), dat=exp(OD_segs), ...))
     }
 }
 
@@ -935,13 +981,14 @@ addModel_growthrates <- function(data, fit, ID="model", ... ) {
 ## * convertData with arguments grofit or growthrates
 ## * fitResults to get results
 
-#' Add \pkg{grofit}/\pkg{growthrates} fits to plate data object
+#' Add fits from various growth model interfaces to plate data object.
 #'
-#'
+#' TODO: depending on class of `fit`.
 #' @param data a platexpress data set, see \code{\link{readPlateData}}
 #' @param fit result object from calls to batch model fitting functions
-#' from \pkg{grofit} or \pkg{growthrates}, ie. result of a call to
-#' \code{\link{gcFit.2}} or any of \pkg{growthrates} batch functions (`all_')
+#' \code{\link{gcFit.2}}, any of \pkg{growthrates} batch functions (`all_'),
+#' or \code{platexpress} interfaces \code{\link{segmented_plate}}, and
+#' \code{\link{dpseg_plate}}.
 #' @param ID ID for the new data set
 #' @param ... arguments to \code{\link{addData}} (eg. \code{col} for
 #' color selection)
@@ -951,6 +998,8 @@ addModel <- function(data, fit, ID="model", ...) {
     if ( class(fit)=="gcFit" )
         return(addModel_gcFit(data=data, fit=fit, ID=ID, ...))
     else if ( class(fit)=="dpseg_list" )
+        return(addModel_dpseg(data=data, fit=fit, ID=ID, ...))
+    else if ( class(fit)=="segmented_list" )
         return(addModel_dpseg(data=data, fit=fit, ID=ID, ...))
     else if ( length(grep("^multiple_",class(fit)))==1 )
         return(addModel_growthrates(data=data, fit=fit, ID=ID, ...))
