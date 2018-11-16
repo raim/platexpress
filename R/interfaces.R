@@ -1,6 +1,65 @@
 ## @importFrom grofit  grofit.control gcFitModel gcFitSpline gcBootspline
 ## @importFrom methods is
 
+
+### COMMON INTERFACES for growthrates/grofit packages
+
+## TODO: more common functions for all packages
+## use function with() to pass specific arguments
+## * convertData with arguments grofit or growthrates
+## * fitResults to get results
+
+#' Add fits from various growth model interfaces to plate data object.
+#'
+#' @param fit result object from calls to batch model fitting functions
+#' \code{\link{gcFit.2}}, any of \pkg{growthrates} batch functions (`all_'),
+#' or \code{platexpress} interfaces \code{\link{segmented_plate}}, and
+#' \code{\link{dpseg_plate}}.
+#' @param data a platexpress data set, see \code{\link{readPlateData}}
+#' @param ID ID for the new data set
+#' @param ... arguments to \code{\link{addData}} (eg. \code{col} for
+#' color selection)
+#' @export
+addModel <- function(fit, data, ID="model", ...) {
+   UseMethod("addModel", fit)
+#    if ( class(fit)=="gcFit" )
+#        return(addModel_gcFit(fit=fit, data=data, ID=ID, ...))
+#    else if ( class(fit)=="dpseg_list" )
+#        return(addModel_dpseg(fit=fit, data=data, ID=ID, ...))
+#    else if ( class(fit)=="segmented_list" )
+#        return(addModel_dpseg(fit=fit, data=data, ID=ID, ...))
+#    else if ( length(grep("^multiple_",class(fit)))==1 )
+#        return(addModel_growthrates(fit=fit, data=data, ID=ID, ...))
+
+}
+
+
+#' merge results to plate layout map
+#'
+#' a wrapper around R base function \code{\link[base:merge]{merge}}
+#' for merging results per well into a \pkg{platexpress} layout map.
+#' Usage is the same as for \code{\link[base:merge]{merge}} with
+#' some defaults changed.
+#' @param x a plate layout map or any data frame with a "well" column
+#' specified by argument \code{by}
+#' @param y results: any data frame with a "well" column
+#' specified by argument \code{by}, see \code{\link[base:merge]{merge}}
+#' @param ID prefix added to to the merged \code{y} data
+#' @param by column name(s) by which to merge, 
+#' @param all.x keep all rows of \code{x}, see \code{\link[base:merge]{merge}}
+#' @param sort sort the results on the \code{by} column? See
+#' \code{\link[base:merge]{merge}}
+#' @param ... further arguments to \code{\link[base:merge]{merge}}
+#' @export
+mergeResults <- function(x, y, ID, by = "well", 
+                         all.x=TRUE, sort=FALSE, ...) {
+
+    if ( !missing(ID) )
+        colnames(y)[2:ncol(y)] <- paste0(ID, "_",colnames(y)[2:ncol(y)])
+    merge(x=x, y=y, by="well", all.x=all.x, sort=sort, ...)
+
+}
+
 #### GROWTH PHASE SEGMENTATION
 
 ### SEGMENTED INTERFACE
@@ -99,7 +158,7 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
             Sys.sleep(.4)
           }
     }
-    class(segments) <- "segmented_list"
+    class(segments) <- "segmentedl"
     invisible(segments)
 }
 
@@ -111,13 +170,13 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
 #' \code{platexpress} data object. Option \code{add.slopes}
 #' allows to add a time-course of growth rates (slopes
 #' of the linear segments) instead.
-#' @param data \code{platexpress} data object
 #' @param fit list of \code{\link[segmented:segmented]{segmented}} objects
+#' @param data \code{platexpress} data object
 #' @param ID data ID for the new object
 #' @param add.slopes add slopes instead of reconstructed data
 #' @param ... arguments passed to \code{\link{addModel}}
 #'@export
-addModel_segmented <- function(data, fit, ID="y", add.slopes=FALSE, ...) {
+addModel.segmentedl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
 
     x <- data[[data$xids[1]]]
 
@@ -185,7 +244,7 @@ dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
         list(dpseg::dpseg(x=x, y=Y[,well], verb=verb, ...))
     })
     names(segments) <- wells
-    class(segments) <- "dpseg_list"
+    class(segments) <- "dpsegl"
     invisible(segments)
 }
 
@@ -203,7 +262,7 @@ dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
 #' @param add.slopes add slopes instead of reconstructed data
 #' @param ... arguments passed to \code{\link{addModel}}
 #'@export
-addModel_dpseg <- function(data, fit, ID="y", add.slopes=FALSE, ...) {
+addModel.dpsegl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
 
     if ( add.slopes ) {
         ## get breakpoints and slopes
@@ -293,12 +352,13 @@ addModel_dpseg <- function(data, fit, ID="y", add.slopes=FALSE, ...) {
 #' @param verb print messages
 #' @param ... further arguments to \code{\link{grofit.2.control}}
 #'@export
-callGrofit <- function(data, plate, yid, amount,
-                       fields=c("strain","medium","substance"),
-                       control, model.type=c("richards","logistic",
-                                             "gompertz.exp","gompertz"),
-                       nboot.gc=100, plot=TRUE, interactive=FALSE, verb=TRUE,
-                       col="#0000FF", ...) {
+### do not add to model, just return list of results
+grofit_plate <- function(data, plate, yid, amount,
+                         fields=c("strain","medium","substance"),
+                         control, model.type=c("richards","logistic",
+                                               "gompertz.exp","gompertz"),
+                         nboot.gc=100, plot=TRUE, interactive=FALSE, verb=TRUE,
+                         col="#0000FF", ...) {
 
   ## take the first data, if none was passed
   if ( missing(yid) ) {
@@ -334,22 +394,23 @@ callGrofit <- function(data, plate, yid, amount,
     control$plot <- plot
 
   ## call grofit; redirect plots to detail pdf
-  odfit <- gcFit.2(gdat$time, gdat$data, control)
+    odfit <- gcFit.2(gdat$time, gdat$data, control)
+    invisible(odfit)
 
-  ## get grofit results
-  params <- grofitResults(odfit)
-  #colnames(params) <- paste0(yid,"_",colnames(params))
-
-  ## ... add to layout data
-  if ( !missing(plate) )
-    params <- params[as.character(plate[,"well"]),]
-
-  ## add modelled data!
-  data <- addModel(data, odfit, ID=paste0(yid,"_model"), col=col)
-
-  res <- list(data=data, parameters=params, fit=odfit)
-
-  res
+  ### get grofit results
+  #params <- grofitResults(odfit)
+  ##colnames(params) <- paste0(yid,"_",colnames(params))
+  #
+  ### ... add to layout data
+  #if ( !missing(plate) )
+  #  params <- params[as.character(plate[,"well"]),]
+  #
+  ### add modelled data!
+  #data <- addModel(odfit, data, ID=paste0(yid,"_model"), col=col)
+  #
+  #res <- list(data=data, parameters=params, fit=odfit)
+  #
+  #res
 }
 
 ### data2grofit: see AP12.R for example, TODO: fix example data and update file
@@ -464,8 +525,20 @@ grofitResults <- function(fit, p=c("lambda.model","mu.model","A.model","used.mod
 
 
 
-## adds predict data from grofit to plate data; called from addModel
-addModel_gcFit <- function(data, fit, ID="model", ... ) {
+#' Add results from  \code{\link{grofit_plate}}
+#' to \code{platexpress} object.
+#'
+#' Calls the \code{\link[stats:predict]{predict}} method
+#' for the growth curves fits returned
+#' by grofit's \code{\link[grofit:gcFit]{gcFit}} or via the interface
+#' \code{\link{grofit_plate}}, and adds it to the
+#' \code{platexpress} data object.
+#' @param fit a \code{\link[grofit:gcFit]{gcFit}} object
+#' @param data \code{platexpress} data object
+#' @param ID data ID for the new object
+#' @param ... arguments passed to \code{\link{addData}}
+#'@export
+addModel.gcFit <- function(fit, data, ID="model", ... ) {
 
     testid <- "TestId" # this requires wells being used as TestId in grofit
 
@@ -662,6 +735,157 @@ gcFit.2 <- function (time, data, control = grofit.2.control())  {
 
 
 
+
+### growthrates INTERFACE
+
+## TODO: wrapper to call all_easylinearfits etc?
+
+#' interface to package \pkg{growthrates}
+#'
+#' converts \code{platexpress} data for
+#' use with \pkg{growthrates}
+#' @param data platexpress data set, see \code{\link{readPlateData}}
+#' @param yid data ID of the data to be converted for growthrates, from
+#' \code{data$dataIDs}
+#' @param wells column IDs of the data set to use, if missing all wells
+#' are used
+#' @param plate plate layout map, see \code{\link{readPlateMap}}, to skip
+#' blanks wells
+#' annotation
+#' @seealso \code{\link{growthratesResults}}, \code{\link{data2grofit}}
+#' @export
+data2growthrates <- function(data, yid, wells, plate) {
+
+    if ( missing(wells) )
+        wells <- colnames(data[[yid]]$data)
+    ## filter by plate & rm blanks
+    if ( !missing(plate) ) {
+        wells <- wells[wells%in%plate[,"well"]]
+        wells <- wells[!plate[match(wells, plate[,"well"]),"blank"]]
+    }
+
+    dat <- data[[yid]]$data[,wells,drop=FALSE]
+
+  value <- c(dat)
+  time <- rep(data$Time, ncol(dat))
+  well <- rep(colnames(dat), each=nrow(dat))
+  df <- data.frame(time=time, value=value,
+                   well=factor(well, levels=colnames(dat)))
+  df
+}
+
+#' parse fitted parameters from package \pkg{growthrates}
+#'
+#' parses the output of \code{\link{gcFit.2}} into a table
+#' of the main model parameters, for each well
+#' @param fit growthrates object, the result of a call to fit functions
+#' from package \pkg{growthrates}, such as
+#' \code{\link[growthrates:all_easylinear]{all_easylinear}}
+#' @param scale.richards if the \code{beta} parameter from Richard's model is present,
+#' multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})
+#' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
+#' @export
+growthratesResults <- function(fit, scale.richards=TRUE) {
+  res <- data.frame(growthrates::results(fit), stringsAsFactors = FALSE)
+  ## replace names to match names in other packages
+  ## lambda, mu; but keep K (A for some models, but K in Monod)
+  nms <- colnames(res)
+  nms <- sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms)))
+  colnames(res) <- nms
+
+  if ( scale.richards & "beta" %in% nms ) {
+    ## NOTE/TODO: scaling mu from richards?
+    res[,"mumax"] <- res[,"mu"]
+    res[,"mu"] <- res[,"mu"] * res[,"beta"]
+    ## TODO: also scale gompertz?
+  }
+
+  data.frame(res)
+}
+
+#' `predict' hack for  \pkg{growthrates} fits
+#'
+#' \pkg{growthrates} provides several
+#' functions to fit growth rates, but their result objects have currently
+#' slighly different structures/interfaces. To obtain relevant data from
+#' \code{\link[growthrates:fit_easylinear]{fit_easylinear}} and
+#' \code{\link[growthrates:fit_spline]{fit_spline}} the fitted
+#' functions and parameters have to be directly used instead of just
+#' calling \code{\link[growthrates:predict]{predict}} methods.
+#' @param fit fit object from \pkg{growthrates} fitting functions, either
+#' a single fit (`fit_` functions) or a list of fits from batch functions
+#' (`all_` functions)
+#' @param time the time points at which growth data is to be predicted
+#' @export
+grpredict <- function(fit, time) {
+
+    ## NOTE: predict not implemented for easylinear and returning
+    ## the full spline fit for smooth.spline
+
+    ## call recursively for lists of fits
+    if ( length(grep("^multiple_",class(fit)))==1 )
+        return(lapply(fit@fits, grpredict, time=time))
+
+    if ( class(fit)=="easylinear_fit" ) {
+
+        xy <- fit@FUN(time, fit@par)[,1:2]
+        ## NOTE: easylinear requires to add the lag phase
+        xy[,1] <- xy[,1] + growthrates::coef(fit)["lag"]
+        ## interpolate to requested time and convert to matrix
+        xy <- matrix(unlist(approx(x=xy[,1], y=xy[,2], xout=time)),
+                            ncol=2, byrow=FALSE)
+
+    } else if ( class(fit)=="smooth.spline_fit" ) {
+
+        ## NOTE: smooth.spline predict returns full spline fit as log(y)
+        xy <- fit@FUN(time, fit@par)[,1:2]
+
+    } else {
+        xy <- growthrates::predict(fit, newdata=list(time=time))[,c("time","y")]
+    }
+    xy
+}
+
+
+## adds predict data from growthrates to plate data; called from addModel
+#' Add results from  package \pkg{growthrates}
+#' to \code{platexpress} object.
+#'
+#' Calls the appropriate \code{\link[stats:predict]{predict}} methods
+#' for the growth curves fits returned by
+#' by \pkg{growthrates}'s batch functions (`all_`),
+#' and adds results to the \code{platexpress} data object.
+#' @param fit a \code{\link[grofit:gcFit]{gcFit}} object
+#' @param data \code{platexpress} data object
+#' @param ID data ID for the new object
+#' @param ... arguments passed to \code{\link{addData}}
+#'@export
+addModel.multiple_fits <- function(fit, data, ID="model", ... ) {
+
+    ## global time and new data matrix
+    time <- data[[data$xids[1]]]
+
+    ## newdat matrix, just copy first data set
+    newdat <- data[[data$dataIDs[1]]]$data
+    newdat[] <- NA
+
+    ## get results
+    lst <- grpredict(fit, time=time)
+
+    ## convert to matrix
+    lst <- lapply(lst, function(x) x[,2])
+    newdat[,names(lst)] <- matrix(unlist(lst),
+                                  ncol = length(lst), byrow = FALSE)
+
+
+    ## add and return
+    addData(data=data, ID=ID, dat= newdat,
+            processing=paste("growthrates",class(fit),"prediction"), ...)
+
+}
+
+
+
 ### cellGrowth INTERFACE
 
 #' hack of the cellGrowth package function
@@ -835,200 +1059,4 @@ fitCellGrowths.2 = function(data, yid, xid, wells, ...) {
     }
     names(fits) <- wells
     fits
-}
-
-### growthrates INTERFACE
-
-## TODO: wrapper to call all_easylinearfits etc?
-
-#' interface to package \pkg{growthrates}
-#'
-#' converts \code{platexpress} data for
-#' use with \pkg{growthrates}
-#' @param data platexpress data set, see \code{\link{readPlateData}}
-#' @param yid data ID of the data to be converted for growthrates, from
-#' \code{data$dataIDs}
-#' @param wells column IDs of the data set to use, if missing all wells
-#' are used
-#' @param plate plate layout map, see \code{\link{readPlateMap}}, to skip
-#' blanks wells
-#' annotation
-#' @seealso \code{\link{growthratesResults}}, \code{\link{data2grofit}}
-#' @export
-data2growthrates <- function(data, yid, wells, plate) {
-
-    if ( missing(wells) )
-        wells <- colnames(data[[yid]]$data)
-    ## filter by plate & rm blanks
-    if ( !missing(plate) ) {
-        wells <- wells[wells%in%plate[,"well"]]
-        wells <- wells[!plate[match(wells, plate[,"well"]),"blank"]]
-    }
-
-    dat <- data[[yid]]$data[,wells,drop=FALSE]
-
-  value <- c(dat)
-  time <- rep(data$Time, ncol(dat))
-  well <- rep(colnames(dat), each=nrow(dat))
-  df <- data.frame(time=time, value=value,
-                   well=factor(well, levels=colnames(dat)))
-  df
-}
-
-#' parse fitted parameters from package \pkg{growthrates}
-#'
-#' parses the output of \code{\link{gcFit.2}} into a table
-#' of the main model parameters, for each well
-#' @param fit growthrates object, the result of a call to fit functions
-#' from package \code{\link[growthrates]{growthrates}}, such as
-#' \code{\link[growthrates:all_easylinear]{all_easylinear}}
-#' @param scale.richards if the \code{beta} parameter from Richard's model is present,
-#' multiply growthrate \code{mu} with \code{beta} (original stored as \code{mumax})
-#' @seealso \code{\link{data2growthrates}}, \code{\link{grofitResults}}
-#' @export
-growthratesResults <- function(fit, scale.richards=TRUE) {
-  res <- data.frame(growthrates::results(fit), stringsAsFactors = FALSE)
-  ## replace names to match names in other packages
-  ## lambda, mu; but keep K (A for some models, but K in Monod)
-  nms <- colnames(res)
-  nms <- sub("y0","X0",sub("lag","lambda",sub("mumax","mu",nms)))
-  colnames(res) <- nms
-
-  if ( scale.richards & "beta" %in% nms ) {
-    ## NOTE/TODO: scaling mu from richards?
-    res[,"mumax"] <- res[,"mu"]
-    res[,"mu"] <- res[,"mu"] * res[,"beta"]
-    ## TODO: also scale gompertz?
-  }
-
-  data.frame(res)
-}
-
-#' `predict' hack for  \pkg{growthrates} fits
-#'
-#' \pkg{growthrates} provides several
-#' functions to fit growth rates, but their result objects have currently
-#' slighly different structures/interfaces. To obtain relevant data from
-#' \code{\link[growthrates:fit_easylinear]{fit_easylinear}} and
-#' \code{\link[growthrates:fit_spline]{fit_spline}} the fitted
-#' functions and parameters have to be directly used instead of just
-#' calling \code{\link[growthrates:predict]{predict}} methods.
-#' @param fit fit object from \pkg{growthrates} fitting functions, either
-#' a single fit (`fit_' functions) or a list of fits from batch functions
-#' (`all_' functions)
-#' @param time the time points at which growth data is to be predicted
-#' @export
-grpredict <- function(fit, time) {
-
-    ## NOTE: predict not implemented for easylinear and returning
-    ## the full spline fit for smooth.spline
-
-    ## call recursively for lists of fits
-    if ( length(grep("^multiple_",class(fit)))==1 )
-        return(lapply(fit@fits, grpredict, time=time))
-
-    if ( class(fit)=="easylinear_fit" ) {
-
-        xy <- fit@FUN(time, fit@par)[,1:2]
-        ## NOTE: easylinear requires to add the lag phase
-        xy[,1] <- xy[,1] + growthrates::coef(fit)["lag"]
-        ## interpolate to requested time and convert to matrix
-        xy <- matrix(unlist(approx(x=xy[,1], y=xy[,2], xout=time)),
-                            ncol=2, byrow=FALSE)
-
-    } else if ( class(fit)=="smooth.spline_fit" ) {
-
-        ## NOTE: smooth.spline predict returns full spline fit as log(y)
-        xy <- fit@FUN(time, fit@par)[,1:2]
-
-    } else {
-        xy <- growthrates::predict(fit, newdata=list(time=time))[,c("time","y")]
-    }
-    xy
-}
-
-
-## adds predict data from growthrates to plate data; called from addModel
-addModel_growthrates <- function(data, fit, ID="model", ... ) {
-
-    ## global time and new data matrix
-    time <- data[[data$xids[1]]]
-
-    ## newdat matrix, just copy first data set
-    newdat <- data[[data$dataIDs[1]]]$data
-    newdat[] <- NA
-
-    ## get results
-    lst <- grpredict(fit, time=time)
-
-    ## convert to matrix
-    lst <- lapply(lst, function(x) x[,2])
-    newdat[,names(lst)] <- matrix(unlist(lst),
-                                  ncol = length(lst), byrow = FALSE)
-
-
-    ## add and return
-    addData(data=data, ID=ID, dat= newdat,
-            processing=paste("growthrates",class(fit),"prediction"), ...)
-
-}
-
-
-### COMMON INTERFACES for growthrates/grofit packages
-
-## TODO: more common functions for all packages
-## use function with() to pass specific arguments
-## * convertData with arguments grofit or growthrates
-## * fitResults to get results
-
-#' Add fits from various growth model interfaces to plate data object.
-#'
-#' TODO: depending on class of `fit`.
-#' @param data a platexpress data set, see \code{\link{readPlateData}}
-#' @param fit result object from calls to batch model fitting functions
-#' \code{\link{gcFit.2}}, any of \pkg{growthrates} batch functions (`all_'),
-#' or \code{platexpress} interfaces \code{\link{segmented_plate}}, and
-#' \code{\link{dpseg_plate}}.
-#' @param ID ID for the new data set
-#' @param ... arguments to \code{\link{addData}} (eg. \code{col} for
-#' color selection)
-#' @export
-addModel <- function(data, fit, ID="model", ...) {
-
-    if ( class(fit)=="gcFit" )
-        return(addModel_gcFit(data=data, fit=fit, ID=ID, ...))
-    else if ( class(fit)=="dpseg_list" )
-        return(addModel_dpseg(data=data, fit=fit, ID=ID, ...))
-    else if ( class(fit)=="segmented_list" )
-        return(addModel_dpseg(data=data, fit=fit, ID=ID, ...))
-    else if ( length(grep("^multiple_",class(fit)))==1 )
-        return(addModel_growthrates(data=data, fit=fit, ID=ID, ...))
-
-}
-
-
-#' merge results to plate layout map
-#'
-#' a wrapper around R base function \code{\link[base:merge]{merge}}
-#' for merging results per well into a \pkg{platexpress} layout map.
-#' Usage is the same as for \code{\link[base:merge]{merge}} with
-#' some defaults changed.
-#' @param x a plate layout map or any data frame with a "well" column
-#' specified by argument \code{by}
-#' @param y results: any data frame with a "well" column
-#' specified by argument \code{by}, see \code{\link[base:merge]{merge}}
-#' @param ID prefix added to to the merged \code{y} data
-#' @param by column name(s) by which to merge, 
-#' @param all.x keep all rows of \code{x}, see \code{\link[base:merge]{merge}}
-#' @param sort sort the results on the \code{by} column? See
-#' \code{\link[base:merge]{merge}}
-#' @param ... further arguments to \code{\link[base:merge]{merge}}
-#' @export
-mergeResults <- function(x, y, ID, by = "well", 
-                         all.x=TRUE, sort=FALSE, ...) {
-
-    if ( !missing(ID) )
-        colnames(y)[2:ncol(y)] <- paste0(ID, "_",colnames(y)[2:ncol(y)])
-    merge(x=x, y=y, by="well", all.x=all.x, sort=sort, ...)
-
 }

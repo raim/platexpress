@@ -4,15 +4,15 @@
 \alias{addModel}
 \title{Add fits from various growth model interfaces to plate data object.}
 \usage{
-addModel(data, fit, ID = "model", ...)
+addModel(fit, data, ID = "model", ...)
 }
 \arguments{
-\item{data}{a platexpress data set, see \code{\link{readPlateData}}}
-
 \item{fit}{result object from calls to batch model fitting functions
 \code{\link{gcFit.2}}, any of \pkg{growthrates} batch functions (`all_'),
 or \code{platexpress} interfaces \code{\link{segmented_plate}}, and
 \code{\link{dpseg_plate}}.}
+
+\item{data}{a platexpress data set, see \code{\link{readPlateData}}}
 
 \item{ID}{ID for the new data set}
 
@@ -20,5 +20,5 @@ or \code{platexpress} interfaces \code{\link{segmented_plate}}, and
 color selection)}
 }
 \description{
-TODO: depending on class of `fit`.
+Add fits from various growth model interfaces to plate data object.
 }

@@ -8,8 +8,8 @@ grpredict(fit, time)
 }
 \arguments{
 \item{fit}{fit object from \pkg{growthrates} fitting functions, either
-a single fit (`fit_' functions) or a list of fits from batch functions
-(`all_' functions)}
+a single fit (`fit_` functions) or a list of fits from batch functions
+(`all_` functions)}
 
 \item{time}{the time points at which growth data is to be predicted}
 }
