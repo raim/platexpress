@@ -10,8 +10,9 @@ Description: The platexpress package provides a quick&easy interface to
 Depends:
     R (>= 2.5.0)
 Imports:
-    readxl, tidyr
+    tidyr
 Suggests:
+    readxl,
     dpseg,
     segmented,
     grofit,
