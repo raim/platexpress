@@ -387,10 +387,11 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
     else if ( type=="Synergy" )
       data <- readSynergyPlate(files=files, data.ids=data.ids,
                                verb=verb, ...)
-    else if ( type=="BioLector" )
+    else if ( type=="BioLector" ) {
       data <- readBioLectorPlate(files=files, data.ids=data.ids,
                                  verb=verb, ...)
-    else if ( type=="simple" ) # single data item in simple spreadsheet
+      interpolate <- FALSE
+    } else if ( type=="simple" ) # single data item in simple spreadsheet
       data <- readSimplePlate(files=files, data.ids=data.ids,
                               verb=verb, ...)
 
@@ -457,8 +458,69 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
 }
 
 ## TODO
+## headerline <- 23 ## line of data header in BioLector result file
 readBioLectorPlate <- function(files=files, data.ids=data.ids,
-                               verb=verb) {stop("NOT IMPLEMENTED")}
+                               headerline=23, hnrw=20, 
+                               verb=verb) {
+
+
+
+    ## parse header to get experiment information
+    filt <- read.csv2(files, nrow=hnrw,
+                      stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
+
+    nrw <- as.numeric(filt[filt[,1]=="MTP ROWS",2])
+    ncl <- as.numeric(filt[filt[,1]=="MTP COLUMNS",2])
+    nfl <- as.numeric(filt[filt[,1]=="FILTERSETS",2])
+    
+    skip <- which(filt[,1]=="FILTERSET") -2
+
+    ## parse header again to get filter information
+    filters <- read.csv2(files, skip=skip, nrow=nfl,
+                         stringsAsFactors=FALSE, header=TRUE)
+              
+
+
+    dat <- read.csv2(files, skip=headerline, stringsAsFactors=FALSE, fill=TRUE)
+
+    fidx <- grep("READING", colnames(dat)) # column with filter info
+
+    ## get time
+    tidx <- grep("TIME", dat[,fidx])
+    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])
+    
+    ## get calibrated rows
+    didx <- grep("Cal.", dat[,fidx])
+    data <- as.data.frame(t(dat[didx,fidx:ncol(dat)]), stringsAsFactors=FALSE)
+    colnames(data) <- dat[didx,1]
+
+    data <- list()
+    for ( i in 1:nrow(filters) ) {
+        didx <- grep(paste0("Cal..*FS=",filters[i,1]), dat[,fidx])
+        dt <- t(dat[didx,(fidx+1):ncol(dat)])
+        colnames(dt) <- dat[didx,1]
+        data[[i]] <- list()
+        data[[i]]$time <- time
+        data[[i]]$data <- as.matrix(dt)
+    }
+    names(data) <- trimws(filters[,2])
+    
+    data$dataIDs <- names(data)
+    data$Time <- time
+    data$xids <- "Time"
+
+    ## TODO: use this for all data parsers, although
+    ## only required for viewPlate; but could be used for
+    ## auto-grouping
+    data$wells$plate <- t(matrix(colnames(data[[data$dataIDs[1]]]$data),
+                                 nrow=ncl,ncol=nrw))
+    data$wells$rows <- toupper(letters[1:nrw])
+    data$wells$cols <- sprintf("%02d", 1:ncl)
+        
+    class(data) <- "platedata"
+    ## TODO: get temperature and humidity
+    data
+}
 
 #' Read Synergy Mx Plate Data
 #'

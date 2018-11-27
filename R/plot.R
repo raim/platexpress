@@ -595,6 +595,12 @@ viewPlate <- function(data, wells, wcols,
                       xid, xscale=FALSE,xlim,
                       yids, dtype="data", pcols, yscale=TRUE, ylims, ylim,
                       log="", axes, yaxis="", legpos="topleft", add.legend=TRUE) {
+    ## TODO: ADAPT viewPlate to use rows and cols from data!!?
+    ## currently for BioLector only!!
+    if ( "wells"%in%names(data) ) {
+        rows <- data$wells$rows
+        cols <- data$wells$cols
+    }
 
     ## which wells to plot?
     if ( missing(wells) ) {
