@@ -499,16 +499,34 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
 
     data <- list()
     for ( i in 1:nrow(filters) ) {
+        if ( verb ) cat(paste("parsing", trimws(filters[i,2])))
         didx <- grep(paste0("Cal..*FS=",filters[i,1]), dat[,fidx])
+        ## take raw values if no calibration exists
+        if ( length(didx)==0 ) {
+            didx <- which(dat[,fidx]==filters[i,1])
+            if ( verb) cat(" - RAW VALUES")
+        }
         dt <- t(dat[didx,(fidx+1):ncol(dat)])
         colnames(dt) <- dat[didx,1]
         data[[i]] <- list()
         data[[i]]$time <- time
         data[[i]]$data <- as.matrix(dt)
+        if ( verb ) cat("\n")
     }
     names(data) <- trimws(filters[,2])
     
-    data$dataIDs <- names(data)
+    dataIDs <- names(data)
+
+    ## filter only requested data
+    if ( !missing(data.ids) ) {
+        if ( verb )
+            cat(paste("skipping",
+                      paste(dataIDs[!dataIDs%in%data.ids],collapse=";"), "\n"))
+        data <- data[dataIDs%in%data.ids]
+        dataIDs <- dataIDs[dataIDs%in%data.ids]
+    }
+    data$dataIDs <- dataIDs
+    
     data$Time <- time
     data$xids <- "Time"
 
