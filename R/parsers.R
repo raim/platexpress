@@ -457,17 +457,19 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
     data
 }
 
-## TODO
+## TODO: get rid of german format
+## TODO: what's wrong with GFP?
+## TODO: get temperature and humidity
 ## headerline <- 23 ## line of data header in BioLector result file
 readBioLectorPlate <- function(files=files, data.ids=data.ids,
-                               headerline=23, hnrw=20, 
+                               headerline=23, hnrw=20, sep=";", dec=",",
                                verb=verb) {
 
 
 
     ## parse header to get experiment information
-    filt <- read.csv2(files, nrow=hnrw,
-                      stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
+    filt <- read.csv(files, nrow=hnrw, sep = sep, dec = dec,
+                     stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
 
     nrw <- as.numeric(filt[filt[,1]=="MTP ROWS",2])
     ncl <- as.numeric(filt[filt[,1]=="MTP COLUMNS",2])
@@ -476,12 +478,13 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
     skip <- which(filt[,1]=="FILTERSET") -2
 
     ## parse header again to get filter information
-    filters <- read.csv2(files, skip=skip, nrow=nfl,
+    filters <- read.csv(files, skip=skip, nrow=nfl, sep = sep, dec = dec,
                          stringsAsFactors=FALSE, header=TRUE)
               
 
 
-    dat <- read.csv2(files, skip=headerline, stringsAsFactors=FALSE, fill=TRUE)
+    dat <- read.csv(files, skip=headerline, sep = sep, dec = dec,
+                    stringsAsFactors=FALSE, fill=TRUE)
 
     fidx <- grep("READING", colnames(dat)) # column with filter info
 
