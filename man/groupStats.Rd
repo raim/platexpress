@@ -4,7 +4,7 @@
 \alias{groupStats}
 \title{Group Statistics}
 \usage{
-groupStats(data, groups, yids)
+groupStats(data, groups, yids, xid)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
@@ -14,6 +14,9 @@ groupStats(data, groups, yids)
 
 \item{yids}{data IDs for which statistics should be reported,
 if missing stats for all data will be reported}
+
+\item{xid}{ID of a data-set in the input data that can be used as x-axis
+instead of the default Time vector}
 }
 \value{
 Returns a data structure similar to the input data, but

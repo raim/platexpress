@@ -887,3 +887,40 @@ readbmg <- function(files, time.format=" %H h %M min", sep=";", dec=",", verb=TR
     }
 
 }
+
+
+#' writes out all data from the `platexpress` object
+#'
+#' calls \code{\link{write.csv}} for each data type and writes
+#' them to separate files names `<file>_<dataID>.csv`.
+#' @param data \code{platexpress} data object
+#' @param file either a character string naming a file or a connection open
+#' for writing.  ‘""’ indicates output to the console.
+#' @param yids IDs of the data to be written; if missing, all data will
+#' written
+#' @param xid ID of a data-set in the input data that can be used as x-axis
+#' instead of the default Time vector
+#' @param dtype type of the data to be plotted, default is the main 'data', but
+#' e.g. 'orig' allows to plot the original data w/o processing (e.g.
+#' interpolation, blank correction, etc.)
+#' @param verb print messages if \code{>1}
+#' @param ... arguments passed to write.csv
+#' @export
+writeData <- function(data, file, yids, xid, dtype="data", verb=1, ...) {
+
+    ## which data to write?
+    if ( missing(yids) ) yids <- data$dataIDs
+    ## get x-axis data: time and temperature or another data set
+    if ( missing(xid) )
+        xid <- data$xids[1]
+    x <- data[[xid]]
+
+    for ( id in yids ) {
+        file.name <- paste0(file, "_", make.names(id), ".csv")
+        if ( verb ) cat(paste("writing", file.name, "\n"))
+        dat <- data[[id]][[dtype]]
+        dat <- cbind(x, dat)
+        colnames(dat)[1] <- xid
+        write.csv(dat, file.name, row.names=FALSE, ...)
+    }
+}

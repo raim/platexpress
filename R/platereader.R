@@ -19,7 +19,7 @@
 #'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off gray.colors
 #'@importFrom tidyr separate
 ##@importFrom readxl read_excel
-#'@importFrom utils read.csv read.table
+#'@importFrom utils read.csv read.table write.csv
 NULL
 
 
@@ -1106,6 +1106,8 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 #' \code{\link{getGroups}}
 #' @param yids data IDs for which statistics should be reported,
 #' if missing stats for all data will be reported
+#' @param xid ID of a data-set in the input data that can be used as x-axis
+#' instead of the default Time vector
 #' @details Calculates the simple statistics over grouped wells
 #' (means, 95% confidence intervals, stdandard errors) along the x-axis
 #' (usually time).
@@ -1114,11 +1116,15 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 #' @seealso \code{\link{readPlateMap}}, \code{\link{viewGroups}}
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-groupStats <- function(data, groups, yids) {
+groupStats <- function(data, groups, yids, xid) {
 
     if ( missing(yids) )
         yids <- data$dataIDs
+    ## get x-axis data: time and temperature or another data set
+    if ( missing(xid) )
+        xid <- data$xids[1]
 
+    new <- list()
     for ( yid in yids ) {
         SE <- matrix(NA,nrow=nrow(data[[yid]]$data),ncol=length(groups))
         colnames(SE) <- names(groups)
@@ -1136,9 +1142,15 @@ groupStats <- function(data, groups, yids) {
             SE[,sg] <- apply(dat,1,function(x) se(x,na.rm=TRUE))
             CI[,sg] <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
         }
-        data[[yid]]$stats <- list(mean=MN,sd=SD,se=SE,ci05=CI)
+        new[[yid]] <- list(mean=MN,sd=SD,se=SE,ci05=CI)
     }
-    data
+    names(new) <- yids
+
+    ## add x-axis
+    new[[length(new)+1]] <- data[[xid]] # TODO: choose xaxis
+    names(new)[length(new)] <- xid
+    
+    new
 }
 
 #' Group Colors
