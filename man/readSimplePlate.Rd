@@ -4,8 +4,8 @@
 \alias{readSimplePlate}
 \title{Read Simple Plate Data Tables}
 \usage{
-readSimplePlate(files, data.ids, skip, sep = "\\t", time.format = "\%M:\%S",
-  verb = TRUE)
+readSimplePlate(files, data.ids, nrow, time.format = "\%M:\%S", verb = TRUE,
+  ...)
 }
 \arguments{
 \item{files}{list of one or more data files}
@@ -13,13 +13,13 @@ readSimplePlate(files, data.ids, skip, sep = "\\t", time.format = "\%M:\%S",
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
 
-\item{skip}{lines to skip before parsing data}
+\item{nrow}{organize data into a matrix with this number of rows}
 
-\item{sep}{field separator used in the input tabular file}
-
-\item{time.format}{format of the time, see \code{\link[base:strptime]{strptime}})}
+\item{time.format}{format of the time, see \code{\link[base:strptime]{strptime}}); only used if time column is not numeric!}
 
 \item{verb}{print messages if true}
+
+\item{...}{arguments passed to \code{\link{read.csv}}}
 }
 \description{
 Read in simple platereader data with only one data type, time

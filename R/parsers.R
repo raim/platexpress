@@ -446,7 +446,6 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
 #' in \code{\link{readPlateMap}}.
 #' @param nrow organize data into a matrix with this number of rows
 #' @param time.format format of the time, see \code{\link[base:strptime]{strptime}}); only used if time column is not numeric!
-#' @param sep field separator used in the input tabular file
 #' @param ... arguments passed to \code{\link{read.csv}}
 #' @inheritParams readPlateData
 readSimplePlate <- function(files, data.ids, 
