@@ -1,5 +1,28 @@
 ### PLATE DESIGN & DATA
 
+### UTILS
+
+## get the square-most matrix for a given number
+tosquare <- function(x) {
+    fct <-factorize(x)
+    mid <- length(fct)/2
+    if ( length(fct)%%2==0 )
+        dim <- c(nrow=fct[mid], ncol=fct[mid+1])
+    else
+        dim <- c(nrow=fct[mid-.5],ncol=fct[mid+.5])
+    dim
+}
+
+## https://stackoverflow.com/questions/6424856/r-function-for-returning-all-factors
+factorize <- function(x) {
+    x <- as.integer(x)
+    div <- seq_len(abs(x))
+    factors <- div[x %% div == 0L]
+    return(factors)
+}
+
+### TODO FUNCTIONS
+
 ## TODO: wrapper to read both layout and data
 readPlates <- function(layout, data.path, type, settings) {
     ## read plate layout, potentially multiple plates in one file
@@ -12,6 +35,8 @@ readPlates <- function(layout, data.path, type, settings) {
 mergePlates <- function(data=list(), layouts=list()) {
     #just generates lists of plates, and one big layout table
 }
+
+### LAYOUT PARSERS
 
 ## Read Plate Layout Map
 ## parses a plate design file in CSV. Rows and columns
@@ -339,7 +364,7 @@ amountColors <- function(map, substance="substance",amount="amount", color="colo
     map
 }
 
-### PLATE DATA
+### PLATE DATA PARSERS
 
 ## TODO: repair this in example
 #' Read Plate Data
@@ -391,10 +416,13 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
       data <- readBioLectorPlate(files=files, data.ids=data.ids,
                                  verb=verb, ...)
       interpolate <- FALSE
-    } else if ( type=="simple" ) # single data item in simple spreadsheet
-      data <- readSimplePlate(files=files, data.ids=data.ids,
-                              verb=verb, ...)
-
+    } else if ( type=="simple" ) {
+        ## single data item in simple spreadsheet
+        data <- readSimplePlate(files=files, data.ids=data.ids,
+                                verb=verb, ...)
+        interpolate <- FALSE
+    }
+    
     ## NOW PREPARE DATA
     ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
     ## interpolate data: this adds a master time and temperature
@@ -416,19 +444,18 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
 #' in the first column and data for all wells in the following columns,
 #' where the column header must correspond to wells
 #' in \code{\link{readPlateMap}}.
-#' @param skip lines to skip before parsing data
-#' @param time.format format of the time, see \code{\link[base:strptime]{strptime}})
+#' @param nrow organize data into a matrix with this number of rows
+#' @param time.format format of the time, see \code{\link[base:strptime]{strptime}}); only used if time column is not numeric!
 #' @param sep field separator used in the input tabular file
+#' @param ... arguments passed to \code{\link{read.csv}}
 #' @inheritParams readPlateData
-readSimplePlate <- function(files, data.ids, skip, sep="\t",
-                            time.format="%M:%S", verb=TRUE) {
+readSimplePlate <- function(files, data.ids, 
+                            nrow, time.format="%M:%S", verb=TRUE, ...) {
 
     if ( verb )
       cat(paste("Parsing file", files, "\n"))
 
     ## defaults
-    if ( missing(skip) )
-      skip <- 0
     if ( missing(data.ids) )
       data.ids <- "data"
 
@@ -436,26 +463,64 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
       cat(paste("\tloading data", data.ids, "\n"))
 
     ## parse file and get data
-    dat <- read.csv(files, sep=sep, skip=skip)
-    time <- as.numeric(strptime(dat[,1],format=time.format)) # time in seconds
+    dat <- read.csv(files, ...)
+
+    ## split into time (first column) and well data
+    time <- dat[,1]
+    ## attempt format time, if not numeric
+    if (  !typeof(dat[,1])%in%c("double","integer") )
+        time <- as.numeric(strptime(time,format=time.format)) # time in seconds
     time <- time - time[1]
     dat <- dat[, -1]
 
-    ## for convenience replase leading 0, e.g. A07 -> A7
+    ## for convenience replace leading 0, e.g. A07 -> A7
     ## in column namnes
+    ## TODO: generalize somehow? 
     colnames(dat) <- gsub("([A-Z])0(.*)", "\\1\\2", colnames(dat))
-
+    
     ## generate local data
     data <-  list()
     data[[data.ids]] <- list()
-    data[[data.ids]]$time <- time
     data[[data.ids]]$data <- data.matrix(dat)
 
     ## set dataID
     data$dataIDs <- data.ids
 
+    ## generate wells: factorize and take middle factors
+    N <- ncol(dat)
+    if ( missing(nrow) ) {
+        dim <- tosquare(N)
+        nrow <- dim[1]
+        ncol <- dim[2]
+    }
+    if ( !exists("ncol", mode="numeric" ) ) ncol <- N/nrow
+    cat(paste(nrow, N, "\n"))
+    
+    data$wells$plate <- t(matrix(colnames(data[[data$dataIDs[1]]]$data),
+                                 nrow=ncol, ncol=nrow))
+
+    ## ROWS: are used in viewPlate
+    ## TODO: avoid to force letters for rows and numbers for columns?
+    data$wells$rows <- toupper(letters[1:nrow])
+    data$wells$cols <- as.character(1:ncol)
+
+    ## or alternatively from well names, assuming rows in
+    ## first letter, and columns in rest!?
+    if ( FALSE ) {
+        wells <- colnames(data[[data$dataIDs[1]]]$data)
+        rows <- do.call(rbind,strsplit(wells,""))[,1]
+        cols <- unlist(lapply(strsplit(wells,""),
+                              function(x) paste0(x[2:length(x)])))
+    }
+    
+    ## add global time and xids
+    data$Time <- time
+    data$xids <- "Time"
+    
+    class(data) <- "platedata"
     data
 }
+
 
 ## TODO: get rid of german format
 ## TODO: what's wrong with GFP?
@@ -463,6 +528,7 @@ readSimplePlate <- function(files, data.ids, skip, sep="\t",
 ## headerline <- 23 ## line of data header in BioLector result file
 readBioLectorPlate <- function(files=files, data.ids=data.ids,
                                headerline=23, hnrw=20, sep=";", dec=",",
+                               replace.zero=TRUE,
                                verb=verb) {
 
 
@@ -511,6 +577,9 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
         data[[i]] <- list()
         data[[i]]$time <- time
         data[[i]]$data <- as.matrix(dt)
+        if ( replace.zero )
+            colnames(data[[i]]$data) <- sub("0","", colnames(data[[i]]$data))
+                                            
         if ( verb ) cat("\n")
     }
     names(data) <- trimws(filters[,2])
@@ -533,13 +602,16 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
     ## TODO: use this for all data parsers, although
     ## only required for viewPlate; but could be used for
     ## auto-grouping
+    ## TODO: generalize? split well strings?
     data$wells$plate <- t(matrix(colnames(data[[data$dataIDs[1]]]$data),
                                  nrow=ncl,ncol=nrw))
     data$wells$rows <- toupper(letters[1:nrw])
-    data$wells$cols <- sprintf("%02d", 1:ncl)
+    if ( replace.zero ) 
+        data$wells$cols <- as.character(1:ncl)
+    else data$wells$cols <- sprintf("%02d", 1:ncl)
         
     class(data) <- "platedata"
-    ## TODO: get temperature and humidity
+    ## TODO: get temperature and humidity 
     data
 }
 

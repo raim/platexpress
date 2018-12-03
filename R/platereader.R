@@ -281,13 +281,17 @@ prettyData <- function(data, yids, colors) {
 
     ## re-order: xids first and IDs last
     data$dataIDs <- yids
-    ## store colors
+    ## store old data 
+    origwells <- data$wells
     origcols <- data$colors
+    ## reduce to xids and yids
     data <- data[c(match(xids,names(data)),
                    match("xids",names(data)),
                    match(yids,names(data)),
                    match("dataIDs",names(data)))]
+    ## re-add original data
     data$colors <- origcols
+    data$wells <- origwells
 
     ## rename!
     if ( !is.null(names(yids)) ) {
