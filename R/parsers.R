@@ -614,6 +614,99 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
     data
 }
 
+readBioLectorProPlate <- function(files=files, data.ids=data.ids,
+                                  sep=";", dec=".",
+                                  replace.zero=TRUE,
+                                  verb=verb) {
+
+    ## first parse header to get experiment information
+    ## TODO: get and use more info
+    dat <- read.csv(files, sep = sep, dec = dec,
+                    stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
+
+    ## data start, for second parsing step
+    dstart <- which(dat[,1] == "=====data=====")
+   
+    nrw <- as.numeric(sub(".*]","",grep("mtp-rows", dat[,1], value=TRUE)))
+    ncl <- as.numeric(sub(".*]","",grep("mtp-columns", dat[,1], value=TRUE)))
+    nfl <- as.numeric(sub(".*]","",grep("no_filterset", dat[,1], value=TRUE)))
+   
+
+    ## parse again without header to get columns properly
+    dat <- read.csv(files, sep = sep, dec = dec, skip = dstart,
+                    stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
+    dend <- tail(which(dat[,1] == "M"), 1)
+    
+    ## parse again without header to get columns properly
+    dat <- read.csv(files, sep = sep, dec = dec, skip = dstart, nrow = dend,
+                    stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
+
+    ## skip last column, only NA, since lines end with ;
+    dat <- dat[,-ncol(dat)]
+    
+    ## get time of main measurements
+    ## NOTE: second T is time for user comments and system events
+    tidx <- which(dat[,1] == "T")[1]
+    fidx <- which(dat[tidx,] == "Time [h]->")
+    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])
+    
+    ## get calibrated rows
+    didx <- grep("Cal.", dat[,fidx])
+    data <- as.data.frame(t(dat[didx,fidx:ncol(dat)]), stringsAsFactors=FALSE)
+    colnames(data) <- dat[didx,1]
+
+    data <- list()
+    for ( i in 1:nrow(filters) ) {
+        if ( verb ) cat(paste("parsing", trimws(filters[i,2])))
+        didx <- grep(paste0("Cal..*FS=",filters[i,1]), dat[,fidx])
+        ## take raw values if no calibration exists
+        if ( length(didx)==0 ) {
+            didx <- which(dat[,fidx]==filters[i,1])
+            if ( verb) cat(" - RAW VALUES")
+        }
+        dt <- t(dat[didx,(fidx+1):ncol(dat)])
+        colnames(dt) <- dat[didx,1]
+        data[[i]] <- list()
+        data[[i]]$time <- time
+        data[[i]]$data <- as.matrix(dt)
+        if ( replace.zero )
+            colnames(data[[i]]$data) <- sub("0","", colnames(data[[i]]$data))
+                                            
+        if ( verb ) cat("\n")
+    }
+    names(data) <- trimws(filters[,2])
+    
+    dataIDs <- names(data)
+
+    ## filter only requested data
+    if ( !missing(data.ids) ) {
+        if ( verb )
+            cat(paste("skipping",
+                      paste(dataIDs[!dataIDs%in%data.ids],collapse=";"), "\n"))
+        data <- data[dataIDs%in%data.ids]
+        dataIDs <- dataIDs[dataIDs%in%data.ids]
+    }
+    data$dataIDs <- dataIDs
+    
+    data$Time <- time
+    data$xids <- "Time"
+
+    ## TODO: use this for all data parsers, although
+    ## only required for viewPlate; but could be used for
+    ## auto-grouping
+    ## TODO: generalize? split well strings?
+    data$wells$plate <- t(matrix(colnames(data[[data$dataIDs[1]]]$data),
+                                 nrow=ncl,ncol=nrw))
+    data$wells$rows <- toupper(letters[1:nrw])
+    if ( replace.zero ) 
+        data$wells$cols <- as.character(1:ncl)
+    else data$wells$cols <- sprintf("%02d", 1:ncl)
+        
+    class(data) <- "platedata"
+    ## TODO: get temperature and humidity 
+    data
+}
+
 #' Read Synergy Mx Plate Data
 #'
 #' Parses date exported from the Excel file that can be exported
