@@ -19,7 +19,7 @@
 #'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off gray.colors
 #'@importFrom tidyr separate
 ##@importFrom readxl read_excel
-#'@importFrom utils read.csv read.table write.csv
+#'@importFrom utils read.csv read.table write.csv tail
 NULL
 
 
@@ -886,12 +886,16 @@ listAverage <- function(lst, id) {
 #' parsing the raw data with \code{\link{readPlateData}}, unless
 #' explicitly suppressed. The same is also done for well temperatures.
 #' @param data  \code{\link{platexpress}} data, see \code{\link{readPlateData}}
+#' @param time.range "common" requires that all data must have
+#' the same number of time-points, "full" interpolates
+#' the maximal available time range, using the mean
+#' time step of the mean of data-specific time vectors \eqn{\omega}{omega}
 #' @param verb  print messages if true
 #' @return returns a copy of the full data list with a master time and
 #' temperature added at the top level
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-interpolatePlateTimes <- function(data, verb=TRUE) {
+interpolatePlateTimes <- function(data, time.range=c("common","full"), verb=TRUE) {
 
 
     ## catch single data case
@@ -902,7 +906,8 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
     }
 
     if ( verb )
-      cat(paste("Interpolating all data to a single master time.\n"))
+        cat(paste("Interpolating all data to a single master time\n",
+                  "\ttime.range rule:", time.range, "\n"))
 
     ## 0) TODO: check whether all data items have the same
     ## number of time-points, and cut end - this can stem from
@@ -910,15 +915,37 @@ interpolatePlateTimes <- function(data, verb=TRUE) {
     ## 0a: first, cut data at non-increasing time steps, 00:00:00 in Synergy
     ## 0b: check length
 
-    ## 1) calculate average (MASTER) time
-    mtime <- listAverage(data, "time")
+      ## 1) calculate average (MASTER) time
+      ## NOTE: "common" requires that all data must have
+      ## the same number of time-points, "full" interpolates
+      ## the maximal available time-range, using the mean
+      ## time step `\Delta t`
+      masterTime <- function(lst, id="time")  {
+          lst <- lst[unlist(lapply(lst, function(x) id%in%names(x)))]
+          if ( length(lst)==0 ) return(NULL)
+          ## collect values for different data sets
+          vals <- lapply(lst, function(x) x[[id]])
+          ## get ranges and diff
+          rng <- range(unlist(vals))
+          dff <- mean(unlist(lapply(vals, function(x) mean(diff(x)))))
+          seq(rng[1], rng[2], by=dff)
+      }
+      if ( time.range[1]=="common" )
+          mtime <- listAverage(data, "time")
+      else if ( time.range[1]=="full" )
+          mtime <- masterTime(data, "time")
+
     ## TODO: add back temperature
     #mtemp <- listAverage(data, "temp")
-
+    if ( verb )
+        cat(paste("\ttime range:", paste(range(mtime),collapse="-"), "\n",
+                  "\ttime points:", length(mtime), "\n"))
+    
     ## 2) interpolate all data to MASTER time
     for ( id in data$dataIDs ) {
         data[[id]]$orig <- data[[id]]$data
-        mdat <- data[[id]]$data
+        mdat <- matrix(NA, nrow=length(mtime), ncol=ncol(data[[id]]$data))
+        colnames(mdat) <- colnames(data[[id]]$data)
         for ( j in 1:ncol(data[[id]]$data) ) {
             x <- data[[id]]$time
             y <- data[[id]]$data[,j]

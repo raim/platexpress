@@ -378,17 +378,21 @@ amountColors <- function(map, substance="substance",amount="amount", color="colo
 #' @param files list of one or more data files
 #' @param type pre-defined formats, as exported from platereaders; currently
 #' for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars
-#' vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export
+#' vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'), BioLector ('BioLector'), BioLector Pro ('BioLectorPro');  TODO: define export
 #' protocols!
+#' @param data.ids an optional sub-selection of data types in the input file,
+#' as a list of strings
 #' @param interpolate if true a master time, the average time between distinct
 #' measurements of one timepoint, is calculated and all values are interpolated
 #' to this mastertime. This is currently obligatory for further processing.
 #' See function \code{\link{interpolatePlateTimes}} for details.
-#' @param data.ids an optional sub-selection of data types in the input file,
-#' as a list of strings
-#' @param verb print messages if true
+#' @param time.range "common" requires that all data must have
+#' the same number of time-points, "full" interpolates
+#' the maximal available time range, using the mean
+#' time step of the mean of data-specific time vectors
 #' @param time.conversion conversion factor for the plate time, e.g., 1/3600
 #' to convert from hours to seconds
+#' @param verb print messages if true
 #' @param ... further parameters to plate-reader specific parsing functions
 #' @note The original data is all interpolated to a common/average 'master' time
 #' @return a list of distinct measurement time-courses from one plate
@@ -400,8 +404,9 @@ amountColors <- function(map, substance="substance",amount="amount", color="colo
 #'                      data.ids=c("600","YFP_50:500,535"),
 #'                      dec=",", time.format="%H:%M:%S")
 #' @export
-readPlateData <- function(files, type, data.ids, verb=TRUE,
-                          interpolate=TRUE, time.conversion, ...) {
+readPlateData <- function(files, type, data.ids, 
+                          interpolate=TRUE, time.range=c("common","full"),
+                          time.conversion, verb=TRUE, ...) {
 
     if ( type=="BMG" )
       data <- readBMGPlate(files=files, data.ids=data.ids,
@@ -416,6 +421,10 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
       data <- readBioLectorPlate(files=files, data.ids=data.ids,
                                  verb=verb, ...)
       interpolate <- FALSE
+    } else if ( type=="BioLectorPro" ) {
+      data <- readBioLectorProPlate(files=files, data.ids=data.ids,
+                                    verb=verb, ...)
+      interpolate <- FALSE
     } else if ( type=="simple" ) {
         ## single data item in simple spreadsheet
         data <- readSimplePlate(files=files, data.ids=data.ids,
@@ -429,7 +438,7 @@ readPlateData <- function(files, type, data.ids, verb=TRUE,
     ## and interpolates all data to this time; if this step
     ## is omitted, there will be no global master time!
     if ( interpolate )
-      data <- interpolatePlateTimes(data, verb=verb)
+      data <- interpolatePlateTimes(data, time.range=time.range, verb=verb)
 
     if ( !missing(time.conversion) )
         data$Time <- data$Time * time.conversion
@@ -459,7 +468,7 @@ readSimplePlate <- function(files, data.ids,
       data.ids <- "data"
 
     if ( verb  )
-      cat(paste("\tloading data", data.ids, "\n"))
+      cat(paste0("\tloading data: \"", data.ids, "\"\n"))
 
     ## parse file and get data
     dat <- read.csv(files, ...)
@@ -525,10 +534,10 @@ readSimplePlate <- function(files, data.ids,
 ## TODO: what's wrong with GFP?
 ## TODO: get temperature and humidity
 ## headerline <- 23 ## line of data header in BioLector result file
-readBioLectorPlate <- function(files=files, data.ids=data.ids,
+readBioLectorPlate <- function(files, data.ids,
                                headerline=23, hnrw=20, sep=";", dec=",",
                                replace.zero=TRUE,
-                               verb=verb) {
+                               verb=TRUE) {
 
 
 
@@ -555,7 +564,8 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
 
     ## get time
     tidx <- grep("TIME", dat[,fidx])
-    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])
+    ## convert time to seconds, SI and in-line with other formats
+    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])/3600
     
     ## get calibrated rows
     didx <- grep("Cal.", dat[,fidx])
@@ -614,10 +624,18 @@ readBioLectorPlate <- function(files=files, data.ids=data.ids,
     data
 }
 
-readBioLectorProPlate <- function(files=files, data.ids=data.ids,
+##if ( FALSE ) {
+##    DATPATH <- "~/work/hhu_talks/uebung_201812/BIQ980-2018/data/BIQ980_groupI_20181206/biolector"
+##    file <- "6_BIQ980_gI_20181206_REDUCTION-1.csv"
+##     DATPATH <- "~/work/hhu_talks/uebung_201812/BIQ980-2018/data/BIQ980_groupII_20181207/biolector"
+##    file <- "7_BIQ980_gI_20181206_REDUCTION-1.csv"
+##   files <- file.path(DATPATH, file)
+##    sep=";";dec="."
+##}
+readBioLectorProPlate <- function(files, data.ids,
                                   sep=";", dec=".",
                                   replace.zero=TRUE,
-                                  verb=verb) {
+                                  verb=TRUE) {
 
     ## first parse header to get experiment information
     ## TODO: get and use more info
@@ -630,7 +648,13 @@ readBioLectorProPlate <- function(files=files, data.ids=data.ids,
     nrw <- as.numeric(sub(".*]","",grep("mtp-rows", dat[,1], value=TRUE)))
     ncl <- as.numeric(sub(".*]","",grep("mtp-columns", dat[,1], value=TRUE)))
     nfl <- as.numeric(sub(".*]","",grep("no_filterset", dat[,1], value=TRUE)))
-   
+
+    ## get filters
+    filters <- cbind(1:nfl, rep(NA,nfl))
+    for ( i in 1:nfl ) {
+        fid <- paste0("\\[",sprintf("%02d",i),"_name\\]")
+        filters[i,2] <- sub(fid,"",grep(fid,dat[,1],value=T))
+    }
 
     ## parse again without header to get columns properly
     dat <- read.csv(files, sep = sep, dec = dec, skip = dstart,
@@ -648,24 +672,28 @@ readBioLectorProPlate <- function(files=files, data.ids=data.ids,
     ## NOTE: second T is time for user comments and system events
     tidx <- which(dat[,1] == "T")[1]
     fidx <- which(dat[tidx,] == "Time [h]->")
-    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])
+    ## convert time to seconds, SI and in line with other formats!
+    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])/3600
     
     ## get calibrated rows
-    didx <- grep("Cal.", dat[,fidx])
+    didx <- grep("Cali.", dat[,fidx])
     data <- as.data.frame(t(dat[didx,fidx:ncol(dat)]), stringsAsFactors=FALSE)
     colnames(data) <- dat[didx,1]
 
     data <- list()
     for ( i in 1:nrow(filters) ) {
         if ( verb ) cat(paste("parsing", trimws(filters[i,2])))
-        didx <- grep(paste0("Cal..*FS=",filters[i,1]), dat[,fidx])
-        ## take raw values if no calibration exists
+
+        ## first search calibrated version
+        fid <- paste0("Cali.",filters[i,2])
+        didx <- grep(fid, dat[,fidx], fixed=TRUE)
+        ## if not present, use raw
         if ( length(didx)==0 ) {
-            didx <- which(dat[,fidx]==filters[i,1])
+            didx <- grep(filters[i,2], dat[,fidx], fixed=TRUE)
             if ( verb) cat(" - RAW VALUES")
         }
         dt <- t(dat[didx,(fidx+1):ncol(dat)])
-        colnames(dt) <- dat[didx,1]
+        colnames(dt) <- dat[didx,2]
         data[[i]] <- list()
         data[[i]]$time <- time
         data[[i]]$data <- as.matrix(dt)
@@ -759,7 +787,7 @@ readSynergyPlate <- function(files, data.ids,
     for ( dataID in dataIDs  ) {
 
         if ( verb  )
-          cat(paste("\tloading data", dataID, "\n"))
+            cat(paste0("\tloading data: \"", dataID, "\"\n"))
 
         ## get DATA:
         ## rows: the header is 2 rows after the ID, data starts 3 rows after
@@ -892,7 +920,7 @@ readBMGPlate <- function(files, data.ids,
         names(dlst) <- types
         for ( dtyp in types ) {
             if ( verb )
-              cat(paste("\tloading data", dtyp, "\n"))
+             cat(paste0("\tloading data: \"", dtyp, "\"\n"))
             tdat <- dat[dtype==dtyp,]
             dlst[[dtyp]] <- list(time=tdat[,1],
                                  data=tdat[,2:ncol(tdat)])
@@ -979,8 +1007,8 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
 
     ## last column in BMG2 files is usually empty, remove
     if ( sum(is.na(dat[,ncol(dat)]))==nrow(dat) ) {
-      dat <- dat[,2:ncol(dat)-1,]
-      hdat <- hdat[,2:ncol(hdat)-1,]
+      dat <- dat[,-ncol(dat)]
+      hdat <- hdat[,-ncol(hdat)]
     }
 
 
@@ -989,6 +1017,9 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
     ## rm column 1 (well ID) and column 2 (sample ID, not used here)
     dat <- dat[,-(1:2)]
     hdat <- hdat[,-(1:2)]
+
+    ## 20181209 : FIX MARS BUG: "Shake" instead of number in first timepoint
+    dat[] <- apply(dat, 2, as.numeric)
 
     ## GET ALL DATA
 
@@ -1002,11 +1033,12 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
     names(dlst) <- types
     for ( dtyp in types ) {
       if ( verb )
-        cat(paste("\tloading data", dtyp, "\n"))
+          cat(paste0("\tloading data: \"", dtyp, "\"\n"))
       tdat <- dat[,dtype==dtyp]
       htdat <- hdat[,dtype==dtyp]
 
       ## parse times in row 2
+      ## TODO: use time.format and strptime!!
       hours <- as.numeric(sub(" h.*","",htdat[2,]))
       minutes <- as.numeric(sub(" min","",sub(".*h","",htdat[2,])))
       minutes[is.na(minutes)] <- 0

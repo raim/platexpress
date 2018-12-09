@@ -4,29 +4,34 @@
 \alias{readPlateData}
 \title{Read Plate Data}
 \usage{
-readPlateData(files, type, data.ids, verb = TRUE, interpolate = TRUE,
-  time.conversion, ...)
+readPlateData(files, type, data.ids, interpolate = TRUE,
+  time.range = c("common", "full"), time.conversion, verb = TRUE, ...)
 }
 \arguments{
 \item{files}{list of one or more data files}
 
 \item{type}{pre-defined formats, as exported from platereaders; currently
 for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars
-vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'). TODO: define export
+vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'), BioLector ('BioLector'), BioLector Pro ('BioLectorPro');  TODO: define export
 protocols!}
 
 \item{data.ids}{an optional sub-selection of data types in the input file,
 as a list of strings}
-
-\item{verb}{print messages if true}
 
 \item{interpolate}{if true a master time, the average time between distinct
 measurements of one timepoint, is calculated and all values are interpolated
 to this mastertime. This is currently obligatory for further processing.
 See function \code{\link{interpolatePlateTimes}} for details.}
 
+\item{time.range}{"common" requires that all data must have
+the same number of time-points, "full" interpolates
+the maximal available time range, using the mean
+time step of the mean of data-specific time vectors}
+
 \item{time.conversion}{conversion factor for the plate time, e.g., 1/3600
 to convert from hours to seconds}
+
+\item{verb}{print messages if true}
 
 \item{...}{further parameters to plate-reader specific parsing functions}
 }

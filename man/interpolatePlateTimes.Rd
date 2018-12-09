@@ -4,10 +4,15 @@
 \alias{interpolatePlateTimes}
 \title{Interpolate to Common Timepoints}
 \usage{
-interpolatePlateTimes(data, verb = TRUE)
+interpolatePlateTimes(data, time.range = c("common", "full"), verb = TRUE)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
+
+\item{time.range}{"common" requires that all data must have
+the same number of time-points, "full" interpolates
+the maximal available time range, using the mean
+time step of the mean of data-specific time vectors \eqn{\omega}{omega}}
 
 \item{verb}{print messages if true}
 }
