@@ -311,6 +311,7 @@ prettyData <- function(data, yids, colors) {
             names(colors) <- data$dataIDs
         data$colors[names(colors)] <- colors
     }
+    class(data) <- "platedata"
     data
 }
 
@@ -380,6 +381,8 @@ addData <- function(data, ID, dat, col, processing,replace=FALSE) {
         data <- append(data, list(list(data=dat, processing=processing)))
         names(data) <- c(names(data)[2:length(data)-1],ID)
     }
+    ## append above looses class
+    class(data) <- "platedata"
     data
 }
 
