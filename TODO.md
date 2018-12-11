@@ -3,7 +3,7 @@
 ## 201812
 * extend readSimplePlate to read output of writeData
 * use groupStats in viewGroups
-* 
+* use layout info in viewPlate; eg. plot group2
 
 ## LIBRARY
 ### fix example data to reflect current use
