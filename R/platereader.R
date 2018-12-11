@@ -655,6 +655,12 @@ correctBlanks <- function(data, plate, type="median", by, yids,
 
 ### TODO: correct by time point, eg. for fluorescence in ecoli_rfp_iptg_20160908
 
+    if ( missing(plate) )
+        if ( "layout"%in%names(data) )
+            plate <- data$layout
+        else
+            stop("plate layout required for blank correction!")
+    
     if ( missing(xid) )
         xid <- data$xids[1]
 
