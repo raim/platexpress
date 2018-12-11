@@ -21,6 +21,93 @@ factorize <- function(x) {
     return(factors)
 }
 
+### HIGH-LEVEL WRAPPER
+#' High-level interface of \code{\link{platexpress}}
+#'
+#' This high-level wrapper allows to load a platereader experiment
+#' and its layout file, do blank corrections, and replicate groupings.
+#'
+#' Calls, in this order the  \code{\link{platexpress}} functions
+#'  \code{\link{readPlateData}},  \code{\link{readPlateMap}};
+#'  optionally: \code{\link{skipWells}}, and \code{\link{correctBlanks}},
+#' and \code{\link{getGroups}}. Please see the help files of these
+#' functions for details on parameters.
+#' @inheritParams readPlateData
+#' @inheritParams readPlateMap
+#' @inheritParams skipWells
+#' @inheritParams skipWells
+#' @inheritParams correctBlanks
+#' @param layout the text file containing the plate layout information, see
+#' argument \code{file} in \code{\link{readPlateMap}}
+#' @param skip.wells skip these wells from all analyses, see argument
+#' \code{skip} in \code{\link{skipWells}}
+#' @param blank call \code{\link{correctBlanks}} to blank data
+#' @param blank.data subset of data to blank, see argument \code{yids} in
+#' function \code{\link{correctBlanks}}
+#' @param base optional minimal value; all values will be raised by
+#' the same amount using the function \code{\link{adjustBase}} via
+#' function \code{\link{correctBlanks}} 
+#' @param group1 plate layout column to be used for coarse grouping, via
+#' function \code{\link{getGroups}}, eg. "strains"
+#' @param group2 plate layout column to be used for fine grouping, via
+#' function \code{\link{getGroups}}, eg. "inducer amount")
+#' @param group2.color numeric plate layout column to be used for group2
+#' coloring, via function \code{\link{groupColors}}, eg. "amount"
+#' @export
+readExperiment <- function(files, type,
+                           time.range=c("full"), time.conversion=1/3600,
+                           layout, sep=";",fsep=";",asep=":",blank.id="blank",
+                           fields, afields,
+                           skip.wells, blank=FALSE, blank.data, base=0,
+                           group1, group2, group2.color) {
+
+    ## parse raw data
+    raw <- readPlateData(files, type=type,
+                         time.range=time.range, time.conversion=time.conversion,
+                         verb=TRUE)
+
+
+    ## read layout file
+    map <- readPlateMap(layout, 
+                        fields=fields, blank.id=blank.id,
+                        sep=sep, fsep=fsep, asep=asep,
+                        afields=afields)
+
+    ## skip wells
+    ## TODO: implement in skipWells and do after map is attached
+    if ( !missing(skip.wells) ) {
+        map <- skipWells(map, skip.wells)
+        raw <- skipWells(raw, skip.wells)
+    }
+    
+    
+    ## correct blanks
+    if ( blank | !missing(blank.data) ) {
+        if ( missing(blank.data) )
+            blank.data <- raw$dataIDs
+        dat <- correctBlanks(raw, map, yids = blank.data, base = base)
+    } else dat <- raw
+    rm(raw)
+    
+    ## get groupings
+    dat$groups <- NULL
+    if ( !missing(group1) )
+        dat$groups$group1 <- getGroups(map, by = group1, verb=FALSE)
+    if ( !missing(group2) ) {
+        dat$groups$group2 <- getGroups(map, by = group2, verb=FALSE)
+        if ( !missing(group2.color) )
+            dat$groups$group2.color <- groupColors(map, dat$groups$group2,
+                                                   color = group2.color)
+    }
+    
+    ## attach all layout
+    dat$layout <- map
+    
+    dat
+    
+}
+
+
 ### TODO FUNCTIONS
 
 ## TODO: wrapper to read both layout and data
@@ -443,6 +530,13 @@ readPlateData <- function(files, type, data.ids,
     if ( !missing(time.conversion) )
         data$Time <- data$Time * time.conversion
 
+    if ( verb )
+        cat(paste0("Successfully parsed data:\n",
+                  "\ttype: ", type, "\n",
+                  ifelse(interpolate,
+                         paste0("\ttime.range rule:", time.range, "\n"),""),
+                  "\n"))
+
     class(data) <- "platedata"
     data
 }
@@ -461,7 +555,7 @@ readSimplePlate <- function(files, data.ids,
                             nrow, time.format="%M:%S", verb=TRUE, ...) {
 
     if ( verb )
-      cat(paste("Parsing file", files, "\n"))
+      cat(paste("Parsing file:", files, "\n"))
 
     ## defaults
     if ( missing(data.ids) )
@@ -540,6 +634,8 @@ readBioLectorPlate <- function(files, data.ids,
                                verb=TRUE) {
 
 
+    if ( verb )
+      cat(paste("Parsing file:", files, "\n"))
 
     ## parse header to get experiment information
     filt <- read.csv(files, nrow=hnrw, sep = sep, dec = dec,
@@ -565,7 +661,7 @@ readBioLectorPlate <- function(files, data.ids,
     ## get time
     tidx <- grep("TIME", dat[,fidx])
     ## convert time to seconds, SI and in-line with other formats
-    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])/3600
+    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])*3600
     
     ## get calibrated rows
     didx <- grep("Cal.", dat[,fidx])
@@ -574,7 +670,8 @@ readBioLectorPlate <- function(files, data.ids,
 
     data <- list()
     for ( i in 1:nrow(filters) ) {
-        if ( verb ) cat(paste("parsing", trimws(filters[i,2])))
+        if ( verb ) 
+            cat(paste0("\tloading data: \"", trimws(filters[i,2]), "\""))
         didx <- grep(paste0("Cal..*FS=",filters[i,1]), dat[,fidx])
         ## take raw values if no calibration exists
         if ( length(didx)==0 ) {
@@ -637,6 +734,9 @@ readBioLectorProPlate <- function(files, data.ids,
                                   replace.zero=TRUE,
                                   verb=TRUE) {
 
+    if ( verb )
+      cat(paste("Parsing file:", files, "\n"))
+
     ## first parse header to get experiment information
     ## TODO: get and use more info
     dat <- read.csv(files, sep = sep, dec = dec,
@@ -673,7 +773,7 @@ readBioLectorProPlate <- function(files, data.ids,
     tidx <- which(dat[,1] == "T")[1]
     fidx <- which(dat[tidx,] == "Time [h]->")
     ## convert time to seconds, SI and in line with other formats!
-    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])/3600
+    time <- unlist(dat[tidx, (fidx+1):ncol(dat)])*3600
     
     ## get calibrated rows
     didx <- grep("Cali.", dat[,fidx])
@@ -682,7 +782,8 @@ readBioLectorProPlate <- function(files, data.ids,
 
     data <- list()
     for ( i in 1:nrow(filters) ) {
-        if ( verb ) cat(paste("parsing", trimws(filters[i,2])))
+        if ( verb ) 
+            cat(paste0("\tloading data: \"", trimws(filters[i,2]), "\""))
 
         ## first search calibrated version
         fid <- paste0("Cali.",filters[i,2])
@@ -760,7 +861,7 @@ readSynergyPlate <- function(files, data.ids,
                              verb=TRUE) {
 
     if ( verb )
-      cat(paste("Parsing file", files, "\n"))
+      cat(paste("Parsing file:", files, "\n"))
 
     ## defaults
     if ( missing(skip) )
@@ -879,7 +980,7 @@ readBMGPlate <- function(files, data.ids,
         file <- files[i]
         #id <- names(files)[i]
         if ( verb )
-          cat(paste("Parsing file", file , "\n"))
+          cat(paste("Parsing file:", file , "\n"))
         dat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,
                         skip=skip, sep=sep)
 
@@ -935,7 +1036,7 @@ readBMGPlate <- function(files, data.ids,
         tidx <- which(names(dlst)=="Temperature")
         if ( length(tidx)>1 )
           warning(paste("BMG Temperature format has changed, multiple entries",
-                        "in one data file", file, "\n\t",
+                        "in one data file:", file, "\n\t",
                         "Perhaps check validity of code\n"))
         for ( i in tidx ) {
             temp <- dlst[[i]]$data
@@ -995,7 +1096,7 @@ readBMG2Plate <- function(files, data.ids, time.format=" %H h %M min",
     file <- files[i]
     #id <- names(files)[i]
     if ( verb )
-      cat(paste("Parsing file", file , "\n"))
+      cat(paste("Parsing file:", file , "\n"))
 
     ## parse header and data separately, to obtain
     ## clean numeric data
@@ -1069,7 +1170,7 @@ readbmg <- function(files, time.format=" %H h %M min", sep=";", dec=",", verb=TR
         file <- files[i]
         ##id <- names(files)[i]
         if ( verb )
-            cat(paste("Parsing file", file , "\n"))
+            cat(paste("Parsing file:", file , "\n"))
 
         ## 1) parse header
         dat <- read.csv(file,header=FALSE,stringsAsFactors=FALSE,

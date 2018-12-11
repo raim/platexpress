@@ -281,18 +281,20 @@ prettyData <- function(data, yids, colors) {
 
     ## re-order: xids first and IDs last
     data$dataIDs <- yids
-    ## store old data 
-    origwells <- data$wells
-    origcols <- data$colors
+    ## store old data
+    orig <- data[!names(data)%in%data$dataIDs]
+    #origwells <- data$wells
+    #origcols <- data$colors
     ## reduce to xids and yids
     data <- data[c(match(xids,names(data)),
                    match("xids",names(data)),
                    match(yids,names(data)),
                    match("dataIDs",names(data)))]
     ## re-add original data
-    data$colors <- origcols
-    data$wells <- origwells
-
+#    data$colors <- origcols
+ #   data$wells <- origwells
+    data <- append(data, orig)
+    
     ## rename!
     if ( !is.null(names(yids)) ) {
         names(data)[match(yids,names(data))] <- names(yids)
@@ -890,12 +892,15 @@ listAverage <- function(lst, id) {
 #' the same number of time-points, "full" interpolates
 #' the maximal available time range, using the mean
 #' time step of the mean of data-specific time vectors \eqn{\omega}{omega}
+#' @param spline.method the "method" argument used in \code{stats::spline}
+#' for interpolation
 #' @param verb  print messages if true
 #' @return returns a copy of the full data list with a master time and
 #' temperature added at the top level
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-interpolatePlateTimes <- function(data, time.range=c("common","full"), verb=TRUE) {
+interpolatePlateTimes <- function(data, time.range=c("common","full"),
+                                  spline.method="natural", verb=TRUE) {
 
 
     ## catch single data case
@@ -952,7 +957,7 @@ interpolatePlateTimes <- function(data, time.range=c("common","full"), verb=TRUE
             ## interpolate data, NOTE that rule=2 will fill the end points
             #mdat[,j] <- approx(x=x,y=y,xout=mtime,rule=2)$y
             ## TODO: is this OK/betterer then simple approx?
-            mdat[,j] <- stats::spline(x=x,y=y,xout=mtime,method="fmm")$y
+            mdat[,j] <- stats::spline(x=x,y=y,xout=mtime,method=spline.method)$y
 
         }
         ## replace data

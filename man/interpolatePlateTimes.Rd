@@ -4,7 +4,8 @@
 \alias{interpolatePlateTimes}
 \title{Interpolate to Common Timepoints}
 \usage{
-interpolatePlateTimes(data, time.range = c("common", "full"), verb = TRUE)
+interpolatePlateTimes(data, time.range = c("common", "full"),
+  spline.method = "natural", verb = TRUE)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
@@ -13,6 +14,9 @@ interpolatePlateTimes(data, time.range = c("common", "full"), verb = TRUE)
 the same number of time-points, "full" interpolates
 the maximal available time range, using the mean
 time step of the mean of data-specific time vectors \eqn{\omega}{omega}}
+
+\item{spline.method}{the "method" argument used in \code{stats::spline}
+for interpolation}
 
 \item{verb}{print messages if true}
 }

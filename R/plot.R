@@ -263,6 +263,15 @@ viewGroups <- function(data, groups, groups2,
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
                        g1.legpos="topright", g1.legend=TRUE, verb=TRUE) {
 
+    ## PARSE GROUPINGS
+    if ( "groups" %in% names(data) ) {
+        if ( missing(groups2) & "group2" %in% names(data$groups) )
+            groups2 <- data$groups$group2
+        if ( missing(groups) & "group1" %in% names(data$groups) )
+            groups <- data$groups$group1
+        if ( missing(group2.col) & "group2.color" %in% names(data$groups) )
+            group2.col <- data$groups$group2.color
+    }
 
     if ( missing(groups) ) {
         groups <- list(unlist(groups2))
