@@ -1,12 +1,9 @@
 # TODO - platexpress
 
-## 201807
-* use platexpress only for pre-processing, then convert
-to modern R formats (tidyr, etc.) and use with growthrates
-* viewGroups: integrate group colors and lty selection
- [or move all to ggplot) 
-* integrate smoothing functions 
-* common interface for both growthrates and grofit
+## 201812
+* extend readSimplePlate to read output of writeData
+* use groupStats in viewGroups
+* 
 
 ## LIBRARY
 ### fix example data to reflect current use
