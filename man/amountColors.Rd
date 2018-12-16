@@ -16,7 +16,8 @@ amountColors(map, substance = "substance", amount = "amount",
 
 \item{color}{name of the color column to be added to \code{map}}
 
-\item{colf}{color palette function}
+\item{colf}{color palette function, default is colorRamp's
+\code{\link[colorRamps:matlab.like2]{matlab.like2}}}
 }
 \description{
 add a color palette to the plate layout map, with colors along the range

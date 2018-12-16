@@ -40,9 +40,9 @@ assigned from a color ramp mapped to the numerical range of \code{amount} by
 
 \item{bartype}{type of the error bars, "range" for the full range
 of the data, where the average value will be the
-\code{\link[stats:median]{median}}; or "ci95" for the 95% confidence interval,
-"sd" for the standard deviation, or "se" for the standard error where
-the average value will be the \code{\link[base:mean]{mean}};
+\code{\link[stats:median]{median}}; or "ci95" for the 95\% confidence
+interval, "sd" for the standard deviation, or "se" for the standard error
+where the average value will be the \code{\link[base:mean]{mean}};
 TODO: implement boxplot-like quantiles}
 
 \item{barl}{length of the horizontal lines of error bars (argument \code{length}

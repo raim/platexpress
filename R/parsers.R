@@ -428,7 +428,8 @@ parseAmounts <- function(str, sep=":") {
 #' @param substance name of the substance column in \code{map}
 #' @param amount name of the amount column in \code{map}
 #' @param color name of the color column to be added to \code{map}
-#' @param colf color palette function
+#' @param colf color palette function, default is colorRamp's
+#' \code{\link[colorRamps:matlab.like2]{matlab.like2}}
 #' @seealso \code{\link{readPlateMap}}, \code{\link{replaceAmounts}}
 #' @export
 amountColors <- function(map, substance="substance",amount="amount", color="color", colf=colorRamps::matlab.like2) {
