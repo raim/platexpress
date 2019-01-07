@@ -81,6 +81,10 @@ mergeResults <- function(x, y, ID, by = "well",
 #' @param man apply a moving average \code{\link{ma}} with \code{n=man}
 #' @param maxtry maximum number of attempts to run
 #' \code{\link[segmented]{segmented}}
+#' @param control a list of parameters for controlling the
+#' \code{\link[segmented]{segmented}} fitting process.
+#' See the documentation for \code{\link[segmented:seg.control]{seg.control}}
+#' for details.
 #' @param psis named list of breakpoints for wells, generated from
 #' argument \code{psi} if missing
 #' @param psi vector of breakpoints (x-values) to be passed to
@@ -93,7 +97,7 @@ mergeResults <- function(x, y, ID, by = "well",
 #' @param ... arguments passed to \code{\link[segmented]{segmented}}
 #' @export
 segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
-                            man=1, maxtry=5,
+                            man=1, maxtry=5, control=segmented::seg.control(),
                             psis, psi, npsi=5, plot=FALSE, verb=0, ...) {
 
     if ( missing(xid) ) xid <- data$xids[1]
@@ -136,10 +140,11 @@ segmented_plate <- function(data, yid="OD", wells, log=TRUE, xid,
         class(test) <- "try-error"
         mxtry <- maxtry
         while( class(test)[1]=="try-error" & mxtry>0 ) {
-            test <- try(o <- segmented::segmented(out.lm,psi=psis[[well]]))
+            test <- try(o <- segmented::segmented(out.lm,control=control,
+                                                  psi=psis[[well]]))
             if ( mxtry<5 )
-                warning(well, ": segmented failed in attempt:",
-                        maxtry-mxtry+1, "of", maxtry)
+                warning(well, ": segmented failed in attempt: ",
+                        maxtry-mxtry+1, " of ", maxtry)
             mxtry <- mxtry -1
         }
         

@@ -5,7 +5,8 @@
 \title{Call \code{\link[segmented]{segmented}} for selected wells.}
 \usage{
 segmented_plate(data, yid = "OD", wells, log = TRUE, xid, man = 1,
-  maxtry = 5, psis, psi, npsi = 5, plot = FALSE, verb = 0, ...)
+  maxtry = 5, control = segmented::seg.control(), psis, psi, npsi = 5,
+  plot = FALSE, verb = 0, ...)
 }
 \arguments{
 \item{data}{\code{platexpress} data object}
@@ -22,6 +23,11 @@ segmented_plate(data, yid = "OD", wells, log = TRUE, xid, man = 1,
 
 \item{maxtry}{maximum number of attempts to run
 \code{\link[segmented]{segmented}}}
+
+\item{control}{a list of parameters for controlling the
+\code{\link[segmented]{segmented}} fitting process.
+See the documentation for \code{\link[segmented:seg.control]{seg.control}}
+for details.}
 
 \item{psis}{named list of breakpoints for wells, generated from
 argument \code{psi} if missing}
