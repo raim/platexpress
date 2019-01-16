@@ -282,7 +282,7 @@ addModel.dpsegl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
             sl <- slps[[i]]
             yo <- rep(sl, each=2)
             xo <- c(sapply(1:nrow(sg), function(j)
-                seq(sg[j,1], sg[j,2], length.out=2)))
+                seq(sg[j,1], sg[j,2]*.999, length.out=2)))
             
             approx(xo,yo, xout=x)$y
         })
