@@ -4,7 +4,8 @@
 \alias{plotWavelength}
 \title{Plot Wavelength in Spectrum}
 \usage{
-plotWavelength(x = 534, y = 1.09, ych = 0.95, cex = 5, pch = 19, ...)
+plotWavelength(x = 534, y = 1.09, ych = 0.95, cex = 5, pch = 19,
+  ...)
 }
 \arguments{
 \item{x}{wavelength in nm}

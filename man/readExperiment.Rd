@@ -5,9 +5,9 @@
 \title{High-level interface of \code{\link{platexpress}}}
 \usage{
 readExperiment(files, type, time.range = c("full"),
-  time.conversion = 1/3600, layout, sep = ";", fsep = ";", asep = ":",
-  blank.id = "blank", fields, afields, skip.wells, blank = FALSE,
-  blank.data, base = 0, group1, group2, group2.color)
+  time.conversion = 1/3600, layout, sep = ";", fsep = ";",
+  asep = ":", blank.id = "blank", fields, afields, skip.wells,
+  blank = FALSE, blank.data, base = 0, group1, group2, group2.color)
 }
 \arguments{
 \item{files}{list of one or more data files}

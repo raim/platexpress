@@ -8,8 +8,8 @@ to work with the \code{platexpress} data format, using adjusted default
 values
 TODO: select bandwidths from data$Time}
 \usage{
-bandwidthCV.2(data, yid, xid, wells, bandwidths = seq(0.5, 10, length.out =
-  30), nFold = 10, nWell = 50, cutoff = 0.95, scaleY = identity)
+bandwidthCV.2(data, yid, xid, wells, bandwidths = seq(0.5, 10, length.out
+  = 30), nFold = 10, nWell = 50, cutoff = 0.95, scaleY = identity)
 }
 \arguments{
 \item{data}{platexpress data set, see \code{\link{readPlateData}}}

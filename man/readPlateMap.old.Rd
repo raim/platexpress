@@ -4,8 +4,9 @@
 \alias{readPlateMap.old}
 \title{Read Plate Layout Map}
 \usage{
-readPlateMap.old(file, sep = "\\t", fsep = "\\n", fields, asep, afields,
-  blank.id = "blank", nrows = 8, formatted = FALSE, header = TRUE)
+readPlateMap.old(file, sep = "\\t", fsep = "\\n", fields, asep,
+  afields, blank.id = "blank", nrows = 8, formatted = FALSE,
+  header = TRUE)
 }
 \arguments{
 \item{file}{text file containing the plate layout.}

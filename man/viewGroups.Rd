@@ -6,13 +6,13 @@
 \usage{
 viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
   dtype = "data", ylab, pcols, group2.col, yscale = TRUE, ylims, ylim,
-  log = "", show.ci95 = TRUE, show.mean = TRUE, emphasize.mean = FALSE,
-  lty.orig = 1, lwd.orig = 0.1, lty.mean = 1, lwd.mean = 2,
-  g2.legpos = "topleft", g2.legend = TRUE, embed = FALSE,
-  no.par = FALSE, mai = c(0.5, 0, 0, 0), xmgp = c(1.5, 0.5, 0),
-  ymgp = c(0, -1, -0.05), ytcl = 0.25, nrow = 1, xaxis = TRUE,
-  yaxis = c(1, 2), g1.legpos = "topright", g1.legend = TRUE,
-  verb = TRUE)
+  log = "", show.ci95 = TRUE, show.mean = TRUE,
+  emphasize.mean = FALSE, lty.orig = 1, lwd.orig = 0.1,
+  lty.mean = 1, lwd.mean = 2, g2.legpos = "topleft",
+  g2.legend = TRUE, embed = FALSE, no.par = FALSE, mai = c(0.5, 0,
+  0, 0), xmgp = c(1.5, 0.5, 0), ymgp = c(0, -1, -0.05), ytcl = 0.25,
+  nrow = 1, xaxis = TRUE, yaxis = c(1, 2), g1.legpos = "topright",
+  g1.legend = TRUE, verb = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by

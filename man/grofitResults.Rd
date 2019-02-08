@@ -4,8 +4,9 @@
 \alias{grofitResults}
 \title{parse \pkg{grofit} results}
 \usage{
-grofitResults(fit, p = c("lambda.model", "mu.model", "A.model", "used.model",
-  "lambda.spline", "mu.spline", "A.spline", "lambda.bt", "mu.bt", "A.bt"))
+grofitResults(fit, p = c("lambda.model", "mu.model", "A.model",
+  "used.model", "lambda.spline", "mu.spline", "A.spline", "lambda.bt",
+  "mu.bt", "A.bt"))
 }
 \arguments{
 \item{fit}{grofit object, the result of a call to

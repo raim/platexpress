@@ -4,10 +4,10 @@
 \alias{viewPlate}
 \title{View Plate}
 \usage{
-viewPlate(data, wells, wcols, rows = toupper(letters[1:8]), cols = 1:12,
-  xid, xscale = FALSE, xlim, yids, dtype = "data", pcols, yscale = TRUE,
-  ylims, ylim, log = "", axes, yaxis = "", legpos = "topleft",
-  add.legend = TRUE)
+viewPlate(data, wells, wcols, rows = toupper(letters[1:8]),
+  cols = 1:12, xid, xscale = FALSE, xlim, yids, dtype = "data",
+  pcols, yscale = TRUE, ylims, ylim, log = "", axes, yaxis = "",
+  legpos = "topleft", add.legend = TRUE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by

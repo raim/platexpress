@@ -4,10 +4,10 @@
 \alias{doseResponse}
 \title{Dose-Response Plots with Error Bars}
 \usage{
-doseResponse(map, wells, val, amount = "amount", substance = "substance",
-  col = "black", pch = 1, bartype = "range", barl = 0.05, all = FALSE,
-  line = TRUE, na.y = 0, add = FALSE, ylim, xlim, ylab, xlab,
-  verb = TRUE, ...)
+doseResponse(map, wells, val, amount = "amount",
+  substance = "substance", col = "black", pch = 1,
+  bartype = "range", barl = 0.05, all = FALSE, line = TRUE,
+  na.y = 0, add = FALSE, ylim, xlim, ylab, xlab, verb = TRUE, ...)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some

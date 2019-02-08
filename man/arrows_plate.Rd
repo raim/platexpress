@@ -4,8 +4,8 @@
 \alias{arrows_plate}
 \title{Draw arrows of growth phases.}
 \usage{
-arrows_plate(segments, wells, col = "#000000", ncol = "#F81894", wcol, xlim,
-  maxmu, minmu, lwd.max = 10, head.length = 0.02, add = TRUE,
+arrows_plate(segments, wells, col = "#000000", ncol = "#F81894", wcol,
+  xlim, maxmu, minmu, lwd.max = 10, head.length = 0.02, add = TRUE,
   axis2 = !add, ...)
 }
 \arguments{

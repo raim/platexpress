@@ -4,8 +4,8 @@
 \alias{readBMG2Plate}
 \title{Read BMG Optima/MARS vXXX Plate Data}
 \usage{
-readBMG2Plate(files, data.ids, time.format = " \%H h \%M min", skip = 6,
-  sep = ";", dec = ",", verb = TRUE)
+readBMG2Plate(files, data.ids, time.format = " \%H h \%M min",
+  skip = 6, sep = ";", dec = ",", verb = TRUE)
 }
 \arguments{
 \item{files}{list of one or more data files}
