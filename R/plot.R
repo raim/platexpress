@@ -422,6 +422,7 @@ viewGroups <- function(data, groups, groups2,
                 orig.cols <- getColors(names(sgroups))
             if ( !missing(group2.col) ) {
                 ## colors were explicitly provided
+                cat(paste("USE GROUP COLORS\n"))
                 orig.cols <- group2.col[names(sgroups)]
             }
             for ( sg in 1:length(sgroups) ) {
@@ -449,6 +450,7 @@ viewGroups <- function(data, groups, groups2,
                 par(new=parnew) #i!=1)
                 parnew <- TRUE
                 ## override lty.orig=0 and lwd.orig=0 if x is data-specific
+                ## 20190619: the if was commented out - why?
                 if ( !global.x )
                     col.orig <- orig.cols[sid]
                 if ( !is.null(dim(x)) | length(wells)==1 ) {

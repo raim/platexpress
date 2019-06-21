@@ -277,7 +277,7 @@ prettyData <- function(data, yids, colors) {
     xids <- data$xids
 
     if ( any(is.na(match(yids,names(data)))))
-      stop("IDs (yids) not found in data: ", paste(yids,sep=";"))
+      stop("IDs (yids) not found in data: ", paste(yids,collapse=";"))
 
     ## re-order: xids first and IDs last
     data$dataIDs <- yids
