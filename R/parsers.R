@@ -53,18 +53,19 @@ factorize <- function(x) {
 #' function \code{\link{getGroups}}, eg. "inducer amount")
 #' @param group2.color numeric plate layout column to be used for group2
 #' coloring, via function \code{\link{groupColors}}, eg. "amount"
+#' @param ... further parameters to plate-reader specific parsing functions
 #' @export
 readExperiment <- function(files, type,
                            time.range=c("full"), time.conversion=1/3600,
                            layout, sep=";",fsep=";",asep=":",blank.id="blank",
                            fields, afields,
                            skip.wells, blank=FALSE, blank.data, base=0,
-                           group1, group2, group2.color) {
+                           group1, group2, group2.color, ...) {
 
     ## parse raw data
     raw <- readPlateData(files, type=type,
                          time.range=time.range, time.conversion=time.conversion,
-                         verb=TRUE)
+                         verb=TRUE, ...)
 
 
     ## read layout file
