@@ -436,12 +436,12 @@ viewGroups <- function(data, groups, groups2,
 
 
                 ## get data for selected wells
-                dat <- data[[ptyp]][[dtype]][,wells]
+                dat <- data[[ptyp]][[dtype]][,wells, drop=FALSE]
                 ## calculate stats only for common x!
                 ## TODO: instead bin data on x and calculate ci there
                 ## or interpolate data to common x (on the fly)?
                 ## TODO: do we get NAs or empty vals from ci?
-                if ( is.null(dim(x)) & length(wells)>1 ) {
+                if ( is.null(dim(x)) & length(wells)>=1 ) {
                     mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
                     if ( show.ci95 )
                         ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
@@ -482,7 +482,7 @@ viewGroups <- function(data, groups, groups2,
                         ylab=NA,xlab=NA,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,log=log)
                 ## plot mean and confidence intervals
-                if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
+                if ( is.null(dim(x)) & length(wells)>=1 ) { # only for common x!
                     if ( show.ci95 ) {
 
                         px <- c(x,rev(x))
