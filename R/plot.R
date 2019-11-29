@@ -482,7 +482,7 @@ viewGroups <- function(data, groups, groups2,
                         ylab=NA,xlab=NA,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,log=log)
                 ## plot mean and confidence intervals
-                if ( is.null(dim(x)) & length(wells)>=1 ) { # only for common x!
+                if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
                     if ( show.ci95 ) {
 
                         px <- c(x,rev(x))
@@ -500,6 +500,8 @@ viewGroups <- function(data, groups, groups2,
                         polygon(x=px,y=py,border=NA,
                                 col=paste(g2.col,"55",sep=""))
                     }
+                }
+                if ( is.null(dim(x)) & length(wells)>=1 ) { # only for common x!
                     if ( show.mean )
                         lines(x=x,mn,col=ifelse(emphasize.mean,1,g2.col),
                               lwd=lwd.mean,
