@@ -1,4 +1,58 @@
 
+#' Plot a representation of microreader "plate"
+#' 
+#' @param nrow number of rows of the plate, with letter index from top to bottom
+#' @param ncol number of columns of the plate
+#' @param map the plate map, see  \code{\link{readPlateMap}}
+#' @param color color column in the \code{map}
+#' @param text text column in the \code{map}
+#' @param title plot title (argument \code{main} to plot)
+#' @param add add to an existing plot
+#' @param ... arguments passed to \code{\link{image}}
+#' @export
+viewMap <- function(map, nrow=8, ncol=12, color="color", text="amount", title="plate layout", add=FALSE) {
+
+    bright <- "#FFFFFF"
+    dark <- "#000000"
+
+    ## set-up rows and columns, using standard plate design,
+    ## with letters for rows from top to bottom, and
+    ## numbers for columns
+    cols <- 1:ncol
+    names(cols) <- cols
+    rows <- 1:nrow
+    names(rows) <- rev(toupper(letters[1:nrow]))
+    
+    ## plot canvas
+    if ( !add ) {
+        plot(rep(cols,nrow),rep(rows, ncol), col=NA, axes=FALSE, main=title,
+             xlab=NA, ylab=NA)
+        axis(1, at=cols)
+        axis(2, at=rows, labels=names(rows), las=2)
+    }
+
+    ## plot wells
+    for ( i in rows )
+        for ( j in cols ) {
+            well <- paste0(names(rows)[i],names(cols)[j])
+            widx <- which(as.character(map$well)==well)
+            col <- map[widx, color]
+
+            ## skip missing wells
+            if ( length(widx)==0 ) next 
+
+            ## select text color: dark or bright based on RGB luminescence 
+            crgb <- col2rgb(col)/255
+            L <- 0.2126 * crgb[1,1] + 0.7152 * crgb[2,1] + 0.0722 * crgb[3,1]
+            col.txt <- ifelse(L>.5, dark, bright)
+
+            ## plot well
+            points(cols[j], rows[i], col=map[widx, color], cex=5, pch=19)
+            text(cols[j], rows[i], map[widx, text], cex=1, col=col.txt)
+        }
+}
+
+
 #' Plot a heatmap of \code{platexpress} data.
 #' 
 #' @param data \code{platexpress} data object
