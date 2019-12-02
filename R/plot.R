@@ -47,7 +47,7 @@ viewMap <- function(map, nrow=8, ncol=12, color="color", text="amount", title="p
             col.txt <- ifelse(L>.5, dark, bright)
 
             ## plot well
-            points(cols[j], rows[i], col=map[widx, color], cex=5, pch=19)
+            points(cols[j], rows[i], col=map[widx, color], cex=3, pch=19)
             text(cols[j], rows[i], map[widx, text], cex=1, col=col.txt)
         }
 }
