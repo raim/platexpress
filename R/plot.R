@@ -1152,13 +1152,15 @@ doseResponse <- function(map, wells, val,
 #' @param etype type of statistics to be used for error bars in the bar-plot,
 #' either "ci" (default) for the 95%-confidence interval or "se" for
 #' the standard error
+#' @param ylim y-axis limits
+#' @param ... further arguments to boxplot/barplot
 #' @return Returns an annotated \code{data.frame} of the values, with well
 #' and group IDs in the first two columns. The values in the third column are
 #' raw values (if argument \code{rng} was a single point
 #' on the x-axis) or mean values (if argument\code{rng} was a range).
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRUE, type="box", etype="ci") {
+boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRUE, type="box", etype="se", ylim, ...) {
 
     if ( missing(xid) )
         xid <- data$xids[1]
@@ -1183,10 +1185,12 @@ boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRU
     pdat <- lapply(bdat, function(x) apply(x,2,mean,na.rm=TRUE))
 
     if ( plot ) {
-        #par(mai=c(1,.75,.1,.1))
-        if ( type=="box" )
-            boxplot(pdat,ylab=yid,las=2)
-        else if ( type=="bar" ) {
+        ##par(mai=c(1,.75,.1,.1))
+        if ( type=="box" ) {
+            if ( missing(ylim) )
+                ylim <- range(pdat)
+            boxplot(pdat,ylab=yid,las=2, ylim=ylim, ...)
+        } else if ( type=="bar" ) {
             mn <- unlist(lapply(pdat, mean,na.rm=TRUE))
             if ( etype=="ci" ) # 95% confidence interval
                 ci <- unlist(lapply(pdat, ci95,na.rm=TRUE))
@@ -1195,8 +1199,9 @@ boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRU
                 n2 <- sqrt(unlist(lapply(pdat, length)))
                 ci <-  sd / n2
             }
-
-            x <- barplot(mn,ylim=c(0,max(mn+ci,na.rm=TRUE)),ylab=yid,las=2)
+            if ( missing(ylim) )
+                ylim <- c(0,max(mn+ci,na.rm=TRUE))
+            x <- barplot(mn,ylim=ylim,ylab=yid,las=2, ...)
             arrows(x0=x,x1=x,y0=mn-ci,y1=mn+ci,code=3,angle=90,
                    length=.05,lwd=1.5)
         }

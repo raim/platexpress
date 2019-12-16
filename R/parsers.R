@@ -870,9 +870,15 @@ readSynergyPlate <- function(files, data.ids,
       skip <- 58
 
 
-    indat <- read.csv(files, header=FALSE,stringsAsFactors=FALSE,
-                      sep=sep, dec=dec, skip=skip)
-
+    if ( length(grep("\\.xlsx?$", files)) ) {
+        indat <- data.frame(readxl::read_excel(files,
+                                               col_names=FALSE, skip=skip),
+                            stringsAsFactors=FALSE)
+    } else {
+        indat <- read.csv(files, header=FALSE,stringsAsFactors=FALSE,
+                          sep=sep, dec=dec, skip=skip)
+    }
+    
     ## data IDs are in column 1, followed by data matrices starting
     ## in column 2; skip internal result calculation
     yidx <- c(which(indat[,1]!="" & indat[,1]!="Results"))
