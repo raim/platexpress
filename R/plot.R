@@ -420,7 +420,7 @@ viewGroups <- function(data, groups, groups2,
     #    names(pcols) <- ptypes
     #}
     orig.par <- NULL
-    if ( length(groups)>1 | !embed ) {
+    if ( (length(groups)>1 | !embed) & !no.par ) {
         ncol <- ceiling(length(groups)/nrow)
         orig.par <- list(mfcol=par("mfcol"))
         par(mfcol=c(nrow,ncol))
