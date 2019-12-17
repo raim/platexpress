@@ -5,7 +5,7 @@
 \title{Box-Plots of Data Ranges}
 \usage{
 boxData(data, rng, groups, xid, yid = "OD", interpolate = TRUE,
-  plot = TRUE, type = "box", etype = "se", ylim, ...)
+  plot = TRUE, type = "box", etype = "se", ylim, ylab, ...)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}
@@ -33,6 +33,8 @@ either "ci" (default) for the 95%-confidence interval or "se" for
 the standard error}
 
 \item{ylim}{y-axis limits}
+
+\item{ylab}{y-axis label}
 
 \item{...}{further arguments to boxplot/barplot}
 }
