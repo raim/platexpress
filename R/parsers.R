@@ -37,6 +37,8 @@ factorize <- function(x) {
 #' @inheritParams skipWells
 #' @inheritParams skipWells
 #' @inheritParams correctBlanks
+#' @param dsep \code{sep} parameter for data file, see
+#' \code{\link{readPlateData}}
 #' @param layout the text file containing the plate layout information, see
 #' argument \code{file} in \code{\link{readPlateMap}}
 #' @param skip.wells skip these wells from all analyses, see argument
@@ -55,7 +57,7 @@ factorize <- function(x) {
 #' coloring, via function \code{\link{groupColors}}, eg. "amount"
 #' @param ... further parameters to plate-reader specific parsing functions
 #' @export
-readExperiment <- function(files, type,
+readExperiment <- function(files, type, dsep,
                            time.range=c("full"), time.conversion=1/3600,
                            layout, sep=";",fsep=";",asep=":",blank.id="blank",
                            fields, afields,
@@ -63,9 +65,16 @@ readExperiment <- function(files, type,
                            group1, group2, group2.color, ...) {
 
     ## parse raw data
-    raw <- readPlateData(files, type=type,
-                         time.range=time.range, time.conversion=time.conversion,
-                         verb=TRUE, ...)
+    if ( missing(dsep) ) 
+        raw <- readPlateData(files, type=type,
+                             time.range=time.range,
+                             time.conversion=time.conversion,
+                             verb=TRUE, ...)
+    else
+        raw <- readPlateData(files, type=type, sep=dsep,
+                             time.range=time.range,
+                             time.conversion=time.conversion,
+                             verb=TRUE, ...)
 
 
     ## read layout file

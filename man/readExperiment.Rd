@@ -4,7 +4,7 @@
 \alias{readExperiment}
 \title{High-level interface of \code{\link{platexpress}}}
 \usage{
-readExperiment(files, type, time.range = c("full"),
+readExperiment(files, type, dsep, time.range = c("full"),
   time.conversion = 1/3600, layout, sep = ";", fsep = ";",
   asep = ":", blank.id = "blank", fields, afields, skip.wells,
   blank = FALSE, blank.data, base = 0, group1, group2, group2.color,
@@ -17,6 +17,9 @@ readExperiment(files, type, time.range = c("full"),
 for BMG Optima and Mars v3.01 R2, ('BMG'), BMG Clariostar and Mars
 vXXX ('BMG2') and Biotek Synergy Mx ('Synergy'), BioLector ('BioLector'), BioLector Pro ('BioLectorPro');  TODO: define export
 protocols!}
+
+\item{dsep}{\code{sep} parameter for data file, see
+\code{\link{readPlateData}}}
 
 \item{time.range}{"common" requires that all data must have
 the same number of time-points, "full" interpolates
