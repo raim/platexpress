@@ -1190,7 +1190,7 @@ boxData <- function(data, rng, groups, xid, yid="OD", interpolate=TRUE, plot=TRU
         ##par(mai=c(1,.75,.1,.1))
         if ( type=="box" ) {
             if ( missing(ylim) )
-                ylim <- range(pdat)
+                ylim <- range(pdat, na.rm=TRUE)
             boxplot(pdat,ylab=ylab,las=2, ylim=ylim, ...)
         } else if ( type=="bar" ) {
             mn <- unlist(lapply(pdat, mean,na.rm=TRUE))
