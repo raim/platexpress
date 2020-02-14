@@ -15,16 +15,17 @@ viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
   g1.legend = TRUE, verb = TRUE)
 }
 \arguments{
-\item{data}{the list of measurement data as provided by
+\item{data}{the platereader data object as provided by
 \code{\link{readPlateData}}}
 
-\item{groups}{a list of well grouped wells, as produced by
-\code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2}}
+\item{groups}{a list of well groups, wells from each
+group will be plotted together in one plot, and statistics plotted
+for sub-groups (replicates) in \code{groups2}. Groupings can also
+be present as a list item in the \code{data} object.}
 
-\item{groups2}{sub-groups of \code{groups}, group2 must be constructed as
-\code{groups}, but with one additional grouping, e.g.
-\code{\link{getGroups}}(platemap, by=c("media","strain")) following the
-example for parameter see \code{groups}}
+\item{groups2}{replicate well groups for which statistics are calculated
+and plotted, each group must be a subset of exactly on well group
+in argument \code{groups}.}
 
 \item{xid}{ID of a data-set in the input data that can be used as x-axis
 instead of the default Time vector}

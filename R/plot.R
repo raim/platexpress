@@ -220,9 +220,9 @@ arrows_plate <- function(segments, wells,
 }
 
 
-## TODO
-## wrapper for viewGroups taking list of plates
+## TODO: wrapper for viewGroups taking list of plates
 ## and a merged layout file
+## TODO: rename groups and groups2, eg. into sets and replicates
 viewGroupl <- function(data, groups, groups2, ...) {}
 
 #' View Group Averages
@@ -230,14 +230,15 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' plot grouped wells as summary plots, incl. means and confidence intervals.
 #' This function gives a first overview of the reproducability between
 #' replicates.
-#' @param data the list of measurement data as provided by
+#' @param data the platereader data object as provided by
 #' \code{\link{readPlateData}}
-#' @param groups a list of well grouped wells, as produced by
-#' \code{\link{getGroups}}(platemap, by=c("media")); cf. \code{groups2}
-#' @param groups2 sub-groups of \code{groups}, group2 must be constructed as
-#' \code{groups}, but with one additional grouping, e.g.
-#' \code{\link{getGroups}}(platemap, by=c("media","strain")) following the
-#' example for parameter see \code{groups}
+#' @param groups a list of well groups, wells from each
+#' group will be plotted together in one plot, and statistics plotted
+#' for sub-groups (replicates) in \code{groups2}. Groupings can also
+#' be present as a list item in the \code{data} object.
+#' @param groups2 replicate well groups for which statistics are calculated
+#' and plotted, each group must be a subset of exactly on well group
+#' in argument \code{groups}. 
 #' @param xid ID of a data-set in the input data that can be used as x-axis
 #' instead of the default Time vector
 #' @param yids IDs of the data to be plotted; if missing, all data will
