@@ -759,12 +759,14 @@ data2growthrates <- function(data, yid, wells, plate) {
 
     dat <- data[[yid]]$data[,wells,drop=FALSE]
 
-  value <- c(dat)
-  time <- rep(data$Time, ncol(dat))
-  well <- rep(colnames(dat), each=nrow(dat))
-  df <- data.frame(time=time, value=value,
-                   well=factor(well, levels=colnames(dat)))
-  df
+    value <- c(dat)
+    ## NOTE: this also works for OD interpolated data, but name "time"
+    ## is perhaps misleading
+    time <- rep(data[[data$xids[1]]], ncol(dat))
+    well <- rep(colnames(dat), each=nrow(dat))
+    df <- data.frame(time=time, value=value,
+                     well=factor(well, levels=colnames(dat)))
+    df
 }
 
 ## TODO: simple key word based switch
