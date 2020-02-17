@@ -297,7 +297,7 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' mai, mgp), useful to style your own plots, also see argument \code{embed}
 #' @seealso \code{\link{viewPlate}}, \code{\link{getGroups}},
 #' \code{\link{readPlateMap}}
-#' @param verb print messages if true
+#' @param verb print progress messages
 #' @examples
 #' data(ap12)
 #' groups <- getGroups(plate=ap12plate, by=c("strain"))
@@ -316,7 +316,7 @@ viewGroups <- function(data, groups, groups2,
                        mai=c(0.5,0,0,0), xmgp=c(1.5,.5,0),
                        ymgp=c(0,-1,-.05), ytcl=.25,
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
-                       g1.legpos="topright", g1.legend=TRUE, verb=TRUE) {
+                       g1.legpos="topright", g1.legend=TRUE, verb=FALSE) {
 
     ## PARSE GROUPINGS
     if ( "groups" %in% names(data) ) {
@@ -650,6 +650,7 @@ viewGroups <- function(data, groups, groups2,
 #' @param legpos position of the well IDs on the plots
 #' @param add.legend add a legend for the plotted data types (see
 #' argument \code{yids}) in the last plotted well
+#' @param verb print progress messages
 #' @examples
 #' data(ap12)
 #' # view all data on the plate
@@ -662,7 +663,8 @@ viewPlate <- function(data, wells, wcols,
                       rows=toupper(letters[1:8]),cols=1:12,
                       xid, xscale=FALSE,xlim,
                       yids, dtype="data", pcols, yscale=TRUE, ylims, ylim,
-                      log="", axes, yaxis="", legpos="topleft", add.legend=TRUE) {
+                      log="", axes, yaxis="", legpos="topleft", add.legend=TRUE,
+                      verb=FALSE) {
     ## TODO: ADAPT viewPlate to use rows and cols from data$wells!!?
     ## currently for BioLector only!!
     if ( "wells"%in%names(data) ) {
@@ -689,7 +691,9 @@ viewPlate <- function(data, wells, wcols,
                                    function(id)
                                        colnames(data[[id]][[dtype]]))))
     if ( sum(!wells%in%pwells)>0 ) {
-        #warning("wells ", wells[!wells%in%pwells]," not present, skipped!")
+        if ( verb )
+            cat(paste("wells ", wells[!wells%in%pwells],
+                      " not present, skipped!\n"))
         wells <- wells[wells%in%pwells]
     }
 
@@ -706,7 +710,7 @@ viewPlate <- function(data, wells, wcols,
         xdat <- data[[xid]][[dtype]][,wells,drop=FALSE]
     else
         stop("x-axis data: \"", xid, "\" not found")
-    cat(paste("x-axis:", xid, "\n"))
+    if ( verb ) cat(paste("x-axis:", xid, "\n"))
     ## get x-data: global data (time, temperature)
     ## or a data set specified via xid
     ## TODO: implement absence of master time, if interpolate=FALSE
@@ -731,10 +735,10 @@ viewPlate <- function(data, wells, wcols,
     if ( !missing(yids) ) # only use requested data for plots
       ptypes <- ptypes[ptypes%in%yids]
     if ( length(ptypes)==0 ) {
-        cat(paste("no data to plot\n"))
+        if ( verb ) cat(paste("no data to plot\n"))
         return()
     } else
-        cat(paste("plotting", paste(ptypes,collapse=";"),"\n"))
+        if ( verb ) cat(paste("plotting", paste(ptypes,collapse=";"),"\n"))
 
     ## PLOT PARAMS
     ## xlim
