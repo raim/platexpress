@@ -115,7 +115,7 @@ to the order in argument \code{yids} and as plotted in the legend
 
 \item{g1.legend}{show the main legend, giving plot colors}
 
-\item{verb}{print messages if true}
+\item{verb}{print progress messages}
 }
 \description{
 plot grouped wells as summary plots, incl. means and confidence intervals.

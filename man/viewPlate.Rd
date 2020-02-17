@@ -7,7 +7,7 @@
 viewPlate(data, wells, wcols, rows = toupper(letters[1:8]),
   cols = 1:12, xid, xscale = FALSE, xlim, yids, dtype = "data",
   pcols, yscale = TRUE, ylims, ylim, log = "", axes, yaxis = "",
-  legpos = "topleft", add.legend = TRUE)
+  legpos = "topleft", add.legend = TRUE, verb = FALSE)
 }
 \arguments{
 \item{data}{the list of measurement data as provided by
@@ -59,6 +59,8 @@ multiple y-axis values (multiple yids) are handled in argument\code{yaxis}}
 
 \item{add.legend}{add a legend for the plotted data types (see
 argument \code{yids}) in the last plotted well}
+
+\item{verb}{print progress messages}
 }
 \description{
 plots all data in plate format for a quick inspection of
