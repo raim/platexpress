@@ -16,7 +16,7 @@
 #'@importFrom stats median sd qt approx spline filter predict coef na.omit quantile confint lm
 #'@importFrom graphics plot matplot boxplot barplot legend arrows locator
 #' abline lines points polygon box axis par text title mtext stripchart image
-#'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off gray.colors
+#'@importFrom grDevices rainbow rgb col2rgb png pdf svg tiff jpeg postscript graphics.off gray.colors boxplot.stats
 #'@importFrom tidyr separate
 ##@importFrom readxl read_excel
 #'@importFrom utils read.csv read.table write.csv tail

@@ -237,12 +237,19 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' for sub-groups (replicates) in \code{groups2}. Groupings can also
 #' be present as a list item in the \code{data} object.
 #' @param groups2 replicate well groups for which statistics are calculated
-#' and plotted, each group must be a subset of exactly on well group
-#' in argument \code{groups}. 
+#' and plotted  (see argument \code{stats}), each group must be a subset
+#' of exactly on well group in argument \code{groups}. 
 #' @param xid ID of a data-set in the input data that can be used as x-axis
 #' instead of the default Time vector
 #' @param yids IDs of the data to be plotted; if missing, all data will
 #' be plotted
+#' @param stats type of replicate statistics to plot, where replicates
+#' are defined in option \code{groups2} or defined in the plate data object.
+#' Options are either only a line for each replicate group ("mean" or
+#' "median") or a line with transparent ranges. "CI": mean and 95\%
+#' confidence interval (default), "SD": mean and standard deviation,
+#' "SE": mean and standard error, "boxplot": median and 25\% and 75\%
+#' quantiles, "range": median and full data range (min/max)
 #' @param dtype type of the data to be plotted, default is the main 'data', but
 #' e.g. 'orig' allows to plot the original data w/o processing (e.g.
 #' interpolation, blank correction, etc.)
@@ -261,22 +268,26 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' @param ylim one y-axis limit range that will be used for all plotted data
 #' @param log plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 #' log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes
-#' @param show.ci95 show the 95\% condifence intervals of groups
+#' @param show.ci95 deprecated, but kept for backward compatibility, see
+#' option \code{stats="CI"}: show the 95\% condifence intervals of groups;
+#' set \code{stats="mean"} to reproduce previous \code{show.ci95=FALSE}
+#' behaviour
 #' @param show.mean show the mean of groups as lines
 #' @param emphasize.mean show the means in black instead of group colors,
 #' @param lwd.mean line width for the mean lines, see \code{(par("lwd")}
 #' @param lty.mean line style for the mean lines, see \code{(par("lty")}
 #' this can help to emphasize the means in noisy data (broad overlapping
 #' confidence intervals
+#' @param alpha hexadecimal alpha value for range plot opaqueness
+#' @param lwd.orig line-width of the original single data, set to 0 to
+#' supress plotting of all original data
+#' @param lty.orig line type of the original single data, set to 0 to supress
+#' plotting of all original data
 #' @param g1.legend show the main legend, giving plot colors
 #  of the plotted data types (\code{yids})
 #' @param g1.legpos position of the \code{groups} legend, see \code{g1.legend}
 #' @param g2.legend plot a legend for groups in argument \code{groups2}
 #' @param g2.legpos position of the \code{groups2} legend, see \code{g2.legend}
-#' @param lwd.orig line-width of the original single data, set to 0 to
-#' supress plotting of all original data
-#' @param lty.orig line type of the original single data, set to 0 to supress
-#' plotting of all original data
 #' @param nrow number of plot rows, number of columns will be selected
 #' automatically; NOTE: to change the ordering of the plots
 #' you can change the ordering of the input \code{groups}/
@@ -305,12 +316,12 @@ viewGroupl <- function(data, groups, groups2, ...) {}
 #' vg <- viewGroups(ap12data,groups2=groups,lwd.orig=0.1,nrow=1)
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
-viewGroups <- function(data, groups, groups2,
+viewGroups <- function(data, yids, stats="CI", groups, groups2, 
                        xid, xscale=FALSE, xlim, xlab,
-                       yids, dtype="data", ylab, pcols,group2.col,
+                       dtype="data", ylab, pcols,group2.col,
                        yscale=TRUE,ylims,ylim, log="",
-                       show.ci95=TRUE,show.mean=TRUE,emphasize.mean=FALSE,
-                       lty.orig=1,lwd.orig=0.1,lty.mean=1,lwd.mean=2,
+                       lty.mean=1,lwd.mean=2,alpha=55,lty.orig=1,lwd.orig=0.1,
+                       show.ci95=FALSE,show.mean=TRUE,emphasize.mean=FALSE,
                        g2.legpos="topleft", g2.legend=TRUE,
                        embed=FALSE, no.par=FALSE,
                        mai=c(0.5,0,0,0), xmgp=c(1.5,.5,0),
@@ -318,6 +329,9 @@ viewGroups <- function(data, groups, groups2,
                        nrow=1, xaxis=TRUE, yaxis=c(1,2),
                        g1.legpos="topright", g1.legend=TRUE, verb=FALSE) {
 
+    ## STATISTICS: deprecated argument
+    if ( show.ci95 ) stats <- "CI"
+    
     ## PARSE GROUPINGS
     if ( "groups" %in% names(data) ) {
         if ( missing(groups2) & "group2" %in% names(data$groups) )
@@ -490,6 +504,7 @@ viewGroups <- function(data, groups, groups2,
                 else x <- time
 
 
+                ## STATISTICS
                 ## get data for selected wells
                 dat <- data[[ptyp]][[dtype]][,wells, drop=FALSE]
                 ## calculate stats only for common x!
@@ -497,9 +512,35 @@ viewGroups <- function(data, groups, groups2,
                 ## or interpolate data to common x (on the fly)?
                 ## TODO: do we get NAs or empty vals from ci?
                 if ( is.null(dim(x)) & length(wells)>=1 ) {
-                    mn <- apply(dat,1,function(x) mean(x,na.rm=TRUE))
-                    if ( show.ci95 )
+                    linefun <- mean
+                    if ( stats%in%c("median","range") )
+                        linefun <- median
+                    if ( stats!="boxplot" ) # via boxplot.stats below
+                        mn <- apply(dat,1,function(x) linefun(x,na.rm=TRUE))
+                    ci1 <- NULL
+                    if ( stats=="CI" ) {
                         ci <- apply(dat,1,function(x) ci95(x,na.rm=TRUE))
+                        ci1 <- mn+ci
+                        ci2 <- mn-ci
+                    } else if ( stats=="SD" ) {
+                        ci <- apply(dat,1,function(x) sd(x,na.rm=TRUE))
+                        ci1 <- mn+ci
+                        ci2 <- mn-ci
+                    } else if ( stats=="SE" ) {
+                        ci <- apply(dat,1,function(x) se(x,na.rm=TRUE))
+                        ci1 <- mn+ci
+                        ci2 <- mn-ci
+                    } else if ( stats=="boxplot" ) {
+                        ## NOTE: overrules median
+                        ci <- apply(dat,1,function(x)
+                            boxplot.stats(x)$stats[2:4])
+                        ci1 <- ci[1,]
+                        mn  <- ci[2,]
+                        ci2 <- ci[3,]
+                    } else if ( stats=="range" ) {
+                        ci1 <-  apply(dat,1,function(x) min(x,na.rm=TRUE))
+                        ci2 <-  apply(dat,1,function(x) max(x,na.rm=TRUE))
+                    }
                 }
                 ## PLOT
                 par(new=parnew) #i!=1)
@@ -538,10 +579,11 @@ viewGroups <- function(data, groups, groups2,
                         ylim=ylims[[ptyp]],col=tmp,xlim=xlim,log=log)
                 ## plot mean and confidence intervals
                 if ( is.null(dim(x)) & length(wells)>1 ) { # only for common x!
-                    if ( show.ci95 ) {
+                    ## plot statistics polygon
+                    if ( !is.null(ci1) ) {
 
                         px <- c(x,rev(x))
-                        py <- c(mn-ci,rev(mn+ci))
+                        py <- c(ci1,rev(ci2))
                         px <- px[!is.na(py)]
                         py <- py[!is.na(py)]
                         px <- c(px,px[1])
@@ -553,7 +595,7 @@ viewGroups <- function(data, groups, groups2,
                                     min(py))
                         }
                         polygon(x=px,y=py,border=NA,
-                                col=paste(g2.col,"55",sep=""))
+                                col=paste(g2.col,alpha,sep=""))
                     }
                 }
                 if ( is.null(dim(x)) & length(wells)>=1 ) { # only for common x!

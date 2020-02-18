@@ -4,11 +4,11 @@
 \alias{viewGroups}
 \title{View Group Averages}
 \usage{
-viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
-  dtype = "data", ylab, pcols, group2.col, yscale = TRUE, ylims, ylim,
-  log = "", show.ci95 = TRUE, show.mean = TRUE,
-  emphasize.mean = FALSE, lty.orig = 1, lwd.orig = 0.1,
-  lty.mean = 1, lwd.mean = 2, g2.legpos = "topleft",
+viewGroups(data, yids, stats = "CI", groups, groups2, xid,
+  xscale = FALSE, xlim, xlab, dtype = "data", ylab, pcols, group2.col,
+  yscale = TRUE, ylims, ylim, log = "", lty.mean = 1, lwd.mean = 2,
+  alpha = 55, lty.orig = 1, lwd.orig = 0.1, show.ci95 = FALSE,
+  show.mean = TRUE, emphasize.mean = FALSE, g2.legpos = "topleft",
   g2.legend = TRUE, embed = FALSE, no.par = FALSE, mai = c(0.5, 0,
   0, 0), xmgp = c(1.5, 0.5, 0), ymgp = c(0, -1, -0.05), ytcl = 0.25,
   nrow = 1, xaxis = TRUE, yaxis = c(1, 2), g1.legpos = "topright",
@@ -18,14 +18,25 @@ viewGroups(data, groups, groups2, xid, xscale = FALSE, xlim, xlab, yids,
 \item{data}{the platereader data object as provided by
 \code{\link{readPlateData}}}
 
+\item{yids}{IDs of the data to be plotted; if missing, all data will
+be plotted}
+
+\item{stats}{type of replicate statistics to plot, where replicates
+are defined in option \code{groups2} or defined in the plate data object.
+Options are either only a line for each replicate group ("mean" or
+"median") or a line with transparent ranges. "CI": mean and 95\%
+confidence interval (default), "SD": mean and standard deviation,
+"SE": mean and standard error, "boxplot": median and 25\% and 75\%
+quantiles, "range": median and full data range (min/max)}
+
 \item{groups}{a list of well groups, wells from each
 group will be plotted together in one plot, and statistics plotted
 for sub-groups (replicates) in \code{groups2}. Groupings can also
 be present as a list item in the \code{data} object.}
 
 \item{groups2}{replicate well groups for which statistics are calculated
-and plotted, each group must be a subset of exactly on well group
-in argument \code{groups}.}
+and plotted  (see argument \code{stats}), each group must be a subset
+of exactly on well group in argument \code{groups}.}
 
 \item{xid}{ID of a data-set in the input data that can be used as x-axis
 instead of the default Time vector}
@@ -36,9 +47,6 @@ specifies a subset of the data as x-axis}
 \item{xlim}{plot range of the x-axis}
 
 \item{xlab}{custom x-axis label}
-
-\item{yids}{IDs of the data to be plotted; if missing, all data will
-be plotted}
 
 \item{dtype}{type of the data to be plotted, default is the main 'data', but
 e.g. 'orig' allows to plot the original data w/o processing (e.g.
@@ -62,11 +70,13 @@ all plotted wells; if FALSE each well be locally scaled}
 \item{log}{plot logarithmic axis, use equivalent to normal plot 'log', i.e.,
 log="y" for a log y-axis, log="x" for x-axis and log="yx" for both axes}
 
-\item{show.ci95}{show the 95\% condifence intervals of groups}
+\item{lty.mean}{line style for the mean lines, see \code{(par("lty")}
+this can help to emphasize the means in noisy data (broad overlapping
+confidence intervals}
 
-\item{show.mean}{show the mean of groups as lines}
+\item{lwd.mean}{line width for the mean lines, see \code{(par("lwd")}}
 
-\item{emphasize.mean}{show the means in black instead of group colors,}
+\item{alpha}{hexadecimal alpha value for range plot opaqueness}
 
 \item{lty.orig}{line type of the original single data, set to 0 to supress
 plotting of all original data}
@@ -74,11 +84,14 @@ plotting of all original data}
 \item{lwd.orig}{line-width of the original single data, set to 0 to
 supress plotting of all original data}
 
-\item{lty.mean}{line style for the mean lines, see \code{(par("lty")}
-this can help to emphasize the means in noisy data (broad overlapping
-confidence intervals}
+\item{show.ci95}{deprecated, but kept for backward compatibility, see
+option \code{stats="CI"}: show the 95\% condifence intervals of groups;
+set \code{stats="mean"} to reproduce previous \code{show.ci95=FALSE}
+behaviour}
 
-\item{lwd.mean}{line width for the mean lines, see \code{(par("lwd")}}
+\item{show.mean}{show the mean of groups as lines}
+
+\item{emphasize.mean}{show the means in black instead of group colors,}
 
 \item{g2.legpos}{position of the \code{groups2} legend, see \code{g2.legend}}
 
