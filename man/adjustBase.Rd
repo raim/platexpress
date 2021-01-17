@@ -4,8 +4,7 @@
 \alias{adjustBase}
 \title{Adjusts to Minimal Base}
 \usage{
-adjustBase(data, base = 0, yids, add.fraction, xlim, each = FALSE,
-  verb = TRUE)
+adjustBase(data, base = 0, yids, add.fraction, xlim, each = FALSE, verb = TRUE)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}

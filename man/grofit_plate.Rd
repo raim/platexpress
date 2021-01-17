@@ -4,10 +4,21 @@
 \alias{grofit_plate}
 \title{high-level wrapper for \pkg{grofit}}
 \usage{
-grofit_plate(data, plate, yid, amount, fields = c("strain", "medium",
-  "substance"), control, model.type = c("richards", "logistic",
-  "gompertz.exp", "gompertz"), nboot.gc = 100, plot = TRUE,
-  interactive = FALSE, verb = TRUE, col = "#0000FF", ...)
+grofit_plate(
+  data,
+  plate,
+  yid,
+  amount,
+  fields = c("strain", "medium", "substance"),
+  control,
+  model.type = c("richards", "logistic", "gompertz.exp", "gompertz"),
+  nboot.gc = 100,
+  plot = TRUE,
+  interactive = FALSE,
+  verb = TRUE,
+  col = "#0000FF",
+  ...
+)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}

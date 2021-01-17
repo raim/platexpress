@@ -4,8 +4,13 @@
 \alias{amountColors}
 \title{Add Amount Colors}
 \usage{
-amountColors(map, substance = "substance", amount = "amount",
-  color = "color", colf = colorRamps::matlab.like2)
+amountColors(
+  map,
+  substance = "substance",
+  amount = "amount",
+  color = "color",
+  colf = colorRamps::matlab.like2
+)
 }
 \arguments{
 \item{map}{the plate map, see  \code{\link{readPlateMap}}}

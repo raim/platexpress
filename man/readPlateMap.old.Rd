@@ -4,9 +4,18 @@
 \alias{readPlateMap.old}
 \title{Read Plate Layout Map}
 \usage{
-readPlateMap.old(file, sep = "\\t", fsep = "\\n", fields, asep,
-  afields, blank.id = "blank", nrows = 8, formatted = FALSE,
-  header = TRUE)
+readPlateMap.old(
+  file,
+  sep = "\\t",
+  fsep = "\\n",
+  fields,
+  asep,
+  afields,
+  blank.id = "blank",
+  nrows = 8,
+  formatted = FALSE,
+  header = TRUE
+)
 }
 \arguments{
 \item{file}{text file containing the plate layout.}
@@ -48,7 +57,7 @@ columns should be named as in the corresponding plate reader data files.
 }
 \examples{
 plate.file <- system.file("extdata", "AP12_layout.csv", package = "platexpress")
-plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\\n", fields=c("strain","samples"))
+plate <- readPlateMap(file=plate.file, blank.id="blank",fsep="\n", fields=c("strain","samples"))
 }
 \seealso{
 \code{\link{readPlateData}}

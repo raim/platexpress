@@ -4,8 +4,12 @@
 \alias{interpolatePlateTimes}
 \title{Interpolate to Common Timepoints}
 \usage{
-interpolatePlateTimes(data, time.range = c("common", "full"),
-  spline.method = "natural", verb = TRUE)
+interpolatePlateTimes(
+  data,
+  time.range = c("common", "full"),
+  spline.method = "natural",
+  verb = TRUE
+)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}

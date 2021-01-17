@@ -4,9 +4,16 @@
 \alias{showSpectrum}
 \title{Show Visual Ligh Spectrum}
 \usage{
-showSpectrum(wavelengths = 380:780, alpha = 99, pch = 19, cex = 3,
-  ylab = "approximate color", main = "use findWavelength(3)",
-  xlab = "wavelength, nm", ...)
+showSpectrum(
+  wavelengths = 380:780,
+  alpha = 99,
+  pch = 19,
+  cex = 3,
+  ylab = "approximate color",
+  main = "use findWavelength(3)",
+  xlab = "wavelength, nm",
+  ...
+)
 }
 \arguments{
 \item{wavelengths}{vector of wavelengths to be plotted}

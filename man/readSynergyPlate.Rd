@@ -4,8 +4,16 @@
 \alias{readSynergyPlate}
 \title{Read Synergy Mx Plate Data}
 \usage{
-readSynergyPlate(files, data.ids, skip, sep = ";", dec = ".",
-  skiplastcol = FALSE, time.format = "\%H:\%M:\%S", verb = TRUE)
+readSynergyPlate(
+  files,
+  data.ids,
+  skip,
+  sep = ";",
+  dec = ".",
+  skiplastcol = FALSE,
+  time.format = "\%H:\%M:\%S",
+  verb = TRUE
+)
 }
 \arguments{
 \item{files}{list of one or more data files}

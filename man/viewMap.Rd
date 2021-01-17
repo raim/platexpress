@@ -4,8 +4,15 @@
 \alias{viewMap}
 \title{Plot a representation of microreader "plate"}
 \usage{
-viewMap(map, nrow = 8, ncol = 12, color = "color", text = "amount",
-  title = "plate layout", add = FALSE)
+viewMap(
+  map,
+  nrow = 8,
+  ncol = 12,
+  color = "color",
+  text = "amount",
+  title = "plate layout",
+  add = FALSE
+)
 }
 \arguments{
 \item{map}{the plate map, see  \code{\link{readPlateMap}}}

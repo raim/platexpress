@@ -4,8 +4,16 @@
 \alias{readPlateData}
 \title{Read Plate Data}
 \usage{
-readPlateData(files, type, data.ids, interpolate = TRUE,
-  time.range = c("common", "full"), time.conversion, verb = TRUE, ...)
+readPlateData(
+  files,
+  type,
+  data.ids,
+  interpolate = TRUE,
+  time.range = c("common", "full"),
+  time.conversion,
+  verb = TRUE,
+  ...
+)
 }
 \arguments{
 \item{files}{list of one or more data files}

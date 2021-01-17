@@ -4,8 +4,20 @@
 \alias{boxData}
 \title{Box-Plots of Data Ranges}
 \usage{
-boxData(data, rng, groups, xid, yid = "OD", interpolate = TRUE,
-  plot = TRUE, type = "box", etype = "se", ylim, ylab, ...)
+boxData(
+  data,
+  rng,
+  groups,
+  xid,
+  yid = "OD",
+  interpolate = TRUE,
+  plot = TRUE,
+  type = "box",
+  etype = "se",
+  ylim,
+  ylab,
+  ...
+)
 }
 \arguments{
 \item{data}{\code{\link{platexpress}} data, see \code{\link{readPlateData}}}

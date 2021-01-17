@@ -4,8 +4,19 @@
 \alias{correctBlanks}
 \title{Subtract Blank Values}
 \usage{
-correctBlanks(data, plate, type = "median", by, yids, xid, max.xid,
-  mbins = 1, base, verb = TRUE, ...)
+correctBlanks(
+  data,
+  plate,
+  type = "median",
+  by,
+  yids,
+  xid,
+  max.xid,
+  mbins = 1,
+  base,
+  verb = TRUE,
+  ...
+)
 }
 \arguments{
 \item{data}{the plate data list to be blank-corrected}

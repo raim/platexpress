@@ -5,8 +5,7 @@
 \title{Add results from  \code{\link{segmented_plate}}
 to \code{platexpress} object.}
 \usage{
-\method{addModel}{segmentedl}(fit, data, ID = "y", add.slopes = FALSE,
-  ...)
+\method{addModel}{segmentedl}(fit, data, ID = "y", add.slopes = FALSE, ...)
 }
 \arguments{
 \item{fit}{list of \code{\link[segmented:segmented]{segmented}} objects}

@@ -4,15 +4,47 @@
 \alias{viewGroups}
 \title{View Group Averages}
 \usage{
-viewGroups(data, yids, stats = "CI", groups, groups2, xid,
-  xscale = FALSE, xlim, xlab, dtype = "data", ylab, pcols, group2.col,
-  yscale = TRUE, ylims, ylim, log = "", lty.mean = 1, lwd.mean = 2,
-  alpha = 55, lty.orig = 1, lwd.orig = 0.1, show.ci95 = FALSE,
-  show.mean = TRUE, emphasize.mean = FALSE, g2.legpos = "topleft",
-  g2.legend = TRUE, embed = FALSE, no.par = FALSE, mai = c(0.5, 0,
-  0, 0), xmgp = c(1.5, 0.5, 0), ymgp = c(0, -1, -0.05), ytcl = 0.25,
-  nrow = 1, xaxis = TRUE, yaxis = c(1, 2), g1.legpos = "topright",
-  g1.legend = TRUE, verb = FALSE)
+viewGroups(
+  data,
+  yids,
+  stats = "CI",
+  groups,
+  groups2,
+  xid,
+  xscale = FALSE,
+  xlim,
+  xlab,
+  dtype = "data",
+  ylab,
+  pcols,
+  group2.col,
+  yscale = TRUE,
+  ylims,
+  ylim,
+  log = "",
+  lty.mean = 1,
+  lwd.mean = 2,
+  alpha = 55,
+  lty.orig = 1,
+  lwd.orig = 0.1,
+  show.ci95 = FALSE,
+  show.mean = TRUE,
+  emphasize.mean = FALSE,
+  g2.legpos = "topleft",
+  g2.legend = TRUE,
+  embed = FALSE,
+  no.par = FALSE,
+  mai = c(0.5, 0, 0, 0),
+  xmgp = c(1.5, 0.5, 0),
+  ymgp = c(0, -1, -0.05),
+  ytcl = 0.25,
+  nrow = 1,
+  xaxis = TRUE,
+  yaxis = c(1, 2),
+  g1.legpos = "topright",
+  g1.legend = TRUE,
+  verb = FALSE
+)
 }
 \arguments{
 \item{data}{the platereader data object as provided by

@@ -4,9 +4,19 @@
 \alias{image_plate}
 \title{Plot a heatmap of \code{platexpress} data.}
 \usage{
-image_plate(data, yid, wells, well.norm = FALSE, q.cut = 0.99,
-  ylab = "", xid, xlab, wcol, col = gray.colors(100, start = 1, end =
-  0), ...)
+image_plate(
+  data,
+  yid,
+  wells,
+  well.norm = FALSE,
+  q.cut = 0.99,
+  ylab = "",
+  xid,
+  xlab,
+  wcol,
+  col = gray.colors(100, start = 1, end = 0),
+  ...
+)
 }
 \arguments{
 \item{data}{\code{platexpress} data object}

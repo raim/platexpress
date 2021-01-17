@@ -4,8 +4,7 @@
 \alias{plotdev}
 \title{Select Plot Device}
 \usage{
-plotdev(file = "test", type = "png", width = 5, height = 5,
-  res = 100)
+plotdev(file = "test", type = "png", width = 5, height = 5, res = 100)
 }
 \arguments{
 \item{file}{the name of the file without the extension (.pdf)}

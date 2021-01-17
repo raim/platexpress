@@ -4,8 +4,17 @@
 \alias{data2grofit}
 \title{interface to package \pkg{grofit}}
 \usage{
-data2grofit(data, yid, min.time, max.time, wells, plate, eid, dose,
-  verb = TRUE)
+data2grofit(
+  data,
+  yid,
+  min.time,
+  max.time,
+  wells,
+  plate,
+  eid,
+  dose,
+  verb = TRUE
+)
 }
 \arguments{
 \item{data}{a platexpress data set, see \code{\link{readPlateData}}}

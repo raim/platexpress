@@ -4,8 +4,14 @@
 \alias{readSimplePlate}
 \title{Read Simple Plate Data Tables}
 \usage{
-readSimplePlate(files, data.ids, nrow, time.format = "\%M:\%S",
-  verb = TRUE, ...)
+readSimplePlate(
+  files,
+  data.ids,
+  nrow,
+  time.format = "\%M:\%S",
+  verb = TRUE,
+  ...
+)
 }
 \arguments{
 \item{files}{list of one or more data files}

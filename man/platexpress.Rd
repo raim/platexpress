@@ -3,7 +3,6 @@
 \docType{package}
 \name{platexpress}
 \alias{platexpress}
-\alias{platexpress-package}
 \title{platexpress: quick inspection and analysis of microbial growth & expression.}
 \description{
 The platexpress package provides a quick & easy interface to

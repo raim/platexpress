@@ -4,9 +4,19 @@
 \alias{doseResponse.box}
 \title{Dose-Response Box-Plots}
 \usage{
-doseResponse.box(map, wells, val, amount = "amount",
-  substance = "substance", color = "color", na.y = 0, ylim,
-  xnum = FALSE, xlab, ylab)
+doseResponse.box(
+  map,
+  wells,
+  val,
+  amount = "amount",
+  substance = "substance",
+  color = "color",
+  na.y = 0,
+  ylim,
+  xnum = FALSE,
+  xlab,
+  ylab
+)
 }
 \arguments{
 \item{map}{a plate layout map with columns \code{amount} and some
