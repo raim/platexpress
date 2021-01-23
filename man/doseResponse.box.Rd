@@ -7,8 +7,8 @@
 doseResponse.box(
   map,
   wells,
-  val,
-  amount = "amount",
+  response,
+  dose = "amount",
   substance = "substance",
   color = "color",
   na.y = 0,
@@ -19,32 +19,32 @@ doseResponse.box(
 )
 }
 \arguments{
-\item{map}{a plate layout map with columns \code{amount} and some
-calculated value in column \code{val},
+\item{map}{a plate layout map with columns \code{dose} and some
+calculated value in column \code{response},
 eg. results from \pkg{grofit} or \pkg{growthrates}}
 
 \item{wells}{a list of well IDs to be used in the plot}
 
-\item{val}{the name of a column in \code{map} containing numeric values
+\item{response}{the name of a column in \code{map} containing numeric values
 that should be plotted on y-axis}
 
-\item{amount}{the name of a column in \code{map} providing numeric values
+\item{dose}{the name of a column in \code{map} providing numeric values
 that should be plotted on x-axis, typically a substance added to wells
 in multiple replicates; the default value "amount" is automatically
 generated from appropriate plate layout files by \code{link{readPlateMap}}}
 
 \item{substance}{the name of a column in \code{map} providing the names of
-the substance in \code{amount}, used as x-axis label; if it doesn't
+the substance in \code{dose}, used as x-axis label; if it doesn't
 correspond to a column, its value is directly used as label}
 
 \item{color}{the name of a column in \code{map} providing colors
-for each well; NOTE, that wells with the same \code{amount} should have
-the same color, only the first color for a given \code{amount} is used;
+for each well; NOTE, that wells with the same \code{dose} should have
+the same color, only the first color for a given \code{dose} is used;
 Colors are automatically assigned from a color ramp mapped to the
-numerical range of \code{amount} by \code{link{readPlateMap}}}
+numerical range of \code{dose} by \code{link{readPlateMap}}}
 
 \item{na.y}{value to be used to plot replicates with \code{NA} in
-column \code{val}; set to NA to supress plotting}
+column \code{response}; set to NA to supress plotting}
 
 \item{ylim}{limits of the y-axis}
 
@@ -54,12 +54,12 @@ column \code{val}; set to NA to supress plotting}
 \code{substance}, or if this is a column in \code{map}, the substance
 indicated there}
 
-\item{ylab}{alternative label for the y-axis, default is to use argument \code{val}}
+\item{ylab}{alternative label for the y-axis, default is to use argument \code{response}}
 }
 \description{
 Plots a continuous value for each well as a function
-of an \code{amount} of a \code{substance} and make boxplots
-for all replicates at a given amount. Note that this is deprecated,
+of an \code{dose} of a \code{substance} and make boxplots
+for all replicates at a given dose. Note that this is deprecated,
 and plots with error bars can be generated instead by
 function \code{\link{doseResponse}}.
 }

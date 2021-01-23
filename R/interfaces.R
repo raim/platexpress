@@ -270,6 +270,9 @@ dpseg_plate <- function(data, yid="OD", wells, log=TRUE, xid, verb=0, ...) {
 addModel.dpsegl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
 
     if ( add.slopes ) {
+
+        ## TODO: fix NA in last row!
+        
         ## get breakpoints and slopes
         segs <- lapply(fit, function(x) x$segments[,c("x1","x2")])
         slps <- lapply(fit, function(x) x$segments[1:nrow(x$segments),"slope"])
@@ -281,6 +284,8 @@ addModel.dpsegl <- function(fit, data, ID="y", add.slopes=FALSE, ...) {
             sg <- segs[[i]]
             sl <- slps[[i]]
             yo <- rep(sl, each=2)
+
+            ## TODO: *.999 looks very dirty
             xo <- c(sapply(1:nrow(sg), function(j)
                 seq(sg[j,1], sg[j,2]*.999, length.out=2)))
             

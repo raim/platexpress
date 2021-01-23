@@ -7,8 +7,8 @@
 doseResponse(
   map,
   wells,
-  val,
-  amount = "amount",
+  response,
+  dose = "amount",
   substance = "substance",
   col = "black",
   pch = 1,
@@ -27,30 +27,30 @@ doseResponse(
 )
 }
 \arguments{
-\item{map}{a plate layout map with columns \code{amount} and some
-calculated value in column \code{val},
+\item{map}{a plate layout map with columns \code{dose} and some
+calculated value in column \code{response},
 eg. results from \pkg{grofit} or \pkg{growthrates}}
 
 \item{wells}{a list of well IDs to be used in the plot}
 
-\item{val}{the name of a column in \code{map} containing numeric values
+\item{response}{the name of a column in \code{map} containing numeric values
 that should be plotted on y-axis}
 
-\item{amount}{the name of a column in \code{map} providing numeric values
+\item{dose}{the name of a column in \code{map} providing numeric values
 that should be plotted on x-axis, typically a substance added to wells
 in multiple replicates; the default value "amount" is automatically
 generated from appropriate plate layout files by \code{link{readPlateMap}}}
 
 \item{substance}{the name of a column in \code{map} providing the names of
-the substance in \code{amount}, used as x-axis label; if it doesn't
+the substance in \code{dose}, used as x-axis label; if it doesn't
 correspond to a column, its value is directly used as label}
 
 \item{col}{either a valid color representation or the name of a column in
 \code{map} providing colors for each well or a, if \code{wells} is a named
 list of wells, a named vector of colors with matching names. NOTE for the
-second case, that wells with the same \code{amount} should have the same color, only
-the first color for a given \code{amount} is used; such colors are automatically
-assigned from a color ramp mapped to the numerical range of \code{amount} by
+second case, that wells with the same \code{dose} should have the same color, only
+the first color for a given \code{dose} is used; such colors are automatically
+assigned from a color ramp mapped to the numerical range of \code{dose} by
 \code{\link{readPlateMap}}, see \code{\link{amountColors}};}
 
 \item{pch}{pch of the mean value points}
@@ -72,7 +72,7 @@ error bars}
 values}
 
 \item{na.y}{value to be used to plot replicates with \code{NA} in
-column \code{val}; set to NA to supress plotting}
+column \code{response}; set to NA to supress plotting}
 
 \item{add}{add data to existing plot}
 
@@ -80,7 +80,7 @@ column \code{val}; set to NA to supress plotting}
 
 \item{xlim}{limits of the x-axis}
 
-\item{ylab}{alternative label for the y-axis, default is to use argument \code{val}}
+\item{ylab}{alternative label for the y-axis, default is to use argument \code{response}}
 
 \item{xlab}{alternative label for the x-axis, default is to use argument
 \code{substance}, or if this is a column in \code{map}, the substance
@@ -92,7 +92,7 @@ indicated there}
 }
 \description{
 plots a continuous value for each well as a function
-of an \code{amount} of a \code{substance} and generates error bars
-for all replicates at a given amount; returns the plotted mean values
+of an \code{dose} of a \code{substance} and generates error bars
+for all replicates at a given dose; returns the plotted mean values
 and error bar ranges.
 }

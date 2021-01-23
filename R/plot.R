@@ -540,6 +540,8 @@ viewGroups <- function(data, yids, stats="CI", groups, groups2,
                     } else if ( stats=="range" ) {
                         ci1 <-  apply(dat,1,function(x) min(x,na.rm=TRUE))
                         ci2 <-  apply(dat,1,function(x) max(x,na.rm=TRUE))
+                        ci1[!is.finite(ci1)] <- NA
+                        ci2[!is.finite(ci2)] <- NA
                     }
                 }
                 ## PLOT
@@ -894,38 +896,38 @@ viewPlate <- function(data, wells, wcols,
 #' Dose-Response Box-Plots
 #'
 #' Plots a continuous value for each well as a function
-#' of an \code{amount} of a \code{substance} and make boxplots
-#' for all replicates at a given amount. Note that this is deprecated,
+#' of an \code{dose} of a \code{substance} and make boxplots
+#' for all replicates at a given dose. Note that this is deprecated,
 #' and plots with error bars can be generated instead by
 #' function \code{\link{doseResponse}}.
-#' @param map a plate layout map with columns \code{amount} and some
-#' calculated value in column \code{val},
+#' @param map a plate layout map with columns \code{dose} and some
+#' calculated value in column \code{response},
 #' eg. results from \pkg{grofit} or \pkg{growthrates}
 #' @param wells a list of well IDs to be used in the plot
-#' @param val the name of a column in \code{map} containing numeric values
+#' @param response the name of a column in \code{map} containing numeric values
 #' that should be plotted on y-axis
-#' @param amount the name of a column in \code{map} providing numeric values
+#' @param dose the name of a column in \code{map} providing numeric values
 #' that should be plotted on x-axis, typically a substance added to wells
 #' in multiple replicates; the default value "amount" is automatically
 #' generated from appropriate plate layout files by \code{link{readPlateMap}}
 #' @param substance the name of a column in \code{map} providing the names of
-#' the substance in \code{amount}, used as x-axis label; if it doesn't
+#' the substance in \code{dose}, used as x-axis label; if it doesn't
 #' correspond to a column, its value is directly used as label
 #' @param color the name of a column in \code{map} providing colors
-#' for each well; NOTE, that wells with the same \code{amount} should have
-#' the same color, only the first color for a given \code{amount} is used;
+#' for each well; NOTE, that wells with the same \code{dose} should have
+#' the same color, only the first color for a given \code{dose} is used;
 #' Colors are automatically assigned from a color ramp mapped to the
-#' numerical range of \code{amount} by \code{link{readPlateMap}}
+#' numerical range of \code{dose} by \code{link{readPlateMap}}
 #' @param na.y value to be used to plot replicates with \code{NA} in
-#' column \code{val}; set to NA to supress plotting
+#' column \code{response}; set to NA to supress plotting
 #' @param ylim limits of the y-axis
 #' @param xnum use numerical x-axis instead of default categorical
 #' @param xlab alternative label for the x-axis, default is to use argument
 #' \code{substance}, or if this is a column in \code{map}, the substance
 #' indicated there
-#' @param ylab alternative label for the y-axis, default is to use argument \code{val}
+#' @param ylab alternative label for the y-axis, default is to use argument \code{response}
 #' @export
-doseResponse.box <- function(map, wells, val, amount="amount",
+doseResponse.box <- function(map, wells, response, dose="amount",
                              substance="substance",
                              color="color", na.y=0, ylim, xnum=FALSE,
                              xlab, ylab) {
@@ -935,12 +937,12 @@ doseResponse.box <- function(map, wells, val, amount="amount",
     if ( missing(xlab) )
         xlab <- substance
     if ( missing(ylab) )
-        ylab <- val
+        ylab <- response
     
     wells <- match(wells,map[,"well"])
 
-    y <- map[wells,val]
-    x <- map[wells,amount]
+    y <- map[wells,response]
+    x <- map[wells,dose]
 
     ## get unique colors for unique sorted x, as it will appear in
     ## boxplots
@@ -1000,28 +1002,28 @@ doseResponse.box <- function(map, wells, val, amount="amount",
 #' Dose-Response Plots with Error Bars
 #'
 #' plots a continuous value for each well as a function
-#' of an \code{amount} of a \code{substance} and generates error bars
-#' for all replicates at a given amount; returns the plotted mean values
+#' of an \code{dose} of a \code{substance} and generates error bars
+#' for all replicates at a given dose; returns the plotted mean values
 #' and error bar ranges.
-#' @param map a plate layout map with columns \code{amount} and some
-#' calculated value in column \code{val},
+#' @param map a plate layout map with columns \code{dose} and some
+#' calculated value in column \code{response},
 #' eg. results from \pkg{grofit} or \pkg{growthrates}
 #' @param wells a list of well IDs to be used in the plot
-#' @param val the name of a column in \code{map} containing numeric values
+#' @param response the name of a column in \code{map} containing numeric values
 #' that should be plotted on y-axis
-#' @param amount the name of a column in \code{map} providing numeric values
+#' @param dose the name of a column in \code{map} providing numeric values
 #' that should be plotted on x-axis, typically a substance added to wells
 #' in multiple replicates; the default value "amount" is automatically
 #' generated from appropriate plate layout files by \code{link{readPlateMap}}
 #' @param substance the name of a column in \code{map} providing the names of
-#' the substance in \code{amount}, used as x-axis label; if it doesn't
+#' the substance in \code{dose}, used as x-axis label; if it doesn't
 #' correspond to a column, its value is directly used as label
 #' @param col either a valid color representation or the name of a column in
 #' \code{map} providing colors for each well or a, if \code{wells} is a named
 #' list of wells, a named vector of colors with matching names. NOTE for the
-#' second case, that wells with the same \code{amount} should have the same color, only
-#' the first color for a given \code{amount} is used; such colors are automatically
-#' assigned from a color ramp mapped to the numerical range of \code{amount} by
+#' second case, that wells with the same \code{dose} should have the same color, only
+#' the first color for a given \code{dose} is used; such colors are automatically
+#' assigned from a color ramp mapped to the numerical range of \code{dose} by
 #' \code{\link{readPlateMap}}, see \code{\link{amountColors}};
 #' @param pch pch of the mean value points
 #' @param bartype type of the error bars, "range" for the full range
@@ -1037,19 +1039,19 @@ doseResponse.box <- function(map, wells, val, amount="amount",
 #' @param line logical indicating whether to plot a line connecting the mean
 #' values
 #' @param na.y value to be used to plot replicates with \code{NA} in
-#' column \code{val}; set to NA to supress plotting
+#' column \code{response}; set to NA to supress plotting
 #' @param add add data to existing plot
 #' @param ylim limits of the y-axis
 #' @param xlim limits of the x-axis
-#' @param ylab alternative label for the y-axis, default is to use argument \code{val}
+#' @param ylab alternative label for the y-axis, default is to use argument \code{response}
 #' @param xlab alternative label for the x-axis, default is to use argument
 #' \code{substance}, or if this is a column in \code{map}, the substance
 #' indicated there
 #' @param verb print progress messages
 #' @param ... arguments passed on to the main setup \code{\link{plot}}
 #' @export
-doseResponse <- function(map, wells, val,
-                         amount="amount", substance="substance",
+doseResponse <- function(map, wells, response,
+                         dose="amount", substance="substance",
                          col="black", pch=1, bartype="range", barl=.05,
                          all=FALSE, line=TRUE, na.y=0, add=FALSE,
                          ylim, xlim, ylab, xlab, verb=TRUE, ...) {
@@ -1066,9 +1068,9 @@ doseResponse <- function(map, wells, val,
 
     ## set common xlims/ylims
     if ( missing(xlim) )
-      mc[["xlim"]] <- range(map[map$well%in%unlist(wells),amount],na.rm=TRUE)
+      mc[["xlim"]] <- range(map[map$well%in%unlist(wells),dose],na.rm=TRUE)
     if ( missing(ylim) )
-      mc[["ylim"]] <- range(map[map$well%in%unlist(wells),val],na.rm=TRUE)
+      mc[["ylim"]] <- range(map[map$well%in%unlist(wells),response],na.rm=TRUE)
 
     ymats <- list()
     for ( i in 1:length(wells) ) {
@@ -1090,8 +1092,10 @@ doseResponse <- function(map, wells, val,
 
   wells <- match(wells,map[,"well"])
 
-  y <- map[wells,val]
-  x <- map[wells,amount]
+    ## TODO: remove blanks!
+
+  y <- map[wells,response]
+  x <- map[wells,dose]
 
   if ( substance %in%  colnames(map) )
     subid <- map[wells,substance][1]
@@ -1099,7 +1103,7 @@ doseResponse <- function(map, wells, val,
   if ( missing(xlab) )
     xlab <- subid
   if ( missing(ylab) )
-    ylab <- val
+    ylab <- response
 
   y1 <- y
   x1 <- x
@@ -1122,7 +1126,7 @@ doseResponse <- function(map, wells, val,
   ## boxplots
   ## UGLY, TODO: less ugly?
   if ( col %in% colnames(map) ) {
-    cl <- sapply(xlevels,function(x) map[map[,amount]==x,col][1])
+    cl <- sapply(xlevels,function(x) map[map[,dose]==x,col][1])
     names(cl) <- xlevels
     linecol <- 1
   } else {
@@ -1150,7 +1154,7 @@ doseResponse <- function(map, wells, val,
     else stop("bar type ", bartype, " unknown\n")
     ymat[i,1] <- xi
   }
-  colnames(ymat) <- c(amount,val,paste0(bartype,c(".min",".max")))
+  colnames(ymat) <- c(dose,response,paste0(bartype,c(".min",".max")))
   if ( missing(ylim) )
     ylim <- range(c(ymat[,2:4],ifelse(all,y,NA)),na.rm=TRUE)
   if ( missing(xlim) ) {
