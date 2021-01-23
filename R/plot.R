@@ -538,8 +538,14 @@ viewGroups <- function(data, yids, stats="CI", groups, groups2,
                         mn  <- ci[2,]
                         ci2 <- ci[3,]
                     } else if ( stats=="range" ) {
-                        ci1 <-  apply(dat,1,function(x) min(x,na.rm=TRUE))
-                        ci2 <-  apply(dat,1,function(x) max(x,na.rm=TRUE))
+                        ci1 <-  apply(dat,1,function(x) {
+                            x <- x[!is.na(x)]
+                            if ( length(x)==0 ) return(NA)
+                            min(x,na.rm=TRUE)})
+                        ci2 <-  apply(dat,1,function(x) {
+                            x <- x[!is.na(x)]
+                            if ( length(x)==0 ) return(NA)
+                            max(x,na.rm=TRUE)})
                         ci1[!is.finite(ci1)] <- NA
                         ci2[!is.finite(ci2)] <- NA
                     }
