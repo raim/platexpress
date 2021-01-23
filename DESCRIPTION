@@ -1,6 +1,6 @@
 Package: platexpress
 Title: Inspection and Analysis of Microbial Growth and Gene Expression Data
-Version: 0.1
+Version: 0.2.0
 Author: Rainer Machne <raim@tbi.univie.ac.at>
 Maintainer: Rainer Machne <raim@tbi.univie.ac.at>
 Description: The platexpress package provides a quick&easy interface to
