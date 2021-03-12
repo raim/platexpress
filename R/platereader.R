@@ -1112,7 +1112,7 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 
     ## check if by arguments are present
     if ( any(!by%in%colnames(lpl)))
-        stop("getGroups: argument `by` not found in plate data: ",
+        stop("getGroups: argument `by` not found in plate layout: ",
              paste(by[!by%in%colnames(lpl)],collapse=";"))
     
     for ( b in by )
