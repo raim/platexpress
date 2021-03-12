@@ -696,6 +696,12 @@ correctBlanks <- function(data, plate, type="median", by, yids,
         lpl <- matrix(unlist(lapply(plate,function(x) as.character(x))),
                       ncol=ncol(plate))
         colnames(lpl) <- colnames(plate)
+        
+        ## check if by arguments are present
+        if ( any(!by%in%colnames(lpl)))
+            stop("correctBlanks: argument `by` not found in plate data: ",
+                 paste(by[!by%in%colnames(lpl)],collapse=";"))
+
         ## collapse requested combinations into new type
         types <- rep("",nrow(plate))
         for ( b in by )
@@ -1103,6 +1109,12 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
     colnames(lpl) <- colnames(plate)
     ## collapse requested combinations into new type
     types <- rep("",nrow(plate))
+
+    ## check if by arguments are present
+    if ( any(!by%in%colnames(lpl)))
+        stop("getGroups: argument `by` not found in plate data: ",
+             paste(by[!by%in%colnames(lpl)],collapse=";"))
+    
     for ( b in by )
       types <- paste(types,lpl[,b],sep="_")
     types <- sub("^_","",types) # rm leading _
