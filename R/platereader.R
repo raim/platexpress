@@ -1103,8 +1103,12 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
     colnames(lpl) <- colnames(plate)
     ## collapse requested combinations into new type
     types <- rep("",nrow(plate))
-    for ( b in by )
-      types <- paste(types,lpl[,b],sep="_")
+    for ( b in by ) {
+        if ( !b%in%colnames(lpl) )
+            stop("group \"",b,"\" not found in layout, available columns:\n\t",
+                 paste(colnames(lpl),collapse=";"))
+        types <- paste(types,lpl[,b],sep="_")
+    }
     types <- sub("^_","",types) # rm leading _
     btypes <- unique(types)
 
