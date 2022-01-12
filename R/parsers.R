@@ -302,9 +302,9 @@ readPlateMap.old <- function(file, sep="\t",
 #' @author Rainer Machne \email{raim@tbi.univie.ac.at}
 #' @export
 readPlateMap <- function(file, sep="\t",
-                          fsep="\n", fields, asep, afields,
-                          blank.id="blank",
-                          nrows=8, formatted=FALSE, header=TRUE) {
+                         fsep="\n", fields, asep, afields,
+                         blank.id="blank",
+                         nrows=8, formatted=FALSE, header=TRUE) {
 
     ## already in well format?
     if ( formatted ) {

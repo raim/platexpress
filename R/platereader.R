@@ -671,6 +671,13 @@ correctBlanks <- function(data, plate, type="median", by, yids,
     corr <- data
     time <- data[[xid]] ## TODO: take from data xids
 
+    ## check if by arguments are present
+    ## check if by arguments are present
+    if ( !missing(yids) )
+        if ( any(!yids%in%names(data)))
+            stop("argument `yids` not found in plate data: ",
+                 paste(yids[!yids%in%names(data)],collapse=";"))
+
     ## reduce matrix to requested data
     data <- data[data$dataIDs]
     ptypes <- names(data)
@@ -699,7 +706,7 @@ correctBlanks <- function(data, plate, type="median", by, yids,
         
         ## check if by arguments are present
         if ( any(!by%in%colnames(lpl)))
-            stop("correctBlanks: argument `by` not found in plate data: ",
+            stop("argument `by` not found in plate layout: ",
                  paste(by[!by%in%colnames(lpl)],collapse=";"))
 
         ## collapse requested combinations into new type
@@ -813,6 +820,11 @@ adjustBase <- function(data, base=0, yids, add.fraction, xlim, each=FALSE, verb=
 
     if ( verb )
       cat(paste("adjusting base", paste(yids, collapse=";"),"\n"))
+
+    ## check if by arguments are present
+    if ( any(!yids%in%names(data)))
+        stop("argument `yids` not found in plate data: ",
+             paste(yids[!yids%in%names(data)],collapse=";"))
 
     for ( yid in yids ) {
 
@@ -1112,7 +1124,7 @@ getGroups <- function(plate, by="medium", order=FALSE, verb=TRUE) {
 
     ## check if by arguments are present
     if ( any(!by%in%colnames(lpl)))
-        stop("getGroups: argument `by` not found in plate layout: ",
+        stop("argument `by` not found in plate layout: ",
              paste(by[!by%in%colnames(lpl)],collapse=";"))
     
     for ( b in by )
