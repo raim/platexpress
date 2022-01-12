@@ -64,6 +64,12 @@ readExperiment <- function(files, type, dsep,
                            skip.wells, blank=FALSE, blank.data, base=0,
                            group1, group2, group2.color, ...) {
 
+
+    cat(paste0("PARSING DATA FILE(s): ", paste(files,collapse=";"), "\n",
+               "type\t", type, "\n",
+               "range\t", time.range, "\n",
+               "time\t", time.conversion, "\n"))
+    
     ## parse raw data
     if ( missing(dsep) ) 
         raw <- readPlateData(files, type=type,
@@ -75,7 +81,9 @@ readExperiment <- function(files, type, dsep,
                              time.range=time.range,
                              time.conversion=time.conversion,
                              verb=TRUE, ...)
-
+###return(raw)
+    
+    cat(paste("PARSING LAYOUT:", layout, "\n"))
 
     ## read layout file
     map <- readPlateMap(layout, 
@@ -83,6 +91,7 @@ readExperiment <- function(files, type, dsep,
                         sep=sep, fsep=fsep, asep=asep,
                         afields=afields)
 
+    cat(paste("PRE-PROCESSING DATA\n"))
     ## skip wells
     ## TODO: implement in skipWells and do after map is attached
     if ( !missing(skip.wells) ) {
@@ -99,6 +108,8 @@ readExperiment <- function(files, type, dsep,
     } else dat <- raw
     rm(raw)
     
+    cat(paste("GROUPING DATA\n"))
+
     ## get groupings
     dat$groups <- NULL
     if ( !missing(group1) )
@@ -529,7 +540,8 @@ readPlateData <- function(files, type, data.ids,
                                 verb=verb, ...)
         interpolate <- FALSE
     }
-    
+###return(data)
+
     ## NOW PREPARE DATA
     ## SET GLOBAL TIME & TEMPERATURE by INTERPOLATION:
     ## interpolate data: this adds a master time and temperature
@@ -667,6 +679,9 @@ readBioLectorPlate <- function(files, data.ids,
     dat <- read.csv(files, skip=headerline, sep = sep, dec = dec,
                     stringsAsFactors=FALSE, fill=TRUE)
 
+    if ( verb )
+      cat(paste("Read:", nrow(dat), "rows and", ncol(dat),"columns \n"))
+
     fidx <- grep("READING", colnames(dat)) # column with filter info
 
     ## get time
@@ -753,6 +768,9 @@ readBioLectorProPlate <- function(files, data.ids,
     dat <- read.csv(files, sep = sep, dec = dec,
                     stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
 
+    if ( verb )
+      cat(paste("Preprocessing:",nrow(dat),"rows and",ncol(dat),"columns \n"))
+
     ## data start, for second parsing step
     dstart <- which(dat[,1] == "=====data=====")
    
@@ -776,8 +794,15 @@ readBioLectorProPlate <- function(files, data.ids,
     dat <- read.csv(files, sep = sep, dec = dec, skip = dstart, nrow = dend,
                     stringsAsFactors=FALSE, header=FALSE, fill=TRUE)
 
+   if ( verb )
+      cat(paste("Read:", nrow(dat), "rows and", ncol(dat),"columns \n"))
+
+    ## debug
+    ##return(dat)
     ## skip last column, only NA, since lines end with ;
     dat <- dat[,-ncol(dat)]
+
+ 
     
     ## get time of main measurements
     ## NOTE: second T is time for user comments and system events
